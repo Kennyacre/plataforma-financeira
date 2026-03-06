@@ -40,54 +40,17 @@ if "tela_atual" not in st.session_state:
 if not st.session_state.logado:
     st.markdown("""
         <style>
-        /* Fundo escuro premium (Azul Ardósia escuro) */
+        /* Fundo escuro premium */
         .stApp { background-color: #1e2532 !important; }
-        
-        /* Remove a borda da caixa do formulário para flutuar no fundo */
-        div[data-testid="stForm"] { 
-            background-color: transparent !important; 
-            border: none !important;
-            padding: 0 !important;
-            box-shadow: none !important;
-        }
-        
-        /* Textos e Títulos */
+        div[data-testid="stForm"] { background-color: transparent !important; border: none !important; padding: 0 !important; box-shadow: none !important; }
         .stApp h1 { color: #ffffff !important; font-weight: 700 !important; font-family: 'Segoe UI', sans-serif !important; }
         .stApp p, .stApp label, .stApp span { color: #cbd5e1 !important; font-family: 'Segoe UI', sans-serif !important; }
-        
-        /* Inputs Escuros com Borda Fina */
-        .stTextInput input { 
-            background-color: #1a202c !important; 
-            color: #ffffff !important; 
-            border: 1px solid #334155 !important; 
-            border-radius: 8px !important;
-            padding: 12px 15px !important;
-        }
+        .stTextInput input { background-color: #1a202c !important; color: #ffffff !important; border: 1px solid #334155 !important; border-radius: 8px !important; padding: 12px 15px !important; }
         .stTextInput input:focus { border-color: #3b82f6 !important; box-shadow: 0 0 0 1px #3b82f6 !important; }
-        
-        /* Botão Primário Azulão */
-        button[kind="primary"] { 
-            background-color: #2563eb !important; 
-            color: white !important; 
-            border: none !important; 
-            border-radius: 8px !important; 
-            font-weight: 600 !important; 
-            padding: 10px 0 !important;
-            margin-top: 15px !important;
-        }
+        button[kind="primary"] { background-color: #2563eb !important; color: white !important; border: none !important; border-radius: 8px !important; font-weight: 600 !important; padding: 10px 0 !important; margin-top: 15px !important; }
         button[kind="primary"]:hover { background-color: #1d4ed8 !important; }
-        
-        /* Botão Secundário (Links textuais como "Inscrever-se") */
-        button[kind="secondary"] { 
-            background-color: transparent !important; 
-            color: #3b82f6 !important; 
-            border: none !important; 
-            box-shadow: none !important;
-            font-weight: 600 !important;
-        }
+        button[kind="secondary"] { background-color: transparent !important; color: #3b82f6 !important; border: none !important; box-shadow: none !important; font-weight: 600 !important; }
         button[kind="secondary"]:hover { color: #60a5fa !important; text-decoration: underline !important; background-color: transparent !important; }
-        
-        /* Links em Azul no HTML */
         .link-azul { color: #3b82f6 !important; text-decoration: none; font-size: 14px; font-weight: 500; }
         .link-azul:hover { color: #60a5fa !important; text-decoration: underline; }
         </style>
@@ -96,11 +59,8 @@ if not st.session_state.logado:
     col1, col2, col3 = st.columns([1, 1.2, 1])
     
     with col2:
-        st.write("") 
-        st.write("")
-        st.write("")
+        st.write(""); st.write(""); st.write("")
         
-        # --- TELA DE LOGIN ---
         if st.session_state.tela_atual == "login":
             st.markdown("<h1 style='text-align: left; margin-bottom: 5px;'>Entrar na sua Conta</h1>", unsafe_allow_html=True)
             st.markdown("<p style='text-align: left; margin-bottom: 30px;'>Bem-vindo de volta! por favor, insira seus dados</p>", unsafe_allow_html=True)
@@ -109,10 +69,8 @@ if not st.session_state.logado:
                 login_input = st.text_input("✉️ login")
                 senha_input = st.text_input("🔒 Senha", type="password")
                 
-                # Layout do "Lembrar-me" e Links (Simulando a sua foto)
                 c_chk, c_links = st.columns([1, 1])
-                with c_chk:
-                    st.checkbox("Lembrar-me")
+                with c_chk: st.checkbox("Lembrar-me")
                 with c_links:
                     st.markdown("""
                         <div style="text-align: right; margin-top: 5px;">
@@ -121,7 +79,6 @@ if not st.session_state.logado:
                         </div>
                     """, unsafe_allow_html=True)
                 
-                # Fake reCAPTCHA
                 st.markdown("""
                     <div style="border: 1px solid #334155; padding: 10px; border-radius: 4px; width: 250px; margin: 15px auto; background-color: #f8fafc; color: #000;">
                         <input type="checkbox" style="transform: scale(1.5); margin-right: 10px;"> Não sou um robô
@@ -136,8 +93,7 @@ if not st.session_state.logado:
                     if "Email" not in df_users.columns: df_users["Email"] = ""
                     user_match = df_users[((df_users["Usuario"].astype(str) == login_input) | (df_users["Email"].astype(str) == login_input)) & (df_users["Senha"].astype(str) == senha_input)]
                     if not user_match.empty:
-                        status = user_match.iloc[0]["Status"]
-                        if status.lower() == "ativo":
+                        if user_match.iloc[0]["Status"].lower() == "ativo":
                             st.session_state.logado = True
                             st.session_state.usuario = user_match.iloc[0]["Usuario"]
                             st.session_state.nivel = user_match.iloc[0]["Nivel"]
@@ -150,7 +106,6 @@ if not st.session_state.logado:
                 st.session_state.tela_atual = "cadastro"
                 st.rerun()
 
-        # --- TELA DE CADASTRO ---
         elif st.session_state.tela_atual == "cadastro":
             st.markdown("<h1 style='text-align: left; margin-bottom: 5px;'>Criar Conta</h1>", unsafe_allow_html=True)
             st.markdown("<p style='text-align: left; margin-bottom: 30px;'>Bem-vindo! Por favor, insira seus dados</p>", unsafe_allow_html=True)
@@ -167,19 +122,15 @@ if not st.session_state.logado:
                 if btn_cadastrar:
                     if not c_nome or not c_email or not c_senha or not c_senha_confirma:
                         st.warning("⚠️ Preencha todos os campos obrigatórios.")
-                    elif c_senha != c_senha_confirma:
-                        st.error("❌ As senhas digitadas não coincidem.")
+                    elif c_senha != c_senha_confirma: st.error("❌ As senhas não coincidem.")
                     else:
                         df_u = pd.DataFrame(aba_usuarios_db.get_all_records())
                         if "Email" not in df_u.columns: df_u["Email"] = ""
-                        if c_email in df_u["Email"].astype(str).values:
-                            st.error("❌ Esse E-mail já está cadastrado.")
+                        if c_email in df_u["Email"].astype(str).values: st.error("❌ E-mail já cadastrado.")
                         else:
                             aba_usuarios_db.append_row([c_email, c_senha, "Cliente", "Ativo", "0", "", c_nome, c_email, c_tel])
                             st.success("✅ Conta criada! Você já pode entrar.")
-                            time.sleep(2)
-                            st.session_state.tela_atual = "login"
-                            st.rerun()
+                            time.sleep(2); st.session_state.tela_atual = "login"; st.rerun()
 
             c_bt1, c_bt2, c_bt3 = st.columns([1, 1, 1])
             if c_bt2.button("← Voltar", type="secondary", use_container_width=True):
@@ -197,14 +148,9 @@ else:
         h1, h2, h3 { color: #ffffff !important; font-family: 'Segoe UI', sans-serif; }
         p, label, span { color: #e0e0e0 !important; }
         div[role="radiogroup"] > label > div:first-child { display: none !important; }
-        div[role="radiogroup"] label {
-            padding: 12px 15px; border-radius: 6px; margin-bottom: 5px;
-            background-color: transparent; color: #888888 !important; border: 1px solid transparent; transition: 0.3s;
-        }
+        div[role="radiogroup"] label { padding: 12px 15px; border-radius: 6px; margin-bottom: 5px; background-color: transparent; color: #888888 !important; border: 1px solid transparent; transition: 0.3s; }
         div[role="radiogroup"] label:hover { background-color: #1f1f1f; color: #ffffff !important; }
-        div[role="radiogroup"] label[data-checked="true"] {
-            background-color: #1f1f1f !important; color: #4CAF50 !important; border-left: 4px solid #4CAF50 !important; font-weight: bold;
-        }
+        div[role="radiogroup"] label[data-checked="true"] { background-color: #1f1f1f !important; color: #4CAF50 !important; border-left: 4px solid #4CAF50 !important; font-weight: bold; }
         div[data-testid="stMetric"] { background-color: #1e1e1e !important; border: 1px solid #333 !important; border-radius: 8px !important; padding: 15px !important; }
         div[data-testid="stMetric"] label { color: #888 !important; }
         div[data-testid="stMetric"] div[data-testid="stMetricValue"] { color: #ffffff !important; }
@@ -212,15 +158,7 @@ else:
         div[data-testid="stDataFrame"] * { color: #e0e0e0 !important; }
         .stTextInput input, .stNumberInput input, .stDateInput input { background-color: #1e1e1e !important; color: #ffffff !important; border: 1px solid #333 !important; }
         .stSelectbox>div>div>div { background-color: #1e1e1e !important; color: #ffffff !important; border: 1px solid #333 !important; }
-        /* Botões do Sistema Logado (Verdes para Finanças) */
-        button[kind="primary"], button[kind="secondary"] { 
-            background-color: #2e7d32 !important; 
-            color: white !important; 
-            border: none !important; 
-            border-radius: 4px !important; 
-            font-weight: bold !important; 
-            width: 100% !important; 
-        }
+        button[kind="primary"], button[kind="secondary"] { background-color: #2e7d32 !important; color: white !important; border: none !important; border-radius: 4px !important; font-weight: bold !important; width: 100% !important; }
         button[kind="primary"]:hover, button[kind="secondary"]:hover { background-color: #4CAF50 !important; text-decoration: none !important; }
         </style>
         """, unsafe_allow_html=True)
@@ -275,8 +213,13 @@ else:
                     e_senha = c4.text_input("Senha", value=str(row_data.get("Senha", "")))
                     e_nivel = c5.selectbox("Nível", ["Cliente", "Master"], index=0 if row_data.get("Nivel", "") == "Cliente" else 1)
                     e_status = c6.selectbox("Status", ["Ativo", "Bloqueado"], index=0 if row_data.get("Status", "") == "Ativo" else 1)
+                    
+                    # --- CORREÇÃO DA CÉLULA VAZIA NO VALOR AQUI ---
                     c7, c8 = st.columns(2)
-                    e_valor = c7.number_input("Valor (R$)", value=float(str(row_data.get("Valor", 0)).replace(',','.')), step=10.0)
+                    valor_str = str(row_data.get("Valor", "0")).replace(',', '.').strip()
+                    valor_float = float(valor_str) if valor_str != "" else 0.0
+                    e_valor = c7.number_input("Valor (R$)", value=valor_float, step=10.0)
+                    
                     try: venc_formatado = pd.to_datetime(row_data.get("Vencimento", ""), format='%d/%m/%Y').date()
                     except: venc_formatado = date.today()
                     e_venc = c8.date_input("Vencimento da Assinatura", value=venc_formatado)
