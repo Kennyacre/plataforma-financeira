@@ -8,10 +8,13 @@ import time
 import calendar
 import os
 import base64
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from dateutil.relativedelta import relativedelta
 
 st.set_page_config(page_title="Plataforma SaaS", layout="wide")
+
+# Criação do diretório de comprovativos (Preparação para o Docker no ZimaOS)
+os.makedirs("comprovativos", exist_ok=True)
 
 # --- 1. CONEXÃO SEGURA COM O GOOGLE SHEETS E MOTOR DE CONFIGURAÇÃO ---
 @st.cache_resource
@@ -44,11 +47,9 @@ NOME_RECEBEDOR = config_app.get('NOME_RECEBEDOR', 'Sem recebedor')
 
 def renderizar_logo(width=40):
     if os.path.exists("logo.png"):
-        with open("logo.png", "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read()).decode()
+        with open("logo.png", "rb") as image_file: encoded_string = base64.b64encode(image_file.read()).decode()
         return f"<img src='data:image/png;base64,{encoded_string}' width='{width}' style='border-radius: 8px;'>"
-    else:
-        return f"<img src='https://cdn-icons-png.flaticon.com/512/2942/2942269.png' width='{width}'>"
+    return f"<img src='https://cdn-icons-png.flaticon.com/512/2942/2942269.png' width='{width}'>"
 
 # --- 2. CONTROLE DE SESSÃO ---
 if "logado" not in st.session_state:
@@ -58,66 +59,38 @@ if "logado" not in st.session_state:
 if "tela_atual" not in st.session_state: st.session_state.tela_atual = "login"
 if "edit_user" not in st.session_state: st.session_state.edit_user = ""
 if "edit_conta" not in st.session_state: st.session_state.edit_conta = ""
+if "ghost_mode" not in st.session_state: st.session_state.ghost_mode = "" # NOVO: MODO SUPORTE
 
 # ==========================================
 # ROTA 1: TELA INICIAL (LOGIN E CADASTRO)
 # ==========================================
 if not st.session_state.logado:
-    st.markdown("""
-        <style>
-        .stApp { background-color: #1e2532 !important; }
-        div[data-testid="stForm"] { background-color: transparent !important; border: none !important; padding: 0 !important; box-shadow: none !important; }
-        .stApp h1, .stApp h2 { color: #ffffff !important; font-weight: 700 !important; font-family: 'Segoe UI', sans-serif !important; }
-        .stApp p, .stApp label, .stApp span { color: #cbd5e1 !important; font-family: 'Segoe UI', sans-serif !important; }
-        .stTextInput input { background-color: #1a202c !important; color: #ffffff !important; border: 1px solid #334155 !important; border-radius: 8px !important; padding: 12px 15px !important; }
-        .stTextInput input:focus { border-color: #3b82f6 !important; box-shadow: 0 0 0 1px #3b82f6 !important; }
-        button[kind="primary"] { background-color: #2563eb !important; color: white !important; border: none !important; border-radius: 8px !important; font-weight: 600 !important; padding: 10px 0 !important; margin-top: 15px !important; }
-        button[kind="primary"]:hover { background-color: #1d4ed8 !important; }
-        button[kind="secondary"] { background-color: transparent !important; color: #3b82f6 !important; border: none !important; box-shadow: none !important; font-weight: 600 !important; }
-        button[kind="secondary"]:hover { color: #60a5fa !important; text-decoration: underline !important; background-color: transparent !important; }
-        .link-azul { color: #3b82f6 !important; text-decoration: none; font-size: 14px; font-weight: 500; }
-        </style>
-        """, unsafe_allow_html=True)
-
+    st.markdown("""<style>.stApp { background-color: #1e2532 !important; } div[data-testid="stForm"] { background-color: transparent !important; border: none !important; padding: 0 !important; box-shadow: none !important; } .stApp h1, .stApp h2 { color: #ffffff !important; font-weight: 700 !important; font-family: 'Segoe UI', sans-serif !important; } .stApp p, .stApp label, .stApp span { color: #cbd5e1 !important; font-family: 'Segoe UI', sans-serif !important; } .stTextInput input { background-color: #1a202c !important; color: #ffffff !important; border: 1px solid #334155 !important; border-radius: 8px !important; padding: 12px 15px !important; } .stTextInput input:focus { border-color: #3b82f6 !important; box-shadow: 0 0 0 1px #3b82f6 !important; } button[kind="primary"] { background-color: #2563eb !important; color: white !important; border: none !important; border-radius: 8px !important; font-weight: 600 !important; padding: 10px 0 !important; margin-top: 15px !important; } button[kind="primary"]:hover { background-color: #1d4ed8 !important; } button[kind="secondary"] { background-color: transparent !important; color: #3b82f6 !important; border: none !important; box-shadow: none !important; font-weight: 600 !important; } button[kind="secondary"]:hover { color: #60a5fa !important; text-decoration: underline !important; background-color: transparent !important; } .link-azul { color: #3b82f6 !important; text-decoration: none; font-size: 14px; font-weight: 500; }</style>""", unsafe_allow_html=True)
     col1, col2, col3 = st.columns([1, 1.2, 1])
     with col2:
         st.write(""); st.write("")
         if st.session_state.tela_atual == "login":
-            st.markdown(f"<div style='text-align: center;'>{renderizar_logo(60)}</div>", unsafe_allow_html=True)
-            st.markdown(f"<h2 style='text-align: center; margin-bottom: 5px;'>{NOME_SAAS}</h2>", unsafe_allow_html=True)
-            st.markdown("<p style='text-align: center; margin-bottom: 30px;'>Acesse a sua plataforma financeira</p>", unsafe_allow_html=True)
-            
+            st.markdown(f"<div style='text-align: center;'>{renderizar_logo(60)}</div><h2 style='text-align: center; margin-bottom: 5px;'>{NOME_SAAS}</h2><p style='text-align: center; margin-bottom: 30px;'>Acesse a sua plataforma</p>", unsafe_allow_html=True)
             with st.form("form_login_dark"):
                 login_input = st.text_input("✉️ E-mail ou Login")
                 senha_input = st.text_input("🔒 Senha", type="password")
                 c_chk, c_links = st.columns([1, 1])
                 with c_chk: st.checkbox("Lembrar-me")
                 with c_links: st.markdown('<div style="text-align: right; margin-top: 5px;"><a href="#" class="link-azul">Esqueceu a senha?</a></div>', unsafe_allow_html=True)
-                btn_login = st.form_submit_button("Entrar", type="primary")
-
-                if btn_login:
+                if st.form_submit_button("Entrar", type="primary"):
                     df_users = pd.DataFrame(aba_usuarios_db.get_all_records())
                     if "Email" not in df_users.columns: df_users["Email"] = ""
                     user_match = df_users[((df_users["Usuario"].astype(str) == login_input) | (df_users["Email"].astype(str) == login_input)) & (df_users["Senha"].astype(str) == senha_input)]
-                    
                     if not user_match.empty:
-                        st.session_state.logado = True
-                        st.session_state.usuario = user_match.iloc[0]["Usuario"]
-                        st.session_state.nivel = user_match.iloc[0]["Nivel"]
-                        st.rerun()
+                        st.session_state.logado = True; st.session_state.usuario = user_match.iloc[0]["Usuario"]; st.session_state.nivel = user_match.iloc[0]["Nivel"]; st.rerun()
                     else: st.error("❌ Credenciais incorretas.")
-            
             c_bt1, c_bt2, c_bt3 = st.columns([0.5, 2, 0.5])
-            if c_bt2.button("Criar uma nova conta", type="secondary", use_container_width=True):
-                st.session_state.tela_atual = "cadastro"; st.rerun()
+            if c_bt2.button("Criar uma nova conta", type="secondary", use_container_width=True): st.session_state.tela_atual = "cadastro"; st.rerun()
 
         elif st.session_state.tela_atual == "cadastro":
-            st.markdown(f"<div style='text-align: center;'>{renderizar_logo(50)}</div>", unsafe_allow_html=True)
-            st.markdown("<h2 style='text-align: center; margin-bottom: 5px;'>Criar Conta</h2>", unsafe_allow_html=True)
-            st.markdown("<p style='text-align: center; margin-bottom: 30px;'>Registre-se para usar o sistema</p>", unsafe_allow_html=True)
-            
+            st.markdown(f"<div style='text-align: center;'>{renderizar_logo(50)}</div><h2 style='text-align: center; margin-bottom: 5px;'>Criar Conta</h2><p style='text-align: center; margin-bottom: 30px;'>Registre-se para usar o sistema</p>", unsafe_allow_html=True)
             with st.form("form_cadastro_dark"):
-                c_nome = st.text_input("👤 Nome Completo"); c_email = st.text_input("✉️ Seu E-mail"); c_tel = st.text_input("📞 Nº celular com WhatsApp")
+                c_nome = st.text_input("👤 Nome Completo"); c_email = st.text_input("✉️ Seu E-mail"); c_tel = st.text_input("📞 Nº telemóvel")
                 c_senha = st.text_input("🔒 Crie a sua Senha", type="password"); c_senha_confirma = st.text_input("🔒 Confirme a sua Senha", type="password")
                 if st.form_submit_button("Finalizar Registro", type="primary"):
                     if not c_nome or not c_email or not c_senha: st.warning("⚠️ Preencha os campos.")
@@ -127,8 +100,7 @@ if not st.session_state.logado:
                         if "Email" not in df_u.columns: df_u["Email"] = ""
                         if c_email in df_u["Email"].astype(str).values: st.error("❌ E-mail já registrado.")
                         else:
-                            aba_usuarios_db.append_row([c_email, c_senha, "Cliente", "Ativo", "0", "", c_nome, c_email, c_tel])
-                            st.success("✅ Conta criada! Já pode entrar."); time.sleep(2); st.session_state.tela_atual = "login"; st.rerun()
+                            aba_usuarios_db.append_row([c_email, c_senha, "Cliente", "Ativo", "0", "", c_nome, c_email, c_tel]); st.success("✅ Conta criada!"); time.sleep(2); st.session_state.tela_atual = "login"; st.rerun()
             c_bt1, c_bt2, c_bt3 = st.columns([1, 1, 1])
             if c_bt2.button("← Voltar", type="secondary", use_container_width=True): st.session_state.tela_atual = "login"; st.rerun()
 
@@ -136,66 +108,57 @@ if not st.session_state.logado:
 # ROTA 2: SISTEMA LOGADO
 # ==========================================
 else:
-    st.markdown("""
-        <style>
-        .stApp { background-color: #0f172a !important; }
-        section[data-testid="stSidebar"] { background-color: #0b1121 !important; border-right: 1px solid #1e293b; }
-        h1, h2, h3 { color: #ffffff !important; font-family: 'Segoe UI', sans-serif; }
-        p, label, span { color: #cbd5e1 !important; }
-        div[role="radiogroup"] label { padding: 12px 15px; border-radius: 6px; margin-bottom: 5px; background-color: transparent; color: #888888 !important; border: 1px solid transparent; transition: 0.3s; }
-        div[role="radiogroup"] label:hover { background-color: #1e293b; color: #ffffff !important; }
-        div[role="radiogroup"] label[data-checked="true"] { background-color: #1e293b !important; color: #3b82f6 !important; border-left: 4px solid #3b82f6 !important; font-weight: bold; }
-        div[data-testid="stMetric"] { background-color: #1e293b !important; border: 1px solid #334155 !important; border-radius: 8px !important; padding: 15px !important; }
-        div[data-testid="stMetric"] label { color: #94a3b8 !important; font-weight: bold !important; font-size: 14px !important; }
-        .stTextInput input, .stNumberInput input, .stDateInput input, .stSelectbox>div>div>div { background-color: #1e293b !important; color: #ffffff !important; border: 1px solid #334155 !important; }
-        button[kind="primary"] { background-color: #2563eb !important; color: white !important; border: none !important; border-radius: 4px !important; font-weight: bold !important; width: 100% !important; }
-        button[kind="primary"]:hover { background-color: #1d4ed8 !important; }
-        button[kind="secondary"] { background-color: #1e293b !important; color: #ffffff !important; border: 1px solid #334155 !important; border-radius: 6px !important; padding: 0 !important; min-width: 0 !important; width: 100% !important; height: 36px !important; display: flex !important; justify-content: center !important; align-items: center !important; transition: all 0.2s ease; }
-        button[kind="secondary"]:hover { background-color: #334155 !important; border-color: #4b5563 !important; }
-        .break-text { word-break: break-all !important; white-space: normal !important; }
-        .paywall-box { background-color: #1e293b; border: 2px dashed #ef4444; border-radius: 12px; padding: 30px; text-align: center; margin-top: 20px; }
-        .pix-code { background-color: #0f172a; padding: 15px; border-radius: 8px; font-family: monospace; color: #10b981; font-size: 18px; font-weight: bold; letter-spacing: 1px; border: 1px solid #334155; display: inline-block; margin: 15px 0; }
-        </style>
-        """, unsafe_allow_html=True)
+    st.markdown("""<style>.stApp { background-color: #0f172a !important; } section[data-testid="stSidebar"] { background-color: #0b1121 !important; border-right: 1px solid #1e293b; } h1, h2, h3 { color: #ffffff !important; font-family: 'Segoe UI', sans-serif; } p, label, span { color: #cbd5e1 !important; } div[role="radiogroup"] label { padding: 12px 15px; border-radius: 6px; margin-bottom: 5px; background-color: transparent; color: #888888 !important; border: 1px solid transparent; transition: 0.3s; } div[role="radiogroup"] label:hover { background-color: #1e293b; color: #ffffff !important; } div[role="radiogroup"] label[data-checked="true"] { background-color: #1e293b !important; color: #3b82f6 !important; border-left: 4px solid #3b82f6 !important; font-weight: bold; } div[data-testid="stMetric"] { background-color: #1e293b !important; border: 1px solid #334155 !important; border-radius: 8px !important; padding: 15px !important; } div[data-testid="stMetric"] label { color: #94a3b8 !important; font-weight: bold !important; font-size: 14px !important; } .stTextInput input, .stNumberInput input, .stDateInput input, .stSelectbox>div>div>div { background-color: #1e293b !important; color: #ffffff !important; border: 1px solid #334155 !important; } button[kind="primary"] { background-color: #2563eb !important; color: white !important; border: none !important; border-radius: 4px !important; font-weight: bold !important; width: 100% !important; } button[kind="primary"]:hover { background-color: #1d4ed8 !important; } button[kind="secondary"] { background-color: #1e293b !important; color: #ffffff !important; border: 1px solid #334155 !important; border-radius: 6px !important; padding: 0 !important; min-width: 0 !important; width: 100% !important; height: 36px !important; display: flex !important; justify-content: center !important; align-items: center !important; transition: all 0.2s ease; } button[kind="secondary"]:hover { background-color: #334155 !important; border-color: #4b5563 !important; } .break-text { word-break: break-all !important; white-space: normal !important; } .paywall-box { background-color: #1e293b; border: 2px dashed #ef4444; border-radius: 12px; padding: 30px; text-align: center; margin-top: 20px; } .pix-code { background-color: #0f172a; padding: 15px; border-radius: 8px; font-family: monospace; color: #10b981; font-size: 18px; font-weight: bold; letter-spacing: 1px; border: 1px solid #334155; display: inline-block; margin: 15px 0; } .ghost-banner { background-color: #ef4444; color: white; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; margin-bottom: 20px; animation: pulse 2s infinite; } @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }</style>""", unsafe_allow_html=True)
 
     df_users_master = pd.DataFrame(aba_usuarios_db.get_all_records())
-    meu_cadastro = df_users_master[df_users_master["Usuario"] == st.session_state.usuario]
+    
+    # --- LOGICA DE ROTEAMENTO (GHOST MODE) ---
+    is_master = (st.session_state.nivel.lower() == "master")
+    if is_master and st.session_state.ghost_mode != "":
+        usuario_ativo = st.session_state.ghost_mode
+        nivel_ativo = "cliente" # Força nível de cliente para renderizar o painel financeiro
+    else:
+        usuario_ativo = st.session_state.usuario
+        nivel_ativo = st.session_state.nivel.lower()
+
+    meu_cadastro = df_users_master[df_users_master["Usuario"] == usuario_ativo]
     meu_status = meu_cadastro.iloc[0]["Status"].lower() if not meu_cadastro.empty else "bloqueado"
 
-    # --- SIDEBAR HEADER ---
-    st.sidebar.markdown(f"""
-        <div style='display:flex; align-items:center; gap:10px; padding: 10px 0;'>
-            {renderizar_logo(45)}
-            <span style='font-weight:bold; font-size:18px; color:white;'>{NOME_SAAS}</span>
-        </div>
-    """, unsafe_allow_html=True)
+    # --- SIDEBAR ---
+    st.sidebar.markdown(f"<div style='display:flex; align-items:center; gap:10px; padding: 10px 0;'>{renderizar_logo(45)}<span style='font-weight:bold; font-size:18px; color:white;'>{NOME_SAAS}</span></div>", unsafe_allow_html=True)
     st.sidebar.markdown("---")
     
-    st.sidebar.markdown(f"👤 **{st.session_state.usuario}**")
+    if st.session_state.ghost_mode != "":
+        st.sidebar.markdown(f"🕵️‍♂️ **Modo Suporte Ativo**<br>Visualizando: <span style='color:#ef4444; font-weight:bold;'>{usuario_ativo}</span>", unsafe_allow_html=True)
+    else:
+        st.sidebar.markdown(f"👤 **{usuario_ativo}**")
+    
     cor_st = "#10b981" if meu_status == "ativo" else "#ef4444"
-    st.sidebar.markdown(f"<span style='color:{cor_st}; font-weight:bold;'>Nível: {st.session_state.nivel} | Status: {meu_status.upper()}</span>", unsafe_allow_html=True)
+    st.sidebar.markdown(f"<span style='color:{cor_st}; font-weight:bold;'>Nível: {nivel_ativo} | Status: {meu_status.upper()}</span>", unsafe_allow_html=True)
     st.sidebar.write("")
 
-    # --- MENU DINÂMICO NA SIDEBAR ---
-    if st.session_state.nivel.lower() == "master":
+    if is_master and st.session_state.ghost_mode == "":
         opcoes_menu = {"📊 Dashboard": "Dashboard", "📋 Gestão de Clientes": "Gestao", "➕ Novo Cliente": "Novo", "⚙️ Configurações": "Config"}
-        menu = opcoes_menu[st.sidebar.radio("Navegação", list(opcoes_menu.keys()), label_visibility="collapsed")]
     else:
-        if meu_status == "bloqueado":
-            opcoes_menu = {"💳 Regularizar Assinatura": "Assinatura"}
-        else:
-            opcoes_menu = {"📊 Painel Geral": "Painel", "🔮 Previsão": "Previsão", "📅 Calendário": "Calendário", "📝 Novo Lançamento": "Lançar", "📋 Histórico": "Histórico", "💳 Minha Assinatura": "Assinatura"}
-        menu = opcoes_menu[st.sidebar.radio("Navegação", list(opcoes_menu.keys()), label_visibility="collapsed")]
-
+        if meu_status == "bloqueado": opcoes_menu = {"💳 Regularizar Assinatura": "Assinatura"}
+        else: opcoes_menu = {"📊 Painel Geral": "Painel", "🔮 Previsão": "Previsão", "📅 Calendário": "Calendário", "📝 Novo Lançamento": "Lançar", "📋 Histórico": "Histórico", "🎯 Metas de Gastos": "Metas", "💳 Minha Assinatura": "Assinatura"}
+    
+    menu = opcoes_menu[st.sidebar.radio("Navegação", list(opcoes_menu.keys()), label_visibility="collapsed")]
     st.sidebar.markdown("---")
-    if st.sidebar.button("Sair / Logout"):
-        st.session_state.logado = False; st.rerun()
+    if st.sidebar.button("Sair / Logout"): st.session_state.logado = False; st.session_state.ghost_mode = ""; st.rerun()
+
+    hoje = date.today()
 
     # ==========================================
-    # PAINEL MASTER (AGORA COM NAVEGAÇÃO LATERAL)
+    # PAINEL MASTER (VERDADEIRO)
     # ==========================================
-    if st.session_state.nivel.lower() == "master":
+    if is_master and st.session_state.ghost_mode == "":
         df_users = df_users_master.copy()
+
+        # 🔔 NOTIFICAÇÕES MASTER
+        cli_bloqueados = len(df_users[df_users['Status'].str.lower() == 'bloqueado'])
+        if cli_bloqueados > 0:
+            st.warning(f"🔔 **Atenção:** Você possui {cli_bloqueados} cliente(s) com a assinatura bloqueada.")
 
         if menu == "Dashboard":
             st.title("👑 Central de Comando SaaS")
@@ -203,13 +166,9 @@ else:
             df_ativos = df_users[df_users['Status'].str.lower() == 'ativo'].copy()
             df_users['ValorNum'] = df_users['Valor'].apply(lambda x: float(str(x).replace(',', '.').strip()) if str(x) != "" else 0.0)
             df_ativos['ValorNum'] = df_ativos['Valor'].apply(lambda x: float(str(x).replace(',', '.').strip()) if str(x) != "" else 0.0)
-            
             c_m1, c_m2, c_m3 = st.columns(3)
-            c_m1.metric("Clientes Ativos", f"{len(df_ativos)}")
-            c_m2.metric("Clientes Bloqueados", f"{len(df_users) - len(df_ativos)}")
-            c_m3.metric("Receita Recorrente (MRR)", f"R$ {df_ativos['ValorNum'].sum():,.2f}")
+            c_m1.metric("Clientes Ativos", f"{len(df_ativos)}"); c_m2.metric("Clientes Bloqueados", f"{cli_bloqueados}"); c_m3.metric("Receita Recorrente (MRR)", f"R$ {df_ativos['ValorNum'].sum():,.2f}")
             st.markdown("<br>", unsafe_allow_html=True)
-            
             cg1, cg2 = st.columns(2)
             with cg1:
                 st.markdown("**Proporção de Clientes**")
@@ -225,8 +184,7 @@ else:
             st.title("📋 Gestão de Clientes")
             if st.session_state.edit_user != "":
                 cliente_sel = st.session_state.edit_user
-                if st.button("⬅️ Cancelar / Voltar para a Tabela"):
-                    st.session_state.edit_user = ""; st.rerun()
+                if st.button("⬅️ Cancelar / Voltar para a Tabela"): st.session_state.edit_user = ""; st.rerun()
                 st.markdown(f"### ✏️ Editando Cliente: <span style='color:#3b82f6;'>{cliente_sel}</span>", unsafe_allow_html=True)
                 row_data = df_users[df_users["Usuario"] == cliente_sel].iloc[0]
                 with st.form("editar_cliente_inline"):
@@ -235,16 +193,13 @@ else:
                     c4, c5, c6 = st.columns(3)
                     e_senha = c4.text_input("Senha", value=str(row_data.get("Senha", ""))); e_nivel = c5.selectbox("Nível", ["Cliente", "Master"], index=0 if row_data.get("Nivel", "") == "Cliente" else 1); e_status = c6.selectbox("Status", ["Ativo", "Bloqueado"], index=0 if row_data.get("Status", "") == "Ativo" else 1)
                     c7, c8 = st.columns(2)
-                    v_str = str(row_data.get("Valor", "0")).replace(',', '.').strip()
-                    e_valor = c7.number_input("Valor (R$)", value=float(v_str) if v_str != "" else 0.0, step=10.0)
+                    v_str = str(row_data.get("Valor", "0")).replace(',', '.').strip(); e_valor = c7.number_input("Valor (R$)", value=float(v_str) if v_str != "" else 0.0, step=10.0)
                     try: v_f = pd.to_datetime(row_data.get("Vencimento", ""), format='%d/%m/%Y').date()
                     except: v_f = date.today()
                     e_venc = c8.date_input("Vencimento da Assinatura", value=v_f)
                     if st.form_submit_button("SALVAR ALTERAÇÕES", type="primary"):
                         celula = aba_usuarios_db.find(cliente_sel, in_column=1)
-                        aba_usuarios_db.update_cell(celula.row, 2, e_senha); aba_usuarios_db.update_cell(celula.row, 3, e_nivel); aba_usuarios_db.update_cell(celula.row, 4, e_status)
-                        aba_usuarios_db.update_cell(celula.row, 5, str(e_valor)); aba_usuarios_db.update_cell(celula.row, 6, e_venc.strftime('%d/%m/%Y'))
-                        aba_usuarios_db.update_cell(celula.row, 7, e_nome); aba_usuarios_db.update_cell(celula.row, 8, e_email); aba_usuarios_db.update_cell(celula.row, 9, e_tel)
+                        aba_usuarios_db.update_cell(celula.row, 2, e_senha); aba_usuarios_db.update_cell(celula.row, 3, e_nivel); aba_usuarios_db.update_cell(celula.row, 4, e_status); aba_usuarios_db.update_cell(celula.row, 5, str(e_valor)); aba_usuarios_db.update_cell(celula.row, 6, e_venc.strftime('%d/%m/%Y')); aba_usuarios_db.update_cell(celula.row, 7, e_nome); aba_usuarios_db.update_cell(celula.row, 8, e_email); aba_usuarios_db.update_cell(celula.row, 9, e_tel)
                         st.success(f"Atualizado!"); time.sleep(1); st.session_state.edit_user = ""; st.rerun()
             else:
                 c_f1, c_f2, c_f3 = st.columns([2, 1, 1])
@@ -256,7 +211,7 @@ else:
                 if filtro_status != "Todos": df_show = df_show[df_show['Status'].str.lower() == filtro_status.lower()]
                 if busca: df_show = df_show[df_show['Usuario'].astype(str).str.contains(busca, case=False) | df_show['Nome'].astype(str).str.contains(busca, case=False)]
 
-                st.markdown("""<div style="display: flex; justify-content: space-between; padding: 12px 15px; background-color: #111827; border-radius: 8px 8px 0 0; border-bottom: 1px solid #1f2937; color: #6b7280; font-weight: 600; font-size: 11px; text-transform: uppercase;"><div style="width: 25%;">USUÁRIO</div><div style="width: 20%;">DATAS</div><div style="width: 15%;">SITUAÇÃO</div><div style="width: 20%;">DETALHES</div><div style="width: 20%; text-align: center;">AÇÕES</div></div>""", unsafe_allow_html=True)
+                st.markdown("""<div style="display: flex; justify-content: space-between; padding: 12px 15px; background-color: #111827; border-radius: 8px 8px 0 0; border-bottom: 1px solid #1f2937; color: #6b7280; font-weight: 600; font-size: 11px; text-transform: uppercase;"><div style="width: 25%;">USUÁRIO</div><div style="width: 15%;">DATAS</div><div style="width: 15%;">SITUAÇÃO</div><div style="width: 20%;">DETALHES</div><div style="width: 25%; text-align: center;">AÇÕES</div></div>""", unsafe_allow_html=True)
                 for _, row in df_show.iterrows():
                     user = str(row.get("Usuario", "-")); email = str(row.get("Email", "-")); nivel = str(row.get("Nivel", "Cliente"))
                     venc = str(row.get("Vencimento", "-")); status = str(row.get("Status", "N/A")); nome = str(row.get("Nome", "Sem Nome"))
@@ -265,23 +220,25 @@ else:
                     btn_status = "🟢" if status.lower() == "ativo" else "🔴"
                     
                     st.markdown("<div style='border-top: 1px solid #1f2937;'></div>", unsafe_allow_html=True)
-                    c1, c2, c3, c4, c5 = st.columns([2.5, 1.5, 1.5, 2.5, 2.0])
+                    c1, c2, c3, c4, c5 = st.columns([2.5, 1.5, 1.5, 2.0, 2.5])
                     with c1: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #3b82f6; font-weight: bold; font-size: 15px;">{user}</span><br><span class="break-text" style="color: #6b7280; font-size: 12px;">{email}</span><br><span style="color: #6b7280; font-size: 11px;">Nível: {nivel}</span></div>', unsafe_allow_html=True)
                     with c2: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #d1d5db; font-size: 14px;">{venc}</span><br><span style="color: #6b7280; font-size: 11px;">Vencimento</span></div>', unsafe_allow_html=True)
                     with c3: st.markdown(f'<div style="padding: 10px 0;"><span style="{cor_bdg} padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">{status.upper()}</span><br><br><span style="background-color: #6366f1; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">SaaS</span></div>', unsafe_allow_html=True)
                     with c4: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #d1d5db; font-size: 14px;">{nome}</span><br><span style="color: #9ca3af; font-size: 12px;">R$ {valor:,.2f}</span><br><span style="color: #9ca3af; font-size: 12px;">{tel}</span></div>', unsafe_allow_html=True)
                     with c5:
                         st.markdown("<div style='padding-top: 15px;'></div>", unsafe_allow_html=True)
-                        b1, b2, b3 = st.columns([1,1,1])
-                        if b1.button("✏️", key=f"edit_{user}"): st.session_state.edit_user = user; st.rerun()
-                        if b2.button("🖥️", key=f"ren_{user}"):
+                        b1, b2, b3, b4 = st.columns(4) # NOVO: 4 Botões
+                        if b1.button("✏️", key=f"edit_{user}", help="Editar"): st.session_state.edit_user = user; st.rerun()
+                        if b2.button("🖥️", key=f"ren_{user}", help="Renovar 1 Mês"):
                             try: v_atual = pd.to_datetime(venc, format='%d/%m/%Y')
                             except: v_atual = pd.Timestamp.today()
                             novo_v = (v_atual + relativedelta(months=1)).strftime('%d/%m/%Y')
-                            aba_usuarios_db.update_cell(aba_usuarios_db.find(user, in_column=1).row, 6, novo_v); st.success(f"Renovado!"); time.sleep(0.5); st.rerun()
-                        if b3.button(btn_status, key=f"stat_{user}"):
+                            aba_usuarios_db.update_cell(aba_usuarios_db.find(user, in_column=1).row, 6, novo_v); st.success("Renovado!"); time.sleep(0.5); st.rerun()
+                        if b3.button(btn_status, key=f"stat_{user}", help="Bloquear/Ativar"):
                             n_stat = "Bloqueado" if status.lower() == "ativo" else "Ativo"
-                            aba_usuarios_db.update_cell(aba_usuarios_db.find(user, in_column=1).row, 4, n_stat); st.warning(f"Alterado."); time.sleep(0.5); st.rerun()
+                            aba_usuarios_db.update_cell(aba_usuarios_db.find(user, in_column=1).row, 4, n_stat); st.rerun()
+                        if b4.button("👁️", key=f"ghost_{user}", help="Acessar conta do cliente"):
+                            st.session_state.ghost_mode = user; st.rerun() # ATIVA O GHOST MODE
                 st.markdown("<div style='background-color: #111827; padding: 5px; border-radius: 0 0 8px 8px;'></div>", unsafe_allow_html=True)
 
         elif menu == "Novo":
@@ -294,89 +251,85 @@ else:
                 if st.form_submit_button("SALVAR NOVO CLIENTE", type="primary"):
                     if n_user in df_users["Usuario"].values: st.error("Usuário já existe!")
                     elif n_user and n_senha:
-                        aba_usuarios_db.append_row([n_user, n_senha, n_nivel, n_status, str(n_valor), n_venc.strftime('%d/%m/%Y'), n_nome, n_email, n_tel]); st.success("Cliente criado!"); time.sleep(1); st.rerun()
+                        aba_usuarios_db.append_row([n_user, n_senha, n_nivel, n_status, str(n_valor), n_venc.strftime('%d/%m/%Y'), n_nome, n_email, n_tel]); st.success("Sucesso!"); time.sleep(1); st.rerun()
 
         elif menu == "Config":
             st.title("⚙️ Configurações Globais (White-Label)")
-            st.markdown("Faça o upload do logo e configure os dados de pagamento. Tudo é atualizado em tempo real para os clientes.")
-            
             with st.form("form_config_master"):
-                st.markdown("#### Identidade Visual")
                 c1, c2 = st.columns(2)
                 novo_nome = c1.text_input("Nome da Plataforma", value=NOME_SAAS)
                 logo_file = c2.file_uploader("Upload da Logo (PNG/JPG)", type=['png', 'jpg', 'jpeg'])
-                
-                st.markdown("#### Dados de Cobrança (PIX)")
                 c3, c4 = st.columns(2)
-                nova_chave = c3.text_input("Chave PIX", value=CHAVE_PIX)
-                novo_rec = c4.text_input("Titular do PIX", value=NOME_RECEBEDOR)
-                
+                nova_chave = c3.text_input("Chave PIX", value=CHAVE_PIX); novo_rec = c4.text_input("Titular do PIX", value=NOME_RECEBEDOR)
                 if st.form_submit_button("SALVAR CONFIGURAÇÕES", type="primary"):
                     ws_conf = planilha.worksheet("Configuracoes")
                     ws_conf.update(values=[['Chave', 'Valor'], ['NOME_SAAS', novo_nome], ['CHAVE_PIX', nova_chave], ['NOME_RECEBEDOR', novo_rec]], range_name='A1:B4')
-                    
                     if logo_file is not None:
-                        with open("logo.png", "wb") as f:
-                            f.write(logo_file.getbuffer())
-                    
-                    st.cache_data.clear()
-                    st.success("✅ Plataforma atualizada com sucesso!")
-                    time.sleep(1); st.rerun()
+                        with open("logo.png", "wb") as f: f.write(logo_file.getbuffer())
+                    st.cache_data.clear(); st.success("Atualizada com sucesso!"); time.sleep(1); st.rerun()
 
     # ==========================================
-    # PAINEL DO CLIENTE E PAYWALL
+    # PAINEL DO CLIENTE (E GHOST MODE DO MASTER)
     # ==========================================
     else:
-        if menu == "Assinatura":
+        # AVISO GHOST MODE
+        if st.session_state.ghost_mode != "":
+            st.markdown(f"<div class='ghost-banner'>👁️ MODO SUPORTE: Você está atuando como o cliente {usuario_ativo}</div>", unsafe_allow_html=True)
+            if st.button("⬅️ Sair do Modo Suporte e voltar ao Painel Master", type="primary"):
+                st.session_state.ghost_mode = ""; st.rerun()
+            st.markdown("---")
+
+        if meu_status == "bloqueado":
+            st.error("⛔ ACESSO SUSPENSO: Identificamos uma pendência na sua assinatura.")
             st.title("💳 Minha Assinatura")
             v_str = str(meu_cadastro.iloc[0]["Valor"]).replace(',','.').strip()
             valor_plano = float(v_str) if v_str != "" else 0.0
-            dt_venc = str(meu_cadastro.iloc[0]["Vencimento"])
-            
-            c1, c2, c3 = st.columns(3)
-            c1.metric("Valor do Plano", f"R$ {valor_plano:,.2f}")
-            c2.metric("Vencimento", f"{dt_venc}")
-            c3.metric("Situação Atual", f"{meu_status.upper()}")
-            
+            st.metric("Valor do Plano", f"R$ {valor_plano:,.2f}")
             if valor_plano > 0:
-                st.markdown(f"""
-                <div class="paywall-box">
-                    <h2 style="color:white; margin-bottom:10px;">Pagamento via PIX</h2>
-                    <p style="color:#94a3b8;">Utilize a chave abaixo para renovar o seu acesso à plataforma {NOME_SAAS}.</p>
-                    <div class="pix-code">{CHAVE_PIX}</div>
-                    <p style="color:#cbd5e1; font-size:14px;"><strong>Recebedor:</strong> {NOME_RECEBEDOR}</p>
-                    <br>
-                    <p style="color:#10b981; font-size:13px;">✅ O seu acesso será liberado imediatamente após a confirmação pelo Administrador.</p>
-                </div>
-                """, unsafe_allow_html=True)
-            else:
-                st.success("🎉 O seu plano atual é gratuito ou não possui mensalidade configurada.")
-
+                st.markdown(f"""<div class="paywall-box"><h2 style="color:white; margin-bottom:10px;">Pagamento via PIX</h2><p style="color:#94a3b8;">Utilize a chave abaixo para renovar o seu acesso à plataforma {NOME_SAAS}.</p><div class="pix-code">{CHAVE_PIX}</div><p style="color:#cbd5e1; font-size:14px;"><strong>Recebedor:</strong> {NOME_RECEBEDOR}</p><br><p style="color:#10b981; font-size:13px;">✅ O seu acesso será liberado imediatamente após a confirmação pelo Administrador.</p></div>""", unsafe_allow_html=True)
+        
         elif meu_status == "ativo":
+            # GESTÃO DE BD DO CLIENTE (COM COLUNA NOVINHA PARA COMPROVATIVOS)
             def get_aba_cliente():
-                nome_aba = f"Dados_{st.session_state.usuario}"
+                nome_aba = f"Dados_{usuario_ativo}"
                 try: return planilha.worksheet(nome_aba)
                 except gspread.exceptions.WorksheetNotFound:
                     ws = planilha.add_worksheet(title=nome_aba, rows="1000", cols="10")
-                    ws.append_row(["ID", "Tipo", "Descrição", "Valor", "Status", "Vencimento", "Categoria", "Forma_Pagamento"])
+                    ws.append_row(["ID", "Tipo", "Descrição", "Valor", "Status", "Vencimento", "Categoria", "Forma_Pagamento", "Comprovativo"])
                     return ws
 
-            df = pd.DataFrame(get_aba_cliente().get_all_records())
-            if df.empty:
-                df = pd.DataFrame(columns=["ID", "Tipo", "Descrição", "Valor", "Status", "Vencimento", "Categoria", "Forma_Pagamento"])
-                df['Vencimento'] = pd.to_datetime(df['Vencimento'])
-            else:
-                df['Vencimento'] = pd.to_datetime(df['Vencimento'], errors='coerce').fillna(pd.Timestamp.now())
-                df['ID'] = df['ID'].astype(str); df['Forma_Pagamento'] = df['Forma_Pagamento'].astype(str); df['Valor'] = pd.to_numeric(df['Valor'], errors='coerce').fillna(0.0)
+            def carregar_dados():
+                ws = get_aba_cliente()
+                df = pd.DataFrame(ws.get_all_records())
+                if df.empty:
+                    df = pd.DataFrame(columns=["ID", "Tipo", "Descrição", "Valor", "Status", "Vencimento", "Categoria", "Forma_Pagamento", "Comprovativo"])
+                else:
+                    if "Comprovativo" not in df.columns: df["Comprovativo"] = ""
+                    df['Vencimento'] = pd.to_datetime(df['Vencimento'], errors='coerce').fillna(pd.Timestamp.now())
+                    df['ID'] = df['ID'].astype(str); df['Forma_Pagamento'] = df['Forma_Pagamento'].astype(str); df['Valor'] = pd.to_numeric(df['Valor'], errors='coerce').fillna(0.0)
+                return df
 
             def salvar_dados(df_novo):
                 ws = get_aba_cliente(); df_s = df_novo.copy()
                 df_s['Vencimento'] = df_s['Vencimento'].dt.strftime('%Y-%m-%d'); df_s = df_s.fillna("")
                 ws.clear(); ws.update(values=[df_s.columns.tolist()] + df_s.values.tolist(), range_name='A1')
 
-            hoje = date.today()
+            # MOTOR DE METAS (BUDGETING)
+            def get_metas():
+                try: return planilha.worksheet("Metas")
+                except gspread.exceptions.WorksheetNotFound:
+                    ws = planilha.add_worksheet(title="Metas", rows="100", cols="3")
+                    ws.append_row(["Usuario", "Categoria", "Limite"])
+                    return ws
+
+            df = carregar_dados()
             CATEGORIAS = ["Consultoria", "Energia/Enel", "Internet", "Moradia", "Salário", "Serviços", "Outros"]
             PAGAMENTOS = ["Pix", "Cartão", "Dinheiro", "Boleto", "Outros"]
+
+            # 🔔 NOTIFICAÇÕES CLIENTE
+            pendentes_hoje = df[(df["Status"] == "Pendente") & (df["Vencimento"].dt.date <= hoje + timedelta(days=2))]
+            if not pendentes_hoje.empty:
+                st.warning(f"🔔 **Lembrete:** Você tem {len(pendentes_hoje)} conta(s) pendentes que vencem hoje ou nos próximos 2 dias!")
 
             if menu == "Painel":
                 st.title("Painel de Controle")
@@ -399,6 +352,47 @@ else:
                         if c_btn.button("PAGAR", key=f"pay_d_{r['ID']}"):
                             df.loc[df['ID'] == r['ID'], 'Status'] = 'Pago'; salvar_dados(df); st.balloons(); time.sleep(0.5); st.rerun()
 
+            elif menu == "Metas":
+                st.title("🎯 Metas de Gastos (Budget)")
+                ws_metas = get_metas()
+                df_metas_geral = pd.DataFrame(ws_metas.get_all_records())
+                if df_metas_geral.empty: df_metas_geral = pd.DataFrame(columns=["Usuario", "Categoria", "Limite"])
+                
+                minhas_metas = df_metas_geral[df_metas_geral['Usuario'] == usuario_ativo].copy()
+                
+                with st.form("nova_meta"):
+                    st.markdown("Defina um limite máximo mensal para uma categoria.")
+                    c_m1, c_m2 = st.columns(2)
+                    cat_meta = c_m1.selectbox("Categoria", CATEGORIAS)
+                    val_meta = c_m2.number_input("Limite (R$)", min_value=0.0, step=50.0)
+                    if st.form_submit_button("Definir Meta", type="primary"):
+                        # Remove a meta antiga se existir e adiciona a nova
+                        if not df_metas_geral.empty:
+                            df_metas_geral = df_metas_geral[~((df_metas_geral['Usuario'] == usuario_ativo) & (df_metas_geral['Categoria'] == cat_meta))]
+                        nova_linha = pd.DataFrame([{"Usuario": usuario_ativo, "Categoria": cat_meta, "Limite": val_meta}])
+                        df_metas_final = pd.concat([df_metas_geral, nova_linha], ignore_index=True)
+                        ws_metas.clear()
+                        ws_metas.update(values=[df_metas_final.columns.tolist()] + df_metas_final.values.tolist(), range_name='A1')
+                        st.success("Meta definida!"); time.sleep(1); st.rerun()
+
+                st.markdown("---")
+                st.subheader("Acompanhamento do Mês Atual")
+                if minhas_metas.empty: st.info("Você ainda não definiu nenhuma meta de gastos.")
+                else:
+                    df_gasto_mes = df[(df['Vencimento'].dt.month == hoje.month) & (df['Vencimento'].dt.year == hoje.year) & (df['Tipo'] == 'Gasto')]
+                    for _, row_meta in minhas_metas.iterrows():
+                        cat = row_meta['Categoria']
+                        limite = float(row_meta['Limite'])
+                        gasto_atual = df_gasto_mes[df_gasto_mes['Categoria'] == cat]['Valor'].sum()
+                        
+                        perc = (gasto_atual / limite) * 100 if limite > 0 else 0
+                        cor_prog = "green" if perc < 75 else "orange" if perc < 100 else "red"
+                        perc_clamp = min(perc, 100) # Previne erro na barra se passar de 100%
+                        
+                        st.markdown(f"**{cat}** - Gasto: R$ {gasto_atual:,.2f} de R$ {limite:,.2f} ({perc:.1f}%)")
+                        st.progress(int(perc_clamp))
+                        st.markdown("<br>", unsafe_allow_html=True)
+
             elif menu == "Previsão":
                 st.title("🔮 Previsão Futura")
                 futuro = df[df['Vencimento'].dt.date > hoje].copy()
@@ -417,10 +411,7 @@ else:
                     cal = calendar.monthcalendar(hoje.year, hoje.month)
                     meses_pt = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]
                     
-                    html_cal = f'<h3 style="text-align:center; color:#3b82f6;">{meses_pt[hoje.month-1]} {hoje.year}</h3>'
-                    html_cal += '<table style="width:100%; text-align:center; color:white; border-collapse: collapse; font-size:18px;">'
-                    html_cal += '<tr style="background-color:#1f2937;"><th>Seg</th><th>Ter</th><th>Qua</th><th>Qui</th><th>Sex</th><th>Sáb</th><th>Dom</th></tr>'
-                    
+                    html_cal = f'<h3 style="text-align:center; color:#3b82f6;">{meses_pt[hoje.month-1]} {hoje.year}</h3><table style="width:100%; text-align:center; color:white; border-collapse: collapse; font-size:18px;"><tr style="background-color:#1f2937;"><th>Seg</th><th>Ter</th><th>Qua</th><th>Qui</th><th>Sex</th><th>Sáb</th><th>Dom</th></tr>'
                     for week in cal:
                         html_cal += '<tr>'
                         for day in week:
@@ -448,7 +439,7 @@ else:
                         bid = pd.Timestamp.now().strftime('%H%M%S')
                         for i in range(qtd if rep != "Não" else 1):
                             delta = relativedelta(months=i) if rep=="Mensal" else relativedelta(days=0)
-                            novos.append({"ID": f"{bid}{i}", "Tipo": tipo, "Descrição": desc, "Valor": val, "Status": "Pago" if tipo=="Recebimento" else "Pendente", "Vencimento": pd.to_datetime(dt)+delta, "Categoria": cat, "Forma_Pagamento": fop})
+                            novos.append({"ID": f"{bid}{i}", "Tipo": tipo, "Descrição": desc, "Valor": val, "Status": "Pago" if tipo=="Recebimento" else "Pendente", "Vencimento": pd.to_datetime(dt)+delta, "Categoria": cat, "Forma_Pagamento": fop, "Comprovativo": ""})
                         salvar_dados(pd.concat([df, pd.DataFrame(novos)]))
                         st.success("Salvo!"); time.sleep(1); st.rerun()
 
@@ -457,8 +448,10 @@ else:
                 if not df.empty:
                     df_export = df.copy(); df_export['Vencimento'] = df_export['Vencimento'].dt.strftime('%d/%m/%Y')
                     csv = df_export.to_csv(index=False, sep=';').encode('utf-8-sig')
-                    st.download_button(label="📥 Descarregar Relatório em Excel", data=csv, file_name=f"Relatorio_Financeiro_{hoje.strftime('%d-%m-%Y')}.csv", mime='text/csv')
+                    st.download_button(label="📥 Descarregar Relatório", data=csv, file_name=f"Relatorio_{hoje.strftime('%d-%m-%Y')}.csv", mime='text/csv')
                 st.markdown("---")
+                
+                # --- 📎 EDIÇÃO COM UPLOAD DE COMPROVATIVO ---
                 if st.session_state.edit_conta != "":
                     idx_edit = df[df['ID'] == st.session_state.edit_conta].index[0]
                     st.markdown(f"### ✏️ Editando Lançamento: <span style='color:#3b82f6;'>{df.at[idx_edit,'Descrição']}</span>", unsafe_allow_html=True)
@@ -470,8 +463,22 @@ else:
                         ec = c3.selectbox("Categoria", CATEGORIAS, index=CATEGORIAS.index(df.at[idx_edit,'Categoria']) if df.at[idx_edit,'Categoria'] in CATEGORIAS else 0)
                         ef = c4.selectbox("Pagamento", PAGAMENTOS, index=PAGAMENTOS.index(df.at[idx_edit,'Forma_Pagamento']) if df.at[idx_edit,'Forma_Pagamento'] in PAGAMENTOS else 0)
                         es = c5.selectbox("Status", ["Pago", "Pendente"], index=0 if df.at[idx_edit,'Status']=="Pago" else 1)
+                        
+                        st.markdown("#### 📎 Anexar Comprovativo (Recibo, PDF ou Imagem)")
+                        nome_comp_atual = df.at[idx_edit, 'Comprovativo'] if 'Comprovativo' in df.columns else ""
+                        if nome_comp_atual: st.info(f"Arquivo atual: {nome_comp_atual}")
+                        novo_comp = st.file_uploader("Fazer Upload", type=['png', 'jpg', 'pdf'])
+
                         if st.form_submit_button("GUARDAR ALTERAÇÕES", type="primary"):
                             df.at[idx_edit,'Descrição'] = ed; df.at[idx_edit,'Valor'] = ev; df.at[idx_edit,'Categoria'] = ec; df.at[idx_edit,'Forma_Pagamento'] = ef; df.at[idx_edit,'Status'] = es
+                            
+                            # Salva o arquivo fisicamente na pasta comprovativos
+                            if novo_comp is not None:
+                                file_name = f"{st.session_state.edit_conta}_{novo_comp.name}"
+                                with open(os.path.join("comprovativos", file_name), "wb") as f:
+                                    f.write(novo_comp.getbuffer())
+                                df.at[idx_edit, 'Comprovativo'] = file_name
+                            
                             salvar_dados(df); st.session_state.edit_conta = ""; st.success("Atualizado!"); time.sleep(1); st.rerun()
                 else:
                     c_f1, c_f2, c_f3 = st.columns([1, 1, 1.5])
@@ -493,6 +500,7 @@ else:
                         cid = str(r['ID']); desc = str(r['Descrição']); cat = str(r['Categoria']); forma = str(r['Forma_Pagamento'])
                         val = float(r['Valor']); status = str(r['Status']); tipo = str(r['Tipo'])
                         venc = r['Vencimento'].strftime('%d/%m/%Y') if pd.notnull(r['Vencimento']) else ""
+                        tem_anexo = "📎" if 'Comprovativo' in r and str(r['Comprovativo']) != "" else ""
                         
                         cor_bdg = "border: 1px solid #10b981; color: #10b981;" if status.lower() == "pago" else "border: 1px solid #ef4444; color: #ef4444;"
                         cor_tipo = "#10b981" if tipo == "Recebimento" else "#ef4444"
@@ -500,7 +508,7 @@ else:
                         
                         st.markdown("<div style='border-top: 1px solid #1f2937;'></div>", unsafe_allow_html=True)
                         c1, c2, c3, c4, c5 = st.columns([3, 2, 1.5, 1.5, 2.0])
-                        with c1: st.markdown(f'<div style="padding: 10px 0;"><span style="color: {cor_tipo}; font-weight: bold; font-size: 15px;">{desc}</span><br><span style="color: #6b7280; font-size: 11px;">{tipo} via {forma}</span></div>', unsafe_allow_html=True)
+                        with c1: st.markdown(f'<div style="padding: 10px 0;"><span style="color: {cor_tipo}; font-weight: bold; font-size: 15px;">{desc} {tem_anexo}</span><br><span style="color: #6b7280; font-size: 11px;">{tipo} via {forma}</span></div>', unsafe_allow_html=True)
                         with c2: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #d1d5db; font-size: 14px;">{venc}</span></div>', unsafe_allow_html=True)
                         with c3: st.markdown(f'<div style="padding: 10px 0;"><span style="background-color: #334155; color: #cbd5e1; padding: 2px 8px; border-radius: 4px; font-size: 11px;">{cat}</span></div>', unsafe_allow_html=True)
                         with c4: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #d1d5db; font-size: 14px;">R$ {val:,.2f}</span><br><span style="{cor_bdg} padding: 1px 6px; border-radius: 4px; font-weight: bold; font-size: 10px;">{status.upper()}</span></div>', unsafe_allow_html=True)
