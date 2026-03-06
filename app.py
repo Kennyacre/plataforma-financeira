@@ -136,16 +136,13 @@ else:
 
     if is_master and st.session_state.ghost_mode == "":
         opcoes_menu = {"📊 Dashboard": "Dashboard", "📋 Gestão de Clientes": "Gestao", "➕ Novo Cliente": "Novo", "⚙️ Configurações": "Config"}
-        
         with st.sidebar.expander("⚙️ Atalho de Configurações"):
             with st.form("form_config_sidebar"):
                 novo_nome_side = st.text_input("Plataforma", value=NOME_SAAS, key="side_nome")
                 logo_file_side = st.file_uploader("Logo", type=['png', 'jpg', 'jpeg'], key="side_logo")
                 nova_chave_side = st.text_input("PIX", value=CHAVE_PIX, key="side_pix")
                 novo_rec_side = st.text_input("Titular", value=NOME_RECEBEDOR, key="side_rec")
-                
                 if st.form_submit_button("Guardar"):
-                    # CORREÇÃO APLICADA AQUI (A1:B5 preservando a ordem)
                     ws_conf = planilha.worksheet("Configuracoes")
                     ws_conf.update(values=[['Chave', 'Valor'], ['NOME_SAAS', novo_nome_side], ['LOGO_URL', 'local'], ['CHAVE_PIX', nova_chave_side], ['NOME_RECEBEDOR', novo_rec_side]], range_name='A1:B5')
                     if logo_file_side is not None:
@@ -167,10 +164,8 @@ else:
     # ==========================================
     if is_master and st.session_state.ghost_mode == "":
         df_users = df_users_master.copy()
-
         cli_bloqueados = len(df_users[df_users['Status'].str.lower() == 'bloqueado'])
-        if cli_bloqueados > 0:
-            st.warning(f"🔔 **Atenção:** Você possui {cli_bloqueados} cliente(s) com a assinatura bloqueada.")
+        if cli_bloqueados > 0: st.warning(f"🔔 **Atenção:** Você possui {cli_bloqueados} cliente(s) com a assinatura bloqueada.")
 
         if menu == "Dashboard":
             st.title("👑 Central de Comando SaaS")
@@ -274,9 +269,7 @@ else:
                 c3, c4 = st.columns(2)
                 nova_chave = c3.text_input("Chave PIX", value=CHAVE_PIX, key="main_pix")
                 novo_rec = c4.text_input("Titular do PIX", value=NOME_RECEBEDOR, key="main_rec")
-                
                 if st.form_submit_button("SALVAR CONFIGURAÇÕES", type="primary"):
-                    # CORREÇÃO APLICADA AQUI (A1:B5 preservando a ordem)
                     ws_conf = planilha.worksheet("Configuracoes")
                     ws_conf.update(values=[['Chave', 'Valor'], ['NOME_SAAS', novo_nome], ['LOGO_URL', 'local'], ['CHAVE_PIX', nova_chave], ['NOME_RECEBEDOR', novo_rec]], range_name='A1:B5')
                     if logo_file is not None:
@@ -311,14 +304,16 @@ else:
                     ws.append_row(["ID", "Tipo", "Descrição", "Valor", "Status", "Vencimento", "Categoria", "Forma_Pagamento", "Comprovativo"])
                     return ws
 
+            # CORREÇÃO APLICADA AQUI: PREVENÇÃO DE ERRO DE DATAFRAME VAZIO
             def carregar_dados():
                 ws = get_aba_cliente()
                 df = pd.DataFrame(ws.get_all_records())
                 if df.empty:
                     df = pd.DataFrame(columns=["ID", "Tipo", "Descrição", "Valor", "Status", "Vencimento", "Categoria", "Forma_Pagamento", "Comprovativo"])
+                    df['Vencimento'] = pd.to_datetime([]) # Força a tipagem para datetime mesmo vazio
                 else:
                     if "Comprovativo" not in df.columns: df["Comprovativo"] = ""
-                    df['Vencimento'] = pd.to_datetime(df['Vencimento'], errors='coerce').fillna(pd.Timestamp.now())
+                    df['Vencimento'] = pd.to_datetime(df['Vencimento'], dayfirst=True, errors='coerce').fillna(pd.Timestamp.now())
                     df['ID'] = df['ID'].astype(str); df['Forma_Pagamento'] = df['Forma_Pagamento'].astype(str); df['Valor'] = pd.to_numeric(df['Valor'], errors='coerce').fillna(0.0)
                 return df
 
@@ -338,9 +333,11 @@ else:
             CATEGORIAS = ["Consultoria", "Energia/Enel", "Internet", "Moradia", "Salário", "Serviços", "Outros"]
             PAGAMENTOS = ["Pix", "Cartão", "Dinheiro", "Boleto", "Outros"]
 
-            pendentes_hoje = df[(df["Status"] == "Pendente") & (df["Vencimento"].dt.date <= hoje + timedelta(days=2))]
-            if not pendentes_hoje.empty:
-                st.warning(f"🔔 **Lembrete:** Você tem {len(pendentes_hoje)} conta(s) pendentes que vencem hoje ou nos próximos 2 dias!")
+            # CORREÇÃO APLICADA AQUI: BLINDAGEM DE NOTIFICAÇÕES
+            if not df.empty:
+                pendentes_hoje = df[(df["Status"] == "Pendente") & (df["Vencimento"].dt.date <= hoje + timedelta(days=2))]
+                if not pendentes_hoje.empty:
+                    st.warning(f"🔔 **Lembrete:** Você tem {len(pendentes_hoje)} conta(s) pendentes que vencem hoje ou nos próximos 2 dias!")
 
             if menu == "Assinatura":
                 st.title("💳 Minha Assinatura")
@@ -369,23 +366,24 @@ else:
             elif menu == "Painel":
                 st.title("Painel de Controle")
                 if df.empty: st.info("👋 Olá! O seu financeiro está vazio. Vá em **Novo Lançamento**.")
-                df_m = df[(df['Vencimento'].dt.month == hoje.month) & (df['Vencimento'].dt.year == hoje.year)].copy()
-                ent = df_m[df_m['Tipo']=='Recebimento']['Valor'].sum(); sai = df_m[df_m['Tipo']=='Gasto']['Valor'].sum()
-                c1, c2, c3 = st.columns(3)
-                c1.metric("Entradas (Mês)", f"R$ {ent:,.2f}"); c2.metric("Saídas (Mês)", f"R$ {sai:,.2f}"); c3.metric("Saldo Líquido", f"R$ {ent - sai:,.2f}")
-                st.markdown("---"); st.subheader("📅 Próximos Pagamentos")
-                pend = df[(df["Status"] == "Pendente") & (df["Tipo"] == "Gasto")].sort_values(by="Vencimento")
-                if pend.empty: st.success("Nenhuma conta pendente.")
                 else:
-                    for _, r in pend.head(5).iterrows():
-                        dv = r['Vencimento'].date()
-                        cor = "#ef4444" if dv < hoje else "#10b981"
-                        c_dt, c_desc, c_val, c_btn = st.columns([1, 3, 2, 1])
-                        c_dt.markdown(f"<span style='color:{cor}; font-weight:bold; font-size:1.1em'>{dv.strftime('%d/%m')}</span>", unsafe_allow_html=True)
-                        c_desc.markdown(f"**{r['Descrição']}** - <small style='color:#94a3b8'>{r['Categoria']}</small>", unsafe_allow_html=True)
-                        c_val.markdown(f"**R$ {r['Valor']:,.2f}**")
-                        if c_btn.button("PAGAR", key=f"pay_d_{r['ID']}"):
-                            df.loc[df['ID'] == r['ID'], 'Status'] = 'Pago'; salvar_dados(df); st.balloons(); time.sleep(0.5); st.rerun()
+                    df_m = df[(df['Vencimento'].dt.month == hoje.month) & (df['Vencimento'].dt.year == hoje.year)].copy()
+                    ent = df_m[df_m['Tipo']=='Recebimento']['Valor'].sum(); sai = df_m[df_m['Tipo']=='Gasto']['Valor'].sum()
+                    c1, c2, c3 = st.columns(3)
+                    c1.metric("Entradas (Mês)", f"R$ {ent:,.2f}"); c2.metric("Saídas (Mês)", f"R$ {sai:,.2f}"); c3.metric("Saldo Líquido", f"R$ {ent - sai:,.2f}")
+                    st.markdown("---"); st.subheader("📅 Próximos Pagamentos")
+                    pend = df[(df["Status"] == "Pendente") & (df["Tipo"] == "Gasto")].sort_values(by="Vencimento")
+                    if pend.empty: st.success("Nenhuma conta pendente.")
+                    else:
+                        for _, r in pend.head(5).iterrows():
+                            dv = r['Vencimento'].date()
+                            cor = "#ef4444" if dv < hoje else "#10b981"
+                            c_dt, c_desc, c_val, c_btn = st.columns([1, 3, 2, 1])
+                            c_dt.markdown(f"<span style='color:{cor}; font-weight:bold; font-size:1.1em'>{dv.strftime('%d/%m')}</span>", unsafe_allow_html=True)
+                            c_desc.markdown(f"**{r['Descrição']}** - <small style='color:#94a3b8'>{r['Categoria']}</small>", unsafe_allow_html=True)
+                            c_val.markdown(f"**R$ {r['Valor']:,.2f}**")
+                            if c_btn.button("PAGAR", key=f"pay_d_{r['ID']}"):
+                                df.loc[df['ID'] == r['ID'], 'Status'] = 'Pago'; salvar_dados(df); st.balloons(); time.sleep(0.5); st.rerun()
 
             elif menu == "Metas":
                 st.title("🎯 Metas de Gastos (Budget)")
@@ -413,10 +411,14 @@ else:
                 st.subheader("Acompanhamento do Mês Atual")
                 if minhas_metas.empty: st.info("Você ainda não definiu nenhuma meta de gastos.")
                 else:
-                    df_gasto_mes = df[(df['Vencimento'].dt.month == hoje.month) & (df['Vencimento'].dt.year == hoje.year) & (df['Tipo'] == 'Gasto')]
+                    if df.empty:
+                        df_gasto_mes = pd.DataFrame(columns=["Categoria", "Valor"])
+                    else:
+                        df_gasto_mes = df[(df['Vencimento'].dt.month == hoje.month) & (df['Vencimento'].dt.year == hoje.year) & (df['Tipo'] == 'Gasto')]
+                    
                     for _, row_meta in minhas_metas.iterrows():
                         cat = row_meta['Categoria']; limite = float(row_meta['Limite'])
-                        gasto_atual = df_gasto_mes[df_gasto_mes['Categoria'] == cat]['Valor'].sum()
+                        gasto_atual = df_gasto_mes[df_gasto_mes['Categoria'] == cat]['Valor'].sum() if not df_gasto_mes.empty else 0.0
                         perc = (gasto_atual / limite) * 100 if limite > 0 else 0
                         cor_prog = "green" if perc < 75 else "orange" if perc < 100 else "red"
                         st.markdown(f"**{cat}** - Gasto: R$ {gasto_atual:,.2f} de R$ {limite:,.2f} ({perc:.1f}%)")
@@ -425,11 +427,13 @@ else:
 
             elif menu == "Previsão":
                 st.title("🔮 Previsão Futura")
-                futuro = df[df['Vencimento'].dt.date > hoje].copy()
-                if futuro.empty: st.info("Sem dados futuros.")
+                if df.empty: st.info("Sem dados futuros.")
                 else:
-                    futuro['Mes_Ano'] = futuro['Vencimento'].dt.strftime('%Y-%m')
-                    st.altair_chart(alt.Chart(futuro.groupby(['Mes_Ano', 'Tipo'])['Valor'].sum().reset_index()).mark_bar().encode(x='Mes_Ano', y='Valor', color=alt.Color('Tipo', scale=alt.Scale(domain=['Recebimento', 'Gasto'], range=['#10b981', '#ef4444']))).properties(height=300), use_container_width=True)
+                    futuro = df[df['Vencimento'].dt.date > hoje].copy()
+                    if futuro.empty: st.info("Sem dados futuros.")
+                    else:
+                        futuro['Mes_Ano'] = futuro['Vencimento'].dt.strftime('%Y-%m')
+                        st.altair_chart(alt.Chart(futuro.groupby(['Mes_Ano', 'Tipo'])['Valor'].sum().reset_index()).mark_bar().encode(x='Mes_Ano', y='Valor', color=alt.Color('Tipo', scale=alt.Scale(domain=['Recebimento', 'Gasto'], range=['#10b981', '#ef4444']))).properties(height=300), use_container_width=True)
 
             elif menu == "Calendário":
                 st.title("📅 Calendário de Vencimentos")
@@ -506,45 +510,48 @@ else:
                                 df.at[idx_edit, 'Comprovativo'] = file_name
                             salvar_dados(df); st.session_state.edit_conta = ""; st.success("Atualizado!"); time.sleep(1); st.rerun()
                 else:
-                    c_f1, c_f2, c_f3 = st.columns([1, 1, 1.5])
-                    with c_f1:
-                        meses = sorted(df['Vencimento'].dt.strftime('%Y-%m').unique(), reverse=True) if not df.empty else []
-                        sel_mes = st.selectbox("📅 Mês", ["Todos"] + meses)
-                    with c_f2: sel_cat = st.selectbox("📂 Categoria", ["Todas"] + CATEGORIAS)
-                    with c_f3: busca = st.text_input("🔍 Busca", placeholder="Texto...")
-                    
-                    df_exibicao = df.copy()
-                    if sel_mes != "Todos": df_exibicao = df_exibicao[df_exibicao['Vencimento'].dt.strftime('%Y-%m') == sel_mes]
-                    if sel_cat != "Todas": df_exibicao = df_exibicao[df_exibicao['Categoria'] == sel_cat]
-                    if busca: df_exibicao = df_exibicao[df_exibicao.apply(lambda x: x.astype(str).str.contains(busca, case=False).any(), axis=1)]
-                    df_exibicao = df_exibicao.sort_values(by="Vencimento", ascending=False)
-
-                    st.markdown("""<div style="display: flex; justify-content: space-between; padding: 12px 15px; background-color: #111827; border-radius: 8px 8px 0 0; border-bottom: 1px solid #1f2937; color: #6b7280; font-weight: 600; font-size: 11px; text-transform: uppercase;"><div style="width: 30%;">DESCRIÇÃO</div><div style="width: 20%;">VENCIMENTO</div><div style="width: 15%;">CATEGORIA</div><div style="width: 15%;">VALOR</div><div style="width: 20%; text-align: center;">AÇÕES</div></div>""", unsafe_allow_html=True)
-
-                    for _, r in df_exibicao.iterrows():
-                        cid = str(r['ID']); desc = str(r['Descrição']); cat = str(r['Categoria']); forma = str(r['Forma_Pagamento'])
-                        val = float(r['Valor']); status = str(r['Status']); tipo = str(r['Tipo'])
-                        venc = r['Vencimento'].strftime('%d/%m/%Y') if pd.notnull(r['Vencimento']) else ""
-                        tem_anexo = "📎" if 'Comprovativo' in r and str(r['Comprovativo']) != "" else ""
+                    if df.empty:
+                        st.info("Nenhum lançamento encontrado.")
+                    else:
+                        c_f1, c_f2, c_f3 = st.columns([1, 1, 1.5])
+                        with c_f1:
+                            meses = sorted(df['Vencimento'].dt.strftime('%Y-%m').unique(), reverse=True) if not df.empty else []
+                            sel_mes = st.selectbox("📅 Mês", ["Todos"] + meses)
+                        with c_f2: sel_cat = st.selectbox("📂 Categoria", ["Todas"] + CATEGORIAS)
+                        with c_f3: busca = st.text_input("🔍 Busca", placeholder="Texto...")
                         
-                        cor_bdg = "border: 1px solid #10b981; color: #10b981;" if status.lower() == "pago" else "border: 1px solid #ef4444; color: #ef4444;"
-                        cor_tipo = "#10b981" if tipo == "Recebimento" else "#ef4444"
-                        btn_status = "🟢" if status.lower() == "pago" else "🔴"
-                        
-                        st.markdown("<div style='border-top: 1px solid #1f2937;'></div>", unsafe_allow_html=True)
-                        c1, c2, c3, c4, c5 = st.columns([3, 2, 1.5, 1.5, 2.0])
-                        with c1: st.markdown(f'<div style="padding: 10px 0;"><span style="color: {cor_tipo}; font-weight: bold; font-size: 15px;">{desc} {tem_anexo}</span><br><span style="color: #6b7280; font-size: 11px;">{tipo} via {forma}</span></div>', unsafe_allow_html=True)
-                        with c2: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #d1d5db; font-size: 14px;">{venc}</span></div>', unsafe_allow_html=True)
-                        with c3: st.markdown(f'<div style="padding: 10px 0;"><span style="background-color: #334155; color: #cbd5e1; padding: 2px 8px; border-radius: 4px; font-size: 11px;">{cat}</span></div>', unsafe_allow_html=True)
-                        with c4: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #d1d5db; font-size: 14px;">R$ {val:,.2f}</span><br><span style="{cor_bdg} padding: 1px 6px; border-radius: 4px; font-weight: bold; font-size: 10px;">{status.upper()}</span></div>', unsafe_allow_html=True)
-                        with c5:
-                            st.markdown("<div style='padding-top: 15px;'></div>", unsafe_allow_html=True)
-                            b1, b2, b3 = st.columns([1,1,1])
-                            if b1.button("✏️", key=f"e_{cid}"): st.session_state.edit_conta = cid; st.rerun()
-                            if b2.button(btn_status, key=f"s_{cid}"):
-                                df.loc[df['ID'] == cid, 'Status'] = "Pendente" if status.lower() == "pago" else "Pago"
-                                salvar_dados(df); st.rerun()
-                            if b3.button("🗑️", key=f"d_{cid}"):
-                                df = df[df['ID'] != cid]
-                                salvar_dados(df); st.rerun()
-                    st.markdown("<div style='background-color: #111827; padding: 5px; border-radius: 0 0 8px 8px;'></div>", unsafe_allow_html=True)
+                        df_exibicao = df.copy()
+                        if sel_mes != "Todos": df_exibicao = df_exibicao[df_exibicao['Vencimento'].dt.strftime('%Y-%m') == sel_mes]
+                        if sel_cat != "Todas": df_exibicao = df_exibicao[df_exibicao['Categoria'] == sel_cat]
+                        if busca: df_exibicao = df_exibicao[df_exibicao.apply(lambda x: x.astype(str).str.contains(busca, case=False).any(), axis=1)]
+                        df_exibicao = df_exibicao.sort_values(by="Vencimento", ascending=False)
+
+                        st.markdown("""<div style="display: flex; justify-content: space-between; padding: 12px 15px; background-color: #111827; border-radius: 8px 8px 0 0; border-bottom: 1px solid #1f2937; color: #6b7280; font-weight: 600; font-size: 11px; text-transform: uppercase;"><div style="width: 30%;">DESCRIÇÃO</div><div style="width: 20%;">VENCIMENTO</div><div style="width: 15%;">CATEGORIA</div><div style="width: 15%;">VALOR</div><div style="width: 20%; text-align: center;">AÇÕES</div></div>""", unsafe_allow_html=True)
+
+                        for _, r in df_exibicao.iterrows():
+                            cid = str(r['ID']); desc = str(r['Descrição']); cat = str(r['Categoria']); forma = str(r['Forma_Pagamento'])
+                            val = float(r['Valor']); status = str(r['Status']); tipo = str(r['Tipo'])
+                            venc = r['Vencimento'].strftime('%d/%m/%Y') if pd.notnull(r['Vencimento']) else ""
+                            tem_anexo = "📎" if 'Comprovativo' in r and str(r['Comprovativo']) != "" else ""
+                            
+                            cor_bdg = "border: 1px solid #10b981; color: #10b981;" if status.lower() == "pago" else "border: 1px solid #ef4444; color: #ef4444;"
+                            cor_tipo = "#10b981" if tipo == "Recebimento" else "#ef4444"
+                            btn_status = "🟢" if status.lower() == "pago" else "🔴"
+                            
+                            st.markdown("<div style='border-top: 1px solid #1f2937;'></div>", unsafe_allow_html=True)
+                            c1, c2, c3, c4, c5 = st.columns([3, 2, 1.5, 1.5, 2.0])
+                            with c1: st.markdown(f'<div style="padding: 10px 0;"><span style="color: {cor_tipo}; font-weight: bold; font-size: 15px;">{desc} {tem_anexo}</span><br><span style="color: #6b7280; font-size: 11px;">{tipo} via {forma}</span></div>', unsafe_allow_html=True)
+                            with c2: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #d1d5db; font-size: 14px;">{venc}</span></div>', unsafe_allow_html=True)
+                            with c3: st.markdown(f'<div style="padding: 10px 0;"><span style="background-color: #334155; color: #cbd5e1; padding: 2px 8px; border-radius: 4px; font-size: 11px;">{cat}</span></div>', unsafe_allow_html=True)
+                            with c4: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #d1d5db; font-size: 14px;">R$ {val:,.2f}</span><br><span style="{cor_bdg} padding: 1px 6px; border-radius: 4px; font-weight: bold; font-size: 10px;">{status.upper()}</span></div>', unsafe_allow_html=True)
+                            with c5:
+                                st.markdown("<div style='padding-top: 15px;'></div>", unsafe_allow_html=True)
+                                b1, b2, b3 = st.columns([1,1,1])
+                                if b1.button("✏️", key=f"e_{cid}"): st.session_state.edit_conta = cid; st.rerun()
+                                if b2.button(btn_status, key=f"s_{cid}"):
+                                    df.loc[df['ID'] == cid, 'Status'] = "Pendente" if status.lower() == "pago" else "Pago"
+                                    salvar_dados(df); st.rerun()
+                                if b3.button("🗑️", key=f"d_{cid}"):
+                                    df = df[df['ID'] != cid]
+                                    salvar_dados(df); st.rerun()
+                        st.markdown("<div style='background-color: #111827; padding: 5px; border-radius: 0 0 8px 8px;'></div>", unsafe_allow_html=True)
