@@ -134,21 +134,10 @@ else:
     st.sidebar.markdown(f"<span style='color:{cor_st}; font-weight:bold;'>Nível: {nivel_ativo} | Status: {meu_status.upper()}</span>", unsafe_allow_html=True)
     st.sidebar.write("")
 
+    # --- MENU DINÂMICO ---
+    # Removido o expander redundante da barra lateral! Tudo limpo.
     if is_master and st.session_state.ghost_mode == "":
         opcoes_menu = {"📊 Dashboard": "Dashboard", "📋 Gestão de Clientes": "Gestao", "➕ Novo Cliente": "Novo", "⚙️ Configurações": "Config"}
-        with st.sidebar.expander("⚙️ Atalho de Configurações"):
-            with st.form("form_config_sidebar"):
-                novo_nome_side = st.text_input("Plataforma", value=NOME_SAAS, key="side_nome")
-                logo_file_side = st.file_uploader("Logo", type=['png', 'jpg', 'jpeg'], key="side_logo")
-                nova_chave_side = st.text_input("PIX", value=CHAVE_PIX, key="side_pix")
-                novo_rec_side = st.text_input("Titular", value=NOME_RECEBEDOR, key="side_rec")
-                if st.form_submit_button("Guardar"):
-                    ws_conf = planilha.worksheet("Configuracoes")
-                    ws_conf.update(values=[['Chave', 'Valor'], ['NOME_SAAS', novo_nome_side], ['LOGO_URL', 'local'], ['CHAVE_PIX', nova_chave_side], ['NOME_RECEBEDOR', novo_rec_side]], range_name='A1:B5')
-                    if logo_file_side is not None:
-                        with open("logo.png", "wb") as f: f.write(logo_file_side.getbuffer())
-                    st.cache_data.clear(); st.success("Atualizado!"); time.sleep(1); st.rerun()
-
     else:
         if meu_status == "bloqueado": opcoes_menu = {"💳 Regularizar Assinatura": "Assinatura"}
         else: opcoes_menu = {"📊 Painel Geral": "Painel", "🔮 Previsão": "Previsão", "📅 Calendário": "Calendário", "📝 Novo Lançamento": "Lançar", "📋 Histórico": "Histórico", "🎯 Metas de Gastos": "Metas", "💳 Minha Assinatura": "Assinatura"}
@@ -262,13 +251,15 @@ else:
 
         elif menu == "Config":
             st.title("⚙️ Configurações Globais (White-Label)")
+            st.markdown("Faça o upload do logo e configure os dados de pagamento. Tudo é atualizado em tempo real para os clientes.")
             with st.form("form_config_main"):
                 c1, c2 = st.columns(2)
-                novo_nome = c1.text_input("Nome da Plataforma", value=NOME_SAAS, key="main_nome")
-                logo_file = c2.file_uploader("Upload da Logo (PNG/JPG)", type=['png', 'jpg', 'jpeg'], key="main_logo")
+                novo_nome = c1.text_input("Nome da Plataforma", value=NOME_SAAS)
+                logo_file = c2.file_uploader("Upload da Logo (PNG/JPG)", type=['png', 'jpg', 'jpeg'])
                 c3, c4 = st.columns(2)
-                nova_chave = c3.text_input("Chave PIX", value=CHAVE_PIX, key="main_pix")
-                novo_rec = c4.text_input("Titular do PIX", value=NOME_RECEBEDOR, key="main_rec")
+                nova_chave = c3.text_input("Chave PIX", value=CHAVE_PIX)
+                novo_rec = c4.text_input("Titular do PIX", value=NOME_RECEBEDOR)
+                
                 if st.form_submit_button("SALVAR CONFIGURAÇÕES", type="primary"):
                     ws_conf = planilha.worksheet("Configuracoes")
                     ws_conf.update(values=[['Chave', 'Valor'], ['NOME_SAAS', novo_nome], ['LOGO_URL', 'local'], ['CHAVE_PIX', nova_chave], ['NOME_RECEBEDOR', novo_rec]], range_name='A1:B5')
@@ -304,13 +295,12 @@ else:
                     ws.append_row(["ID", "Tipo", "Descrição", "Valor", "Status", "Vencimento", "Categoria", "Forma_Pagamento", "Comprovativo"])
                     return ws
 
-            # CORREÇÃO APLICADA AQUI: PREVENÇÃO DE ERRO DE DATAFRAME VAZIO
             def carregar_dados():
                 ws = get_aba_cliente()
                 df = pd.DataFrame(ws.get_all_records())
                 if df.empty:
                     df = pd.DataFrame(columns=["ID", "Tipo", "Descrição", "Valor", "Status", "Vencimento", "Categoria", "Forma_Pagamento", "Comprovativo"])
-                    df['Vencimento'] = pd.to_datetime([]) # Força a tipagem para datetime mesmo vazio
+                    df['Vencimento'] = pd.to_datetime([]) 
                 else:
                     if "Comprovativo" not in df.columns: df["Comprovativo"] = ""
                     df['Vencimento'] = pd.to_datetime(df['Vencimento'], dayfirst=True, errors='coerce').fillna(pd.Timestamp.now())
@@ -333,7 +323,6 @@ else:
             CATEGORIAS = ["Consultoria", "Energia/Enel", "Internet", "Moradia", "Salário", "Serviços", "Outros"]
             PAGAMENTOS = ["Pix", "Cartão", "Dinheiro", "Boleto", "Outros"]
 
-            # CORREÇÃO APLICADA AQUI: BLINDAGEM DE NOTIFICAÇÕES
             if not df.empty:
                 pendentes_hoje = df[(df["Status"] == "Pendente") & (df["Vencimento"].dt.date <= hoje + timedelta(days=2))]
                 if not pendentes_hoje.empty:
