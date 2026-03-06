@@ -178,10 +178,13 @@ else:
             df = pd.DataFrame(registros)
             if df.empty:
                 df = pd.DataFrame(columns=["ID", "Tipo", "Descrição", "Valor", "Status", "Vencimento", "Categoria", "Forma_Pagamento"])
+                # CORREÇÃO AQUI: Força a coluna Vencimento a ser formato de Data, mesmo estando vazia.
+                df['Vencimento'] = pd.to_datetime(df['Vencimento'])
             else:
                 df['Vencimento'] = pd.to_datetime(df['Vencimento'], errors='coerce').fillna(pd.Timestamp.now())
                 df['ID'] = df['ID'].astype(str)
                 df['Forma_Pagamento'] = df['Forma_Pagamento'].astype(str)
+                df['Valor'] = pd.to_numeric(df['Valor'], errors='coerce').fillna(0.0)
             return df
 
         def salvar_dados(df_novo):
@@ -207,6 +210,11 @@ else:
 
         if menu == "Painel":
             st.title("Painel de Controle")
+            
+            if df.empty:
+                st.info("👋 Olá! Seu financeiro está vazio. Vá no menu **'Novo Lançamento'** para registrar sua primeira movimentação.")
+            
+            # Mesmo vazio, o cálculo abaixo agora funciona sem dar erro!
             df_m = df[(df['Vencimento'].dt.month == hoje.month) & (df['Vencimento'].dt.year == hoje.year)].copy()
             c1, c2, c3 = st.columns(3)
             ent = df_m[df_m['Tipo']=='Recebimento']['Valor'].sum()
@@ -234,50 +242,56 @@ else:
 
         elif menu == "Previsão":
             st.title("🔮 Previsão Futura")
-            futuro = df[df['Vencimento'].dt.date > hoje].copy()
-            if futuro.empty: st.info("Sem dados futuros.")
+            if df.empty:
+                st.info("Sem dados suficientes para gerar previsões.")
             else:
-                futuro['Mes_Ano'] = futuro['Vencimento'].dt.strftime('%Y-%m')
-                resumo = futuro.groupby(['Mes_Ano', 'Tipo'])['Valor'].sum().reset_index()
-                chart = alt.Chart(resumo).mark_bar().encode(
-                    x=alt.X('Mes_Ano', title='Mês'), y=alt.Y('Valor', title='Valor (R$)'),
-                    color=alt.Color('Tipo', scale=alt.Scale(domain=['Recebimento', 'Gasto'], range=['#4CAF50', '#ff5252'])),
-                    tooltip=['Mes_Ano', 'Tipo', 'Valor']
-                ).properties(height=300)
-                st.altair_chart(chart, use_container_width=True)
+                futuro = df[df['Vencimento'].dt.date > hoje].copy()
+                if futuro.empty: st.info("Sem dados futuros cadastrados.")
+                else:
+                    futuro['Mes_Ano'] = futuro['Vencimento'].dt.strftime('%Y-%m')
+                    resumo = futuro.groupby(['Mes_Ano', 'Tipo'])['Valor'].sum().reset_index()
+                    chart = alt.Chart(resumo).mark_bar().encode(
+                        x=alt.X('Mes_Ano', title='Mês'), y=alt.Y('Valor', title='Valor (R$)'),
+                        color=alt.Color('Tipo', scale=alt.Scale(domain=['Recebimento', 'Gasto'], range=['#4CAF50', '#ff5252'])),
+                        tooltip=['Mes_Ano', 'Tipo', 'Valor']
+                    ).properties(height=300)
+                    st.altair_chart(chart, use_container_width=True)
 
         elif menu == "Calendário":
             st.title("Calendário de Vencimentos")
-            pend = df[(df["Status"] == "Pendente") & (df["Tipo"] == "Gasto")].sort_values(by="Vencimento")
-            if not pend.empty:
-                pend['Mes_Ano_Str'] = pend['Vencimento'].dt.strftime('%Y-%m')
-                lista_meses = sorted(pend['Mes_Ano_Str'].unique())
-            else: lista_meses = []
-            c_f1, c_f2, c_f3 = st.columns([1, 1, 1.5])
-            sel_mes = c_f1.selectbox("📅 Mês", ["Todos"] + lista_meses)
-            sel_cat = c_f2.selectbox("📂 Categoria", ["Todas"] + CATEGORIAS)
-            busca_cal = c_f3.text_input("🔍 Buscar Conta", placeholder="Descrição...")
-            df_show = pend.copy()
-            if sel_mes != "Todos": df_show = df_show[df_show['Mes_Ano_Str'] == sel_mes]
-            if sel_cat != "Todas": df_show = df_show[df_show['Categoria'] == sel_cat]
-            if busca_cal:
-                mask = df_show.apply(lambda x: x.astype(str).str.contains(busca_cal, case=False).any(), axis=1)
-                df_show = df_show[mask]
-            st.markdown("---")
-            m1, m2 = st.columns(2)
-            m1.metric("Total na Tela", f"R$ {df_show['Valor'].sum():,.2f}")
-            m2.metric("Atrasado (Seleção)", f"R$ {df_show[df_show['Vencimento'].dt.date < hoje]['Valor'].sum():,.2f}")
-            st.markdown("---")
-            for _, r in df_show.iterrows():
-                dv = r['Vencimento'].date()
-                cor = "#ff5252" if dv < hoje else "#69f0ae"
-                with st.container():
-                    c_dt, c_desc, c_val, c_btn = st.columns([1, 3, 2, 1])
-                    c_dt.markdown(f"<span style='color:{cor}; font-weight:bold'>{dv.strftime('%d/%m')}</span>", unsafe_allow_html=True)
-                    c_desc.markdown(f"**{r['Descrição']}**", unsafe_allow_html=True)
-                    c_val.markdown(f"R$ {r['Valor']:,.2f}")
-                    if c_btn.button("PAGAR", key=f"pay_c_{r['ID']}"):
-                        df.loc[df['ID'] == r['ID'], 'Status'] = 'Pago'; salvar_dados(df); st.balloons(); time.sleep(0.5); st.rerun()
+            if df.empty:
+                st.info("Nenhuma movimentação para exibir no calendário.")
+            else:
+                pend = df[(df["Status"] == "Pendente") & (df["Tipo"] == "Gasto")].sort_values(by="Vencimento")
+                if not pend.empty:
+                    pend['Mes_Ano_Str'] = pend['Vencimento'].dt.strftime('%Y-%m')
+                    lista_meses = sorted(pend['Mes_Ano_Str'].unique())
+                else: lista_meses = []
+                c_f1, c_f2, c_f3 = st.columns([1, 1, 1.5])
+                sel_mes = c_f1.selectbox("📅 Mês", ["Todos"] + lista_meses)
+                sel_cat = c_f2.selectbox("📂 Categoria", ["Todas"] + CATEGORIAS)
+                busca_cal = c_f3.text_input("🔍 Buscar Conta", placeholder="Descrição...")
+                df_show = pend.copy()
+                if sel_mes != "Todos": df_show = df_show[df_show['Mes_Ano_Str'] == sel_mes]
+                if sel_cat != "Todas": df_show = df_show[df_show['Categoria'] == sel_cat]
+                if busca_cal:
+                    mask = df_show.apply(lambda x: x.astype(str).str.contains(busca_cal, case=False).any(), axis=1)
+                    df_show = df_show[mask]
+                st.markdown("---")
+                m1, m2 = st.columns(2)
+                m1.metric("Total na Tela", f"R$ {df_show['Valor'].sum():,.2f}")
+                m2.metric("Atrasado (Seleção)", f"R$ {df_show[df_show['Vencimento'].dt.date < hoje]['Valor'].sum():,.2f}")
+                st.markdown("---")
+                for _, r in df_show.iterrows():
+                    dv = r['Vencimento'].date()
+                    cor = "#ff5252" if dv < hoje else "#69f0ae"
+                    with st.container():
+                        c_dt, c_desc, c_val, c_btn = st.columns([1, 3, 2, 1])
+                        c_dt.markdown(f"<span style='color:{cor}; font-weight:bold'>{dv.strftime('%d/%m')}</span>", unsafe_allow_html=True)
+                        c_desc.markdown(f"**{r['Descrição']}**", unsafe_allow_html=True)
+                        c_val.markdown(f"R$ {r['Valor']:,.2f}")
+                        if c_btn.button("PAGAR", key=f"pay_c_{r['ID']}"):
+                            df.loc[df['ID'] == r['ID'], 'Status'] = 'Pago'; salvar_dados(df); st.balloons(); time.sleep(0.5); st.rerun()
 
         elif menu == "Lançar":
             st.title("Novo Registro")
@@ -305,48 +319,51 @@ else:
 
         elif menu == "Histórico / Editar":
             st.title("Histórico")
-            df_exibicao = df.copy()
-            if not df_exibicao.empty:
-                df_exibicao['Mes_Ano_Str'] = df_exibicao['Vencimento'].dt.strftime('%Y-%m')
-                lista_meses = sorted(df_exibicao['Mes_Ano_Str'].unique(), reverse=True)
-            else: lista_meses = []
-            
-            col_f1, col_f2, col_f3 = st.columns([1, 1, 1.5])
-            with col_f1: sel_mes = st.selectbox("📅 Mês", ["Todos"] + lista_meses)
-            with col_f2: sel_cat = st.selectbox("📂 Categoria", ["Todas"] + CATEGORIAS)
-            with col_f3: busca = st.text_input("🔍 Busca", placeholder="Texto...")
-            
-            if sel_mes != "Todos": df_exibicao = df_exibicao[df_exibicao['Mes_Ano_Str'] == sel_mes]
-            if sel_cat != "Todas": df_exibicao = df_exibicao[df_exibicao['Categoria'] == sel_cat]
-            if busca:
-                mask = df_exibicao.apply(lambda x: x.astype(str).str.contains(busca, case=False).any(), axis=1)
-                df_exibicao = df_exibicao[mask]
-            
-            cols_show = [c for c in df_exibicao.columns if c != 'Mes_Ano_Str']
-            st.dataframe(df_exibicao[cols_show].sort_values(by="Vencimento", ascending=False), use_container_width=True)
-            
-            st.markdown("---")
-            st.subheader("Editar Registro")
-            opcoes = [""] + [f"{r['ID']} | {r['Descrição']}" for _, r in df_exibicao.iterrows()]
-            sel = st.selectbox("Selecione ID para Editar:", opcoes)
-            
-            if sel:
-                id_selecionado = sel.split(" | ")[0]
-                idx = df[df['ID'] == id_selecionado].index[0]
-                with st.form("edit"):
-                    c1, c2 = st.columns(2)
-                    ed = c1.text_input("Descrição", df.at[idx,'Descrição'])
-                    ev = c2.number_input("Valor", float(df.at[idx,'Valor']))
-                    c3, c4, c5 = st.columns(3)
-                    ec = c3.selectbox("Categoria", CATEGORIAS, index=CATEGORIAS.index(df.at[idx,'Categoria']) if df.at[idx,'Categoria'] in CATEGORIAS else 0)
-                    val_atual = str(df.at[idx,'Forma_Pagamento'])
-                    idx_pag = PAGAMENTOS.index(val_atual) if val_atual in PAGAMENTOS else 0
-                    ef = c4.selectbox("Pagamento", PAGAMENTOS, index=idx_pag)
-                    es = c5.selectbox("Status", ["Pago", "Pendente"], index=0 if df.at[idx,'Status']=="Pago" else 1)
-                    st.markdown("<br>", unsafe_allow_html=True)
-                    b1, b2, b3 = st.columns(3)
-                    if b1.form_submit_button("SALVAR"):
-                        df.at[idx,'Descrição'] = ed; df.at[idx,'Valor'] = ev; df.at[idx,'Categoria'] = ec; df.at[idx,'Forma_Pagamento'] = ef; df.at[idx,'Status'] = es
-                        salvar_dados(df); st.success("Atualizado!"); time.sleep(0.5); st.rerun()
-                    if b3.form_submit_button("EXCLUIR"):
-                        df = df.drop(idx); salvar_dados(df); st.warning("Excluído!"); time.sleep(0.5); st.rerun()
+            if df.empty:
+                st.info("Nenhuma movimentação registrada no histórico.")
+            else:
+                df_exibicao = df.copy()
+                if not df_exibicao.empty:
+                    df_exibicao['Mes_Ano_Str'] = df_exibicao['Vencimento'].dt.strftime('%Y-%m')
+                    lista_meses = sorted(df_exibicao['Mes_Ano_Str'].unique(), reverse=True)
+                else: lista_meses = []
+                
+                col_f1, col_f2, col_f3 = st.columns([1, 1, 1.5])
+                with col_f1: sel_mes = st.selectbox("📅 Mês", ["Todos"] + lista_meses)
+                with col_f2: sel_cat = st.selectbox("📂 Categoria", ["Todas"] + CATEGORIAS)
+                with col_f3: busca = st.text_input("🔍 Busca", placeholder="Texto...")
+                
+                if sel_mes != "Todos": df_exibicao = df_exibicao[df_exibicao['Mes_Ano_Str'] == sel_mes]
+                if sel_cat != "Todas": df_exibicao = df_exibicao[df_exibicao['Categoria'] == sel_cat]
+                if busca:
+                    mask = df_exibicao.apply(lambda x: x.astype(str).str.contains(busca, case=False).any(), axis=1)
+                    df_exibicao = df_exibicao[mask]
+                
+                cols_show = [c for c in df_exibicao.columns if c != 'Mes_Ano_Str']
+                st.dataframe(df_exibicao[cols_show].sort_values(by="Vencimento", ascending=False), use_container_width=True)
+                
+                st.markdown("---")
+                st.subheader("Editar Registro")
+                opcoes = [""] + [f"{r['ID']} | {r['Descrição']}" for _, r in df_exibicao.iterrows()]
+                sel = st.selectbox("Selecione ID para Editar:", opcoes)
+                
+                if sel:
+                    id_selecionado = sel.split(" | ")[0]
+                    idx = df[df['ID'] == id_selecionado].index[0]
+                    with st.form("edit"):
+                        c1, c2 = st.columns(2)
+                        ed = c1.text_input("Descrição", df.at[idx,'Descrição'])
+                        ev = c2.number_input("Valor", float(df.at[idx,'Valor']))
+                        c3, c4, c5 = st.columns(3)
+                        ec = c3.selectbox("Categoria", CATEGORIAS, index=CATEGORIAS.index(df.at[idx,'Categoria']) if df.at[idx,'Categoria'] in CATEGORIAS else 0)
+                        val_atual = str(df.at[idx,'Forma_Pagamento'])
+                        idx_pag = PAGAMENTOS.index(val_atual) if val_atual in PAGAMENTOS else 0
+                        ef = c4.selectbox("Pagamento", PAGAMENTOS, index=idx_pag)
+                        es = c5.selectbox("Status", ["Pago", "Pendente"], index=0 if df.at[idx,'Status']=="Pago" else 1)
+                        st.markdown("<br>", unsafe_allow_html=True)
+                        b1, b2, b3 = st.columns(3)
+                        if b1.form_submit_button("SALVAR"):
+                            df.at[idx,'Descrição'] = ed; df.at[idx,'Valor'] = ev; df.at[idx,'Categoria'] = ec; df.at[idx,'Forma_Pagamento'] = ef; df.at[idx,'Status'] = es
+                            salvar_dados(df); st.success("Atualizado!"); time.sleep(0.5); st.rerun()
+                        if b3.form_submit_button("EXCLUIR"):
+                            df = df.drop(idx); salvar_dados(df); st.warning("Excluído!"); time.sleep(0.5); st.rerun()
