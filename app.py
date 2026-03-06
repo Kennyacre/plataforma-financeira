@@ -35,9 +35,11 @@ if "tela_atual" not in st.session_state:
     st.session_state.tela_atual = "login"
 if "edit_user" not in st.session_state:
     st.session_state.edit_user = ""
+if "edit_conta" not in st.session_state:
+    st.session_state.edit_conta = ""
 
 # ==========================================
-# ROTA 1: TELA INICIAL (LOGIN E CADASTRO - DARK MODE PREMIUM)
+# ROTA 1: TELA INICIAL (LOGIN E CADASTRO)
 # ==========================================
 if not st.session_state.logado:
     st.markdown("""
@@ -64,10 +66,10 @@ if not st.session_state.logado:
         
         if st.session_state.tela_atual == "login":
             st.markdown("<h1 style='text-align: left; margin-bottom: 5px;'>Entrar na sua Conta</h1>", unsafe_allow_html=True)
-            st.markdown("<p style='text-align: left; margin-bottom: 30px;'>Bem-vindo de volta! por favor, insira seus dados</p>", unsafe_allow_html=True)
+            st.markdown("<p style='text-align: left; margin-bottom: 30px;'>Bem-vindo de volta! Por favor, insira os seus dados</p>", unsafe_allow_html=True)
             
             with st.form("form_login_dark"):
-                login_input = st.text_input("✉️ login")
+                login_input = st.text_input("✉️ Login")
                 senha_input = st.text_input("🔒 Senha", type="password")
                 
                 c_chk, c_links = st.columns([1, 1])
@@ -108,14 +110,14 @@ if not st.session_state.logado:
 
         elif st.session_state.tela_atual == "cadastro":
             st.markdown("<h1 style='text-align: left; margin-bottom: 5px;'>Criar Conta</h1>", unsafe_allow_html=True)
-            st.markdown("<p style='text-align: left; margin-bottom: 30px;'>Bem-vindo! Por favor, insira seus dados</p>", unsafe_allow_html=True)
+            st.markdown("<p style='text-align: left; margin-bottom: 30px;'>Bem-vindo! Por favor, insira os seus dados</p>", unsafe_allow_html=True)
             
             with st.form("form_cadastro_dark"):
                 c_nome = st.text_input("👤 Nome Completo")
                 c_email = st.text_input("✉️ Seu E-mail")
-                c_tel = st.text_input("📞 Nº celular com WhatsApp")
-                c_senha = st.text_input("🔒 Crie sua Senha", type="password")
-                c_senha_confirma = st.text_input("🔒 Confirme sua Senha", type="password")
+                c_tel = st.text_input("📞 Nº telemóvel com WhatsApp")
+                c_senha = st.text_input("🔒 Crie a sua Senha", type="password")
+                c_senha_confirma = st.text_input("🔒 Confirme a sua Senha", type="password")
                 
                 btn_cadastrar = st.form_submit_button("Criar Conta", type="primary")
 
@@ -126,10 +128,10 @@ if not st.session_state.logado:
                     else:
                         df_u = pd.DataFrame(aba_usuarios_db.get_all_records())
                         if "Email" not in df_u.columns: df_u["Email"] = ""
-                        if c_email in df_u["Email"].astype(str).values: st.error("❌ E-mail já cadastrado.")
+                        if c_email in df_u["Email"].astype(str).values: st.error("❌ E-mail já registado.")
                         else:
                             aba_usuarios_db.append_row([c_email, c_senha, "Cliente", "Ativo", "0", "", c_nome, c_email, c_tel])
-                            st.success("✅ Conta criada! Você já pode entrar.")
+                            st.success("✅ Conta criada! Já pode entrar.")
                             time.sleep(2); st.session_state.tela_atual = "login"; st.rerun()
 
             c_bt1, c_bt2, c_bt3 = st.columns([1, 1, 1])
@@ -152,7 +154,7 @@ else:
         div[role="radiogroup"] label:hover { background-color: #1e293b; color: #ffffff !important; }
         div[role="radiogroup"] label[data-checked="true"] { background-color: #1e293b !important; color: #3b82f6 !important; border-left: 4px solid #3b82f6 !important; font-weight: bold; }
         div[data-testid="stMetric"] { background-color: #1e293b !important; border: 1px solid #334155 !important; border-radius: 8px !important; padding: 15px !important; }
-        div[data-testid="stMetric"] label { color: #94a3b8 !important; }
+        div[data-testid="stMetric"] label { color: #94a3b8 !important; font-weight: bold !important; font-size: 14px !important; }
         div[data-testid="stMetric"] div[data-testid="stMetricValue"] { color: #ffffff !important; }
         .stTextInput input, .stNumberInput input, .stDateInput input { background-color: #1e293b !important; color: #ffffff !important; border: 1px solid #334155 !important; }
         .stSelectbox>div>div>div { background-color: #1e293b !important; color: #ffffff !important; border: 1px solid #334155 !important; }
@@ -174,19 +176,25 @@ else:
         st.title("👑 Central de Comando SaaS")
         df_users = pd.DataFrame(aba_usuarios_db.get_all_records())
         
-        # AGORA SÓ TEMOS 2 ABAS!
+        # --- DASHBOARD MASTER ---
+        st.markdown("### 📊 Dashboard de Desempenho (MRR)")
+        df_ativos = df_users[df_users['Status'].str.lower() == 'ativo']
+        receita_total = sum([float(str(v).replace(',', '.').strip()) if str(v) != "" else 0.0 for v in df_ativos['Valor']])
+        clientes_bloq = len(df_users) - len(df_ativos)
+        
+        c_m1, c_m2, c_m3 = st.columns(3)
+        c_m1.metric("Clientes Ativos", f"{len(df_ativos)}")
+        c_m2.metric("Clientes Bloqueados", f"{clientes_bloq}")
+        c_m3.metric("Receita Recorrente (MRR)", f"R$ {receita_total:,.2f}")
+        st.markdown("<br>", unsafe_allow_html=True)
+        
         tab1, tab2 = st.tabs(["📋 Gestão de Clientes", "➕ Novo Cliente Master"])
 
         with tab1:
-            # LÓGICA DE EDIÇÃO INLINE (Se clicou no lápis, mostra o formulário)
             if st.session_state.edit_user != "":
                 cliente_sel = st.session_state.edit_user
-                
-                # Botão de Voltar
                 if st.button("⬅️ Cancelar / Voltar para a Tabela"):
-                    st.session_state.edit_user = ""
-                    st.rerun()
-                    
+                    st.session_state.edit_user = ""; st.rerun()
                 st.markdown(f"### ✏️ Editando Cliente: <span style='color:#3b82f6;'>{cliente_sel}</span>", unsafe_allow_html=True)
                 
                 row_data = df_users[df_users["Usuario"] == cliente_sel].iloc[0]
@@ -195,43 +203,28 @@ else:
                     e_nome = c1.text_input("Nome", value=str(row_data.get("Nome", "")))
                     e_email = c2.text_input("E-mail", value=str(row_data.get("Email", "")))
                     e_tel = c3.text_input("Telefone", value=str(row_data.get("Telefone", "")))
-                    
                     c4, c5, c6 = st.columns(3)
                     e_senha = c4.text_input("Senha", value=str(row_data.get("Senha", "")))
                     e_nivel = c5.selectbox("Nível", ["Cliente", "Master"], index=0 if row_data.get("Nivel", "") == "Cliente" else 1)
                     e_status = c6.selectbox("Status", ["Ativo", "Bloqueado"], index=0 if row_data.get("Status", "") == "Ativo" else 1)
-                    
                     c7, c8 = st.columns(2)
-                    valor_str = str(row_data.get("Valor", "0")).replace(',', '.').strip()
-                    valor_float = float(valor_str) if valor_str != "" else 0.0
-                    e_valor = c7.number_input("Valor (R$)", value=valor_float, step=10.0)
-                    
-                    try: venc_formatado = pd.to_datetime(row_data.get("Vencimento", ""), format='%d/%m/%Y').date()
-                    except: venc_formatado = date.today()
-                    e_venc = c8.date_input("Vencimento da Assinatura", value=venc_formatado)
-
+                    v_str = str(row_data.get("Valor", "0")).replace(',', '.').strip()
+                    e_valor = c7.number_input("Valor (R$)", value=float(v_str) if v_str != "" else 0.0, step=10.0)
+                    try: v_f = pd.to_datetime(row_data.get("Vencimento", ""), format='%d/%m/%Y').date()
+                    except: v_f = date.today()
+                    e_venc = c8.date_input("Vencimento da Assinatura", value=v_f)
                     if st.form_submit_button("SALVAR ALTERAÇÕES", type="primary"):
                         celula = aba_usuarios_db.find(cliente_sel, in_column=1)
                         linha = celula.row
                         aba_usuarios_db.update_cell(linha, 2, e_senha); aba_usuarios_db.update_cell(linha, 3, e_nivel); aba_usuarios_db.update_cell(linha, 4, e_status)
                         aba_usuarios_db.update_cell(linha, 5, str(e_valor)); aba_usuarios_db.update_cell(linha, 6, e_venc.strftime('%d/%m/%Y'))
                         aba_usuarios_db.update_cell(linha, 7, e_nome); aba_usuarios_db.update_cell(linha, 8, e_email); aba_usuarios_db.update_cell(linha, 9, e_tel)
-                        
-                        st.success(f"Dados atualizados! Voltando...")
-                        time.sleep(1)
-                        st.session_state.edit_user = "" # Limpa para voltar à tabela
-                        st.rerun()
-            
-            # SE NÃO CLICOU EM EDITAR, MOSTRA A TABELA NORMAL
+                        st.success(f"Dados atualizados!"); time.sleep(1); st.session_state.edit_user = ""; st.rerun()
             else:
-                st.markdown("### Visão Geral de Assinantes")
-                
                 c_f1, c_f2, c_f3 = st.columns([2, 1, 1])
-                busca = c_f1.text_input("🔍 Pesquisar por usuário ou nome")
+                busca = c_f1.text_input("🔍 Pesquisar por utilizador ou nome")
                 filtro_status = c_f2.selectbox("Situação", ["Todos", "Ativo", "Bloqueado"])
-                c_f3.write("")
-                if c_f3.button("Atualizar / Recarregar"):
-                    st.rerun()
+                c_f3.write(""); c_f3.button("Atualizar")
                 
                 df_show = df_users.copy()
                 if filtro_status != "Todos": df_show = df_show[df_show['Status'].str.lower() == filtro_status.lower()]
@@ -239,91 +232,39 @@ else:
 
                 st.markdown("""
                 <div style="display: flex; justify-content: space-between; padding: 12px 15px; background-color: #111827; border-radius: 8px 8px 0 0; border-bottom: 1px solid #1f2937; color: #6b7280; font-weight: 600; font-size: 11px; text-transform: uppercase;">
-                    <div style="width: 25%;">USUÁRIO</div>
-                    <div style="width: 20%;">DATAS</div>
-                    <div style="width: 15%;">SITUAÇÃO</div>
-                    <div style="width: 25%;">DETALHES</div>
-                    <div style="width: 15%; text-align: center;">AÇÕES</div>
+                    <div style="width: 25%;">USUÁRIO</div><div style="width: 20%;">DATAS</div><div style="width: 15%;">SITUAÇÃO</div><div style="width: 25%;">DETALHES</div><div style="width: 15%; text-align: center;">AÇÕES</div>
                 </div>
                 """, unsafe_allow_html=True)
                 
                 for _, row in df_show.iterrows():
-                    user = str(row.get("Usuario", "-"))
-                    email = str(row.get("Email", "-"))
-                    nivel = str(row.get("Nivel", "Cliente"))
-                    venc = str(row.get("Vencimento", "-"))
-                    status = str(row.get("Status", "N/A"))
-                    nome = str(row.get("Nome", "Sem Nome"))
-                    valor_str = str(row.get("Valor", "0")).replace(',', '.').strip()
-                    valor = float(valor_str) if valor_str != "" else 0.0
-                    tel = str(row.get("Telefone", "-"))
-
+                    user = str(row.get("Usuario", "-")); email = str(row.get("Email", "-")); nivel = str(row.get("Nivel", "Cliente"))
+                    venc = str(row.get("Vencimento", "-")); status = str(row.get("Status", "N/A")); nome = str(row.get("Nome", "Sem Nome"))
+                    v_str = str(row.get("Valor", "0")).replace(',', '.').strip(); valor = float(v_str) if v_str != "" else 0.0; tel = str(row.get("Telefone", "-"))
                     cor_bdg = "border: 1px solid #10b981; color: #10b981;" if status.lower() == "ativo" else "border: 1px solid #ef4444; color: #ef4444;"
                     btn_status = "🟢" if status.lower() == "ativo" else "🔴"
                     
                     st.markdown("<div style='border-top: 1px solid #1f2937;'></div>", unsafe_allow_html=True)
-                    
                     c1, c2, c3, c4, c5 = st.columns([2.5, 2, 1.5, 2.5, 1.5])
-                    
-                    with c1:
-                        st.markdown(f"""
-                        <div style="padding: 10px 0;">
-                            <span style="color: #3b82f6; font-weight: bold; font-size: 15px;">{user}</span><br>
-                            <span style="color: #6b7280; font-size: 12px;">{email}</span><br>
-                            <span style="color: #6b7280; font-size: 11px;">Nível: {nivel}</span>
-                        </div>
-                        """, unsafe_allow_html=True)
-                        
-                    with c2:
-                        st.markdown(f"""
-                        <div style="padding: 10px 0;">
-                            <span style="color: #d1d5db; font-size: 14px;">{venc}</span><br>
-                            <span style="color: #6b7280; font-size: 11px;">Data de Vencimento</span>
-                        </div>
-                        """, unsafe_allow_html=True)
-                        
-                    with c3:
-                        st.markdown(f"""
-                        <div style="padding: 10px 0;">
-                            <span style="{cor_bdg} padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">{status.upper()}</span><br><br>
-                            <span style="background-color: #6366f1; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">SaaS</span>
-                        </div>
-                        """, unsafe_allow_html=True)
-                        
-                    with c4:
-                        st.markdown(f"""
-                        <div style="padding: 10px 0;">
-                            <span style="color: #d1d5db; font-size: 14px;">{nome}</span><br>
-                            <span style="color: #9ca3af; font-size: 12px;">Plano: R$ {valor:,.2f}</span><br>
-                            <span style="color: #9ca3af; font-size: 12px;">Tel: {tel}</span>
-                        </div>
-                        """, unsafe_allow_html=True)
-                        
+                    with c1: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #3b82f6; font-weight: bold; font-size: 15px;">{user}</span><br><span style="color: #6b7280; font-size: 12px;">{email}</span><br><span style="color: #6b7280; font-size: 11px;">Nível: {nivel}</span></div>', unsafe_allow_html=True)
+                    with c2: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #d1d5db; font-size: 14px;">{venc}</span><br><span style="color: #6b7280; font-size: 11px;">Data de Vencimento</span></div>', unsafe_allow_html=True)
+                    with c3: st.markdown(f'<div style="padding: 10px 0;"><span style="{cor_bdg} padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">{status.upper()}</span><br><br><span style="background-color: #6366f1; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">SaaS</span></div>', unsafe_allow_html=True)
+                    with c4: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #d1d5db; font-size: 14px;">{nome}</span><br><span style="color: #9ca3af; font-size: 12px;">Plano: R$ {valor:,.2f}</span><br><span style="color: #9ca3af; font-size: 12px;">Tel: {tel}</span></div>', unsafe_allow_html=True)
                     with c5:
                         st.markdown("<div style='padding-top: 15px;'></div>", unsafe_allow_html=True)
                         b1, b2, b3 = st.columns(3)
-                        
-                        if b1.button("✏️", key=f"edit_{user}", help="Editar Cliente"):
-                            st.session_state.edit_user = user
-                            st.rerun() # Aciona a mágica de recarregar a tela no modo edição
-                            
-                        if b2.button("🖥️", key=f"ren_{user}", help="Renovar Plano (+1 Mês)"):
+                        if b1.button("✏️", key=f"edit_{user}"): st.session_state.edit_user = user; st.rerun()
+                        if b2.button("🖥️", key=f"ren_{user}"):
                             try: v_atual = pd.to_datetime(venc, format='%d/%m/%Y')
                             except: v_atual = pd.Timestamp.today()
                             novo_v = (v_atual + relativedelta(months=1)).strftime('%d/%m/%Y')
-                            
                             cel = aba_usuarios_db.find(user, in_column=1)
                             aba_usuarios_db.update_cell(cel.row, 6, novo_v)
-                            st.success(f"Renovado para: {novo_v}")
-                            time.sleep(1); st.rerun()
-
-                        if b3.button(btn_status, key=f"stat_{user}", help="Ativar/Bloquear Acesso"):
+                            st.success(f"Renovado para: {novo_v}"); time.sleep(1); st.rerun()
+                        if b3.button(btn_status, key=f"stat_{user}"):
                             n_stat = "Bloqueado" if status.lower() == "ativo" else "Ativo"
                             cel = aba_usuarios_db.find(user, in_column=1)
                             aba_usuarios_db.update_cell(cel.row, 4, n_stat)
-                            st.warning(f"Status alterado para: {n_stat}")
-                            time.sleep(1); st.rerun()
-                
+                            st.warning(f"Status alterado."); time.sleep(1); st.rerun()
                 st.markdown("<div style='background-color: #111827; padding: 5px; border-radius: 0 0 8px 8px;'></div>", unsafe_allow_html=True)
 
         with tab2:
@@ -377,12 +318,12 @@ else:
         CATEGORIAS = ["Consultoria", "Energia/Enel", "Internet", "Moradia", "Salário", "Serviços", "Outros"]
         PAGAMENTOS = ["Pix", "Cartão", "Dinheiro", "Boleto", "Outros"]
 
-        opcoes_menu = {"📊  Painel Geral": "Painel", "🔮  Previsão": "Previsão", "📅  Calendário": "Calendário", "📝  Novo Lançamento": "Lançar", "📋  Histórico": "Histórico / Editar"}
+        opcoes_menu = {"📊  Painel Geral": "Painel", "🔮  Previsão": "Previsão", "📅  Calendário": "Calendário", "📝  Novo Lançamento": "Lançar", "📋  Histórico e Edição": "Histórico"}
         menu = opcoes_menu[st.sidebar.radio("Navegação", list(opcoes_menu.keys()), label_visibility="collapsed")]
 
         if menu == "Painel":
             st.title("Painel de Controle")
-            if df.empty: st.info("👋 Olá! Seu financeiro está vazio. Vá em **Novo Lançamento**.")
+            if df.empty: st.info("👋 Olá! O seu financeiro está vazio. Vá em **Novo Lançamento**.")
             df_m = df[(df['Vencimento'].dt.month == hoje.month) & (df['Vencimento'].dt.year == hoje.year)].copy()
             c1, c2, c3 = st.columns(3)
             ent = df_m[df_m['Tipo']=='Recebimento']['Valor'].sum()
@@ -420,7 +361,7 @@ else:
             st.info("Função de calendário ativa. Utilize os filtros laterais para gerir.")
 
         elif menu == "Lançar":
-            st.title("Novo Registro")
+            st.title("Novo Registo")
             with st.form("lancar", clear_on_submit=True):
                 c1, c2 = st.columns(2)
                 tipo = c1.selectbox("Tipo", ["Gasto", "Recebimento"])
@@ -438,19 +379,70 @@ else:
                     salvar_dados(pd.concat([df, pd.DataFrame(novos)]))
                     st.success("Salvo!"); time.sleep(1); st.rerun()
 
-        elif menu == "Histórico / Editar":
-            st.title("Histórico")
-            st.dataframe(df, use_container_width=True)
-            sel = st.selectbox("Editar ID:", [""] + df['ID'].tolist())
-            if sel:
-                idx = df[df['ID'] == sel].index[0]
-                with st.form("edit"):
+        # --- NOVA TABELA PREMIUM PARA O CLIENTE ---
+        elif menu == "Histórico":
+            st.title("📋 Histórico e Gestão")
+            
+            if st.session_state.edit_conta != "":
+                idx_edit = df[df['ID'] == st.session_state.edit_conta].index[0]
+                st.markdown(f"### ✏️ Editando Lançamento: <span style='color:#3b82f6;'>{df.at[idx_edit,'Descrição']}</span>", unsafe_allow_html=True)
+                if st.button("⬅️ Cancelar"): st.session_state.edit_conta = ""; st.rerun()
+                
+                with st.form("edit_cliente"):
                     c1, c2 = st.columns(2)
-                    ed = c1.text_input("Descrição", df.at[idx,'Descrição'])
-                    ev = c2.number_input("Valor", float(df.at[idx,'Valor']))
-                    es = st.selectbox("Status", ["Pago", "Pendente"], index=0 if df.at[idx,'Status']=="Pago" else 1)
-                    if st.form_submit_button("SALVAR", type="primary"):
-                        df.at[idx,'Descrição'] = ed; df.at[idx,'Valor'] = ev; df.at[idx,'Status'] = es
-                        salvar_dados(df); st.success("Atualizado!"); time.sleep(0.5); st.rerun()
-                    if st.form_submit_button("EXCLUIR"):
-                        df = df.drop(idx); salvar_dados(df); st.warning("Excluído!"); time.sleep(0.5); st.rerun()
+                    ed = c1.text_input("Descrição", df.at[idx_edit,'Descrição'])
+                    ev = c2.number_input("Valor", float(df.at[idx_edit,'Valor']))
+                    c3, c4, c5 = st.columns(3)
+                    ec = c3.selectbox("Categoria", CATEGORIAS, index=CATEGORIAS.index(df.at[idx_edit,'Categoria']) if df.at[idx_edit,'Categoria'] in CATEGORIAS else 0)
+                    ef = c4.selectbox("Pagamento", PAGAMENTOS, index=PAGAMENTOS.index(df.at[idx_edit,'Forma_Pagamento']) if df.at[idx_edit,'Forma_Pagamento'] in PAGAMENTOS else 0)
+                    es = c5.selectbox("Status", ["Pago", "Pendente"], index=0 if df.at[idx_edit,'Status']=="Pago" else 1)
+                    if st.form_submit_button("GUARDAR ALTERAÇÕES", type="primary"):
+                        df.at[idx_edit,'Descrição'] = ed; df.at[idx_edit,'Valor'] = ev; df.at[idx_edit,'Categoria'] = ec
+                        df.at[idx_edit,'Forma_Pagamento'] = ef; df.at[idx_edit,'Status'] = es
+                        salvar_dados(df); st.session_state.edit_conta = ""; st.success("Atualizado!"); time.sleep(1); st.rerun()
+            else:
+                c_f1, c_f2, c_f3 = st.columns([1, 1, 1.5])
+                with c_f1:
+                    meses = sorted(df['Vencimento'].dt.strftime('%Y-%m').unique(), reverse=True) if not df.empty else []
+                    sel_mes = st.selectbox("📅 Mês", ["Todos"] + meses)
+                with c_f2: sel_cat = st.selectbox("📂 Categoria", ["Todas"] + CATEGORIAS)
+                with c_f3: busca = st.text_input("🔍 Busca", placeholder="Texto...")
+                
+                df_exibicao = df.copy()
+                if sel_mes != "Todos": df_exibicao = df_exibicao[df_exibicao['Vencimento'].dt.strftime('%Y-%m') == sel_mes]
+                if sel_cat != "Todas": df_exibicao = df_exibicao[df_exibicao['Categoria'] == sel_cat]
+                if busca: df_exibicao = df_exibicao[df_exibicao.apply(lambda x: x.astype(str).str.contains(busca, case=False).any(), axis=1)]
+                df_exibicao = df_exibicao.sort_values(by="Vencimento", ascending=False)
+
+                st.markdown("""
+                <div style="display: flex; justify-content: space-between; padding: 12px 15px; background-color: #111827; border-radius: 8px 8px 0 0; border-bottom: 1px solid #1f2937; color: #6b7280; font-weight: 600; font-size: 11px; text-transform: uppercase;">
+                    <div style="width: 30%;">DESCRIÇÃO</div><div style="width: 20%;">VENCIMENTO</div><div style="width: 20%;">CATEGORIA</div><div style="width: 15%;">VALOR</div><div style="width: 15%; text-align: center;">AÇÕES</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+                for _, r in df_exibicao.iterrows():
+                    cid = str(r['ID']); desc = str(r['Descrição']); cat = str(r['Categoria']); forma = str(r['Forma_Pagamento'])
+                    val = float(r['Valor']); status = str(r['Status']); tipo = str(r['Tipo'])
+                    venc = r['Vencimento'].strftime('%d/%m/%Y') if pd.notnull(r['Vencimento']) else ""
+                    
+                    cor_bdg = "border: 1px solid #10b981; color: #10b981;" if status.lower() == "pago" else "border: 1px solid #ef4444; color: #ef4444;"
+                    cor_tipo = "#10b981" if tipo == "Recebimento" else "#ef4444"
+                    btn_status = "🟢" if status.lower() == "pago" else "🔴"
+                    
+                    st.markdown("<div style='border-top: 1px solid #1f2937;'></div>", unsafe_allow_html=True)
+                    c1, c2, c3, c4, c5 = st.columns([3, 2, 2, 1.5, 1.5])
+                    with c1: st.markdown(f'<div style="padding: 10px 0;"><span style="color: {cor_tipo}; font-weight: bold; font-size: 15px;">{desc}</span><br><span style="color: #6b7280; font-size: 11px;">{tipo} via {forma}</span></div>', unsafe_allow_html=True)
+                    with c2: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #d1d5db; font-size: 14px;">{venc}</span></div>', unsafe_allow_html=True)
+                    with c3: st.markdown(f'<div style="padding: 10px 0;"><span style="background-color: #334155; color: #cbd5e1; padding: 2px 8px; border-radius: 4px; font-size: 11px;">{cat}</span></div>', unsafe_allow_html=True)
+                    with c4: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #d1d5db; font-size: 14px;">R$ {val:,.2f}</span><br><span style="{cor_bdg} padding: 1px 6px; border-radius: 4px; font-weight: bold; font-size: 10px;">{status.upper()}</span></div>', unsafe_allow_html=True)
+                    with c5:
+                        st.markdown("<div style='padding-top: 15px;'></div>", unsafe_allow_html=True)
+                        b1, b2, b3 = st.columns(3)
+                        if b1.button("✏️", key=f"e_{cid}"): st.session_state.edit_conta = cid; st.rerun()
+                        if b2.button(btn_status, key=f"s_{cid}"):
+                            df.loc[df['ID'] == cid, 'Status'] = "Pendente" if status.lower() == "pago" else "Pago"
+                            salvar_dados(df); st.rerun()
+                        if b3.button("🗑️", key=f"d_{cid}"):
+                            df = df[df['ID'] != cid]
+                            salvar_dados(df); st.rerun()
+                st.markdown("<div style='background-color: #111827; padding: 5px; border-radius: 0 0 8px 8px;'></div>", unsafe_allow_html=True)
