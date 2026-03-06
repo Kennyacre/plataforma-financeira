@@ -13,6 +13,7 @@ from dateutil.relativedelta import relativedelta
 
 st.set_page_config(page_title="Plataforma SaaS", layout="wide")
 
+# Criação do diretório de comprovativos (Preparação para o Docker no ZimaOS)
 os.makedirs("comprovativos", exist_ok=True)
 
 # --- 1. CONEXÃO SEGURA COM O GOOGLE SHEETS E MOTOR DE CONFIGURAÇÃO ---
@@ -58,7 +59,7 @@ if "logado" not in st.session_state:
 if "tela_atual" not in st.session_state: st.session_state.tela_atual = "login"
 if "edit_user" not in st.session_state: st.session_state.edit_user = ""
 if "edit_conta" not in st.session_state: st.session_state.edit_conta = ""
-if "ghost_mode" not in st.session_state: st.session_state.ghost_mode = "" 
+if "ghost_mode" not in st.session_state: st.session_state.ghost_mode = ""
 
 # ==========================================
 # ROTA 1: TELA INICIAL (LOGIN E CADASTRO)
@@ -114,7 +115,7 @@ else:
     is_master = (st.session_state.nivel.lower() == "master")
     if is_master and st.session_state.ghost_mode != "":
         usuario_ativo = st.session_state.ghost_mode
-        nivel_ativo = "cliente"
+        nivel_ativo = "cliente" 
     else:
         usuario_ativo = st.session_state.usuario
         nivel_ativo = st.session_state.nivel.lower()
@@ -122,6 +123,7 @@ else:
     meu_cadastro = df_users_master[df_users_master["Usuario"] == usuario_ativo]
     meu_status = meu_cadastro.iloc[0]["Status"].lower() if not meu_cadastro.empty else "bloqueado"
 
+    # --- SIDEBAR ---
     st.sidebar.markdown(f"<div style='display:flex; align-items:center; gap:10px; padding: 10px 0;'>{renderizar_logo(45)}<span style='font-weight:bold; font-size:18px; color:white;'>{NOME_SAAS}</span></div>", unsafe_allow_html=True)
     st.sidebar.markdown("---")
     
@@ -136,6 +138,22 @@ else:
 
     if is_master and st.session_state.ghost_mode == "":
         opcoes_menu = {"📊 Dashboard": "Dashboard", "📋 Gestão de Clientes": "Gestao", "➕ Novo Cliente": "Novo", "⚙️ Configurações": "Config"}
+        
+        # FORMULÁRIO LATERAL DE CONFIG (COM KEYS ÚNICAS)
+        with st.sidebar.expander("⚙️ Atalho de Configurações"):
+            with st.form("form_config_sidebar"):
+                novo_nome_side = st.text_input("Plataforma", value=NOME_SAAS, key="side_nome")
+                logo_file_side = st.file_uploader("Logo", type=['png', 'jpg', 'jpeg'], key="side_logo")
+                nova_chave_side = st.text_input("PIX", value=CHAVE_PIX, key="side_pix")
+                novo_rec_side = st.text_input("Titular", value=NOME_RECEBEDOR, key="side_rec")
+                
+                if st.form_submit_button("Guardar"):
+                    ws_conf = planilha.worksheet("Configuracoes")
+                    ws_conf.update(values=[['Chave', 'Valor'], ['NOME_SAAS', novo_nome_side], ['CHAVE_PIX', nova_chave_side], ['NOME_RECEBEDOR', novo_rec_side]], range_name='A1:B4')
+                    if logo_file_side is not None:
+                        with open("logo.png", "wb") as f: f.write(logo_file_side.getbuffer())
+                    st.cache_data.clear(); st.success("Atualizado!"); time.sleep(1); st.rerun()
+
     else:
         if meu_status == "bloqueado": opcoes_menu = {"💳 Regularizar Assinatura": "Assinatura"}
         else: opcoes_menu = {"📊 Painel Geral": "Painel", "🔮 Previsão": "Previsão", "📅 Calendário": "Calendário", "📝 Novo Lançamento": "Lançar", "📋 Histórico": "Histórico", "🎯 Metas de Gastos": "Metas", "💳 Minha Assinatura": "Assinatura"}
@@ -147,7 +165,7 @@ else:
     hoje = date.today()
 
     # ==========================================
-    # PAINEL MASTER (VERDADEIRO)
+    # PAINEL MASTER
     # ==========================================
     if is_master and st.session_state.ghost_mode == "":
         df_users = df_users_master.copy()
@@ -251,12 +269,15 @@ else:
 
         elif menu == "Config":
             st.title("⚙️ Configurações Globais (White-Label)")
-            with st.form("form_config_master"):
+            with st.form("form_config_main"):
+                # FORMULÁRIO PRINCIPAL DE CONFIG (COM KEYS ÚNICAS)
                 c1, c2 = st.columns(2)
-                novo_nome = c1.text_input("Nome da Plataforma", value=NOME_SAAS)
-                logo_file = c2.file_uploader("Upload da Logo (PNG/JPG)", type=['png', 'jpg', 'jpeg'])
+                novo_nome = c1.text_input("Nome da Plataforma", value=NOME_SAAS, key="main_nome")
+                logo_file = c2.file_uploader("Upload da Logo (PNG/JPG)", type=['png', 'jpg', 'jpeg'], key="main_logo")
                 c3, c4 = st.columns(2)
-                nova_chave = c3.text_input("Chave PIX", value=CHAVE_PIX); novo_rec = c4.text_input("Titular do PIX", value=NOME_RECEBEDOR)
+                nova_chave = c3.text_input("Chave PIX", value=CHAVE_PIX, key="main_pix")
+                novo_rec = c4.text_input("Titular do PIX", value=NOME_RECEBEDOR, key="main_rec")
+                
                 if st.form_submit_button("SALVAR CONFIGURAÇÕES", type="primary"):
                     ws_conf = planilha.worksheet("Configuracoes")
                     ws_conf.update(values=[['Chave', 'Valor'], ['NOME_SAAS', novo_nome], ['CHAVE_PIX', nova_chave], ['NOME_RECEBEDOR', novo_rec]], range_name='A1:B4')
@@ -265,7 +286,7 @@ else:
                     st.cache_data.clear(); st.success("Atualizada com sucesso!"); time.sleep(1); st.rerun()
 
     # ==========================================
-    # PAINEL DO CLIENTE (E GHOST MODE DO MASTER)
+    # PAINEL DO CLIENTE (E GHOST MODE)
     # ==========================================
     else:
         if st.session_state.ghost_mode != "":
@@ -319,7 +340,6 @@ else:
             CATEGORIAS = ["Consultoria", "Energia/Enel", "Internet", "Moradia", "Salário", "Serviços", "Outros"]
             PAGAMENTOS = ["Pix", "Cartão", "Dinheiro", "Boleto", "Outros"]
 
-            # Notificações Ativas
             pendentes_hoje = df[(df["Status"] == "Pendente") & (df["Vencimento"].dt.date <= hoje + timedelta(days=2))]
             if not pendentes_hoje.empty:
                 st.warning(f"🔔 **Lembrete:** Você tem {len(pendentes_hoje)} conta(s) pendentes que vencem hoje ou nos próximos 2 dias!")
