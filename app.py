@@ -29,7 +29,6 @@ except Exception as e:
     st.error(f"🚨 Falha na conexão com a Base de Dados. Detalhe: {e}")
     st.stop()
 
-# Carrega configurações dinâmicas do Sheets (Nome e PIX)
 @st.cache_data(ttl=30)
 def carregar_configuracoes():
     try: ws_config = planilha.worksheet("Configuracoes")
@@ -43,7 +42,6 @@ NOME_SAAS = config_app.get('NOME_SAAS', 'Plataforma SaaS')
 CHAVE_PIX = config_app.get('CHAVE_PIX', 'Sem chave cadastrada')
 NOME_RECEBEDOR = config_app.get('NOME_RECEBEDOR', 'Sem recebedor')
 
-# Renderizador de Logo Dinâmico (Lê o PNG salvo no servidor)
 def renderizar_logo(width=40):
     if os.path.exists("logo.png"):
         with open("logo.png", "rb") as image_file:
@@ -175,75 +173,60 @@ else:
     
     st.sidebar.markdown(f"👤 **{st.session_state.usuario}**")
     cor_st = "#10b981" if meu_status == "ativo" else "#ef4444"
-    st.sidebar.markdown(f"<span style='color:{cor_st}; font-weight:bold;'>Status: {meu_status.upper()}</span>", unsafe_allow_html=True)
+    st.sidebar.markdown(f"<span style='color:{cor_st}; font-weight:bold;'>Nível: {st.session_state.nivel} | Status: {meu_status.upper()}</span>", unsafe_allow_html=True)
     st.sidebar.write("")
-    
-    # --- ⚙️ MENU DE CONFIGURAÇÃO NA SIDEBAR (APENAS MASTER) ---
-    if st.session_state.nivel.lower() == "master":
-        st.sidebar.markdown("<br>", unsafe_allow_html=True)
-        with st.sidebar.expander("⚙️ Configurações (Marca/PIX)"):
-            with st.form("form_config_sidebar"):
-                novo_nome = st.text_input("Nome da Plataforma", value=NOME_SAAS)
-                logo_file = st.file_uploader("Upload da Logo (PNG/JPG)", type=['png', 'jpg', 'jpeg'])
-                nova_chave = st.text_input("Chave PIX", value=CHAVE_PIX)
-                novo_rec = st.text_input("Titular do PIX", value=NOME_RECEBEDOR)
-                
-                if st.form_submit_button("Guardar"):
-                    # Atualiza os textos no Google Sheets
-                    ws_conf = planilha.worksheet("Configuracoes")
-                    ws_conf.update(values=[['Chave', 'Valor'], ['NOME_SAAS', novo_nome], ['CHAVE_PIX', nova_chave], ['NOME_RECEBEDOR', novo_rec]], range_name='A1:B4')
-                    
-                    # Salva a imagem enviada localmente
-                    if logo_file is not None:
-                        with open("logo.png", "wb") as f:
-                            f.write(logo_file.getbuffer())
-                    
-                    st.cache_data.clear()
-                    st.success("Atualizado!")
-                    time.sleep(1); st.rerun()
 
+    # --- MENU DINÂMICO NA SIDEBAR ---
+    if st.session_state.nivel.lower() == "master":
+        opcoes_menu = {"📊 Dashboard": "Dashboard", "📋 Gestão de Clientes": "Gestao", "➕ Novo Cliente": "Novo", "⚙️ Configurações": "Config"}
+        menu = opcoes_menu[st.sidebar.radio("Navegação", list(opcoes_menu.keys()), label_visibility="collapsed")]
+    else:
+        if meu_status == "bloqueado":
+            opcoes_menu = {"💳 Regularizar Assinatura": "Assinatura"}
+        else:
+            opcoes_menu = {"📊 Painel Geral": "Painel", "🔮 Previsão": "Previsão", "📅 Calendário": "Calendário", "📝 Novo Lançamento": "Lançar", "📋 Histórico": "Histórico", "💳 Minha Assinatura": "Assinatura"}
+        menu = opcoes_menu[st.sidebar.radio("Navegação", list(opcoes_menu.keys()), label_visibility="collapsed")]
+
+    st.sidebar.markdown("---")
     if st.sidebar.button("Sair / Logout"):
         st.session_state.logado = False; st.rerun()
-    st.sidebar.markdown("---")
 
     # ==========================================
-    # PAINEL MASTER
+    # PAINEL MASTER (AGORA COM NAVEGAÇÃO LATERAL)
     # ==========================================
     if st.session_state.nivel.lower() == "master":
-        st.title("👑 Central de Comando SaaS")
         df_users = df_users_master.copy()
-        
-        st.markdown("### 📊 Dashboard de Desempenho (MRR)")
-        df_ativos = df_users[df_users['Status'].str.lower() == 'ativo'].copy()
-        df_users['ValorNum'] = df_users['Valor'].apply(lambda x: float(str(x).replace(',', '.').strip()) if str(x) != "" else 0.0)
-        df_ativos['ValorNum'] = df_ativos['Valor'].apply(lambda x: float(str(x).replace(',', '.').strip()) if str(x) != "" else 0.0)
-        
-        c_m1, c_m2, c_m3 = st.columns(3)
-        c_m1.metric("Clientes Ativos", f"{len(df_ativos)}")
-        c_m2.metric("Clientes Bloqueados", f"{len(df_users) - len(df_ativos)}")
-        c_m3.metric("Receita Recorrente (MRR)", f"R$ {df_ativos['ValorNum'].sum():,.2f}")
-        st.markdown("<br>", unsafe_allow_html=True)
-        
-        cg1, cg2 = st.columns(2)
-        with cg1:
-            st.markdown("**Proporção de Clientes**")
-            status_cont = df_users['Status'].value_counts().reset_index(); status_cont.columns = ['Status', 'Total']
-            st.altair_chart(alt.Chart(status_cont).mark_arc(innerRadius=60).encode(theta=alt.Theta(field="Total", type="quantitative"), color=alt.Color(field="Status", type="nominal", scale=alt.Scale(domain=['Ativo', 'Bloqueado', 'ativo', 'bloqueado'], range=['#10b981', '#ef4444', '#10b981', '#ef4444'])), tooltip=['Status', 'Total']).properties(height=250), use_container_width=True)
-        with cg2:
-            st.markdown("**Receita por Nível (Apenas Ativos)**")
-            if not df_ativos.empty:
-                rev_nivel = df_ativos.groupby('Nivel')['ValorNum'].sum().reset_index()
-                st.altair_chart(alt.Chart(rev_nivel).mark_bar().encode(x=alt.X('Nivel:N', title=''), y=alt.Y('ValorNum:Q', title='R$'), color=alt.Color('Nivel:N', legend=None, scale=alt.Scale(range=['#3b82f6', '#6366f1'])), tooltip=['Nivel', 'ValorNum']).properties(height=250), use_container_width=True)
-        
-        st.markdown("---")
-        
-        # Voltei para 2 abas principais na área de trabalho
-        tab1, tab2 = st.tabs(["📋 Gestão de Clientes", "➕ Novo Cliente Master"])
 
-        with tab1:
+        if menu == "Dashboard":
+            st.title("👑 Central de Comando SaaS")
+            st.markdown("### 📊 Dashboard de Desempenho (MRR)")
+            df_ativos = df_users[df_users['Status'].str.lower() == 'ativo'].copy()
+            df_users['ValorNum'] = df_users['Valor'].apply(lambda x: float(str(x).replace(',', '.').strip()) if str(x) != "" else 0.0)
+            df_ativos['ValorNum'] = df_ativos['Valor'].apply(lambda x: float(str(x).replace(',', '.').strip()) if str(x) != "" else 0.0)
+            
+            c_m1, c_m2, c_m3 = st.columns(3)
+            c_m1.metric("Clientes Ativos", f"{len(df_ativos)}")
+            c_m2.metric("Clientes Bloqueados", f"{len(df_users) - len(df_ativos)}")
+            c_m3.metric("Receita Recorrente (MRR)", f"R$ {df_ativos['ValorNum'].sum():,.2f}")
+            st.markdown("<br>", unsafe_allow_html=True)
+            
+            cg1, cg2 = st.columns(2)
+            with cg1:
+                st.markdown("**Proporção de Clientes**")
+                status_cont = df_users['Status'].value_counts().reset_index(); status_cont.columns = ['Status', 'Total']
+                st.altair_chart(alt.Chart(status_cont).mark_arc(innerRadius=60).encode(theta=alt.Theta(field="Total", type="quantitative"), color=alt.Color(field="Status", type="nominal", scale=alt.Scale(domain=['Ativo', 'Bloqueado', 'ativo', 'bloqueado'], range=['#10b981', '#ef4444', '#10b981', '#ef4444'])), tooltip=['Status', 'Total']).properties(height=250), use_container_width=True)
+            with cg2:
+                st.markdown("**Receita por Nível (Apenas Ativos)**")
+                if not df_ativos.empty:
+                    rev_nivel = df_ativos.groupby('Nivel')['ValorNum'].sum().reset_index()
+                    st.altair_chart(alt.Chart(rev_nivel).mark_bar().encode(x=alt.X('Nivel:N', title=''), y=alt.Y('ValorNum:Q', title='R$'), color=alt.Color('Nivel:N', legend=None, scale=alt.Scale(range=['#3b82f6', '#6366f1'])), tooltip=['Nivel', 'ValorNum']).properties(height=250), use_container_width=True)
+
+        elif menu == "Gestao":
+            st.title("📋 Gestão de Clientes")
             if st.session_state.edit_user != "":
                 cliente_sel = st.session_state.edit_user
-                if st.button("⬅️ Cancelar"): st.session_state.edit_user = ""; st.rerun()
+                if st.button("⬅️ Cancelar / Voltar para a Tabela"):
+                    st.session_state.edit_user = ""; st.rerun()
                 st.markdown(f"### ✏️ Editando Cliente: <span style='color:#3b82f6;'>{cliente_sel}</span>", unsafe_allow_html=True)
                 row_data = df_users[df_users["Usuario"] == cliente_sel].iloc[0]
                 with st.form("editar_cliente_inline"):
@@ -301,30 +284,49 @@ else:
                             aba_usuarios_db.update_cell(aba_usuarios_db.find(user, in_column=1).row, 4, n_stat); st.warning(f"Alterado."); time.sleep(0.5); st.rerun()
                 st.markdown("<div style='background-color: #111827; padding: 5px; border-radius: 0 0 8px 8px;'></div>", unsafe_allow_html=True)
 
-        with tab2:
-            st.markdown("### Cadastrar Cliente Manualmente")
+        elif menu == "Novo":
+            st.title("➕ Cadastrar Cliente Manualmente")
             with st.form("novo_cliente_master"):
                 c1, c2, c3 = st.columns(3)
                 n_nome = c1.text_input("Nome"); n_email = c2.text_input("E-mail"); n_tel = c3.text_input("Telefone")
                 n_user = c1.text_input("Usuário (Login)"); n_senha = c2.text_input("Senha"); n_nivel = c3.selectbox("Nível", ["Cliente", "Master"])
                 n_status = c1.selectbox("Status", ["Ativo", "Bloqueado"]); n_valor = c2.number_input("Mensalidade (R$)", min_value=0.0, step=10.0); n_venc = c3.date_input("Data de Vencimento")
-                if st.form_submit_button("SALVAR CLIENTE", type="primary"):
+                if st.form_submit_button("SALVAR NOVO CLIENTE", type="primary"):
                     if n_user in df_users["Usuario"].values: st.error("Usuário já existe!")
                     elif n_user and n_senha:
-                        aba_usuarios_db.append_row([n_user, n_senha, n_nivel, n_status, str(n_valor), n_venc.strftime('%d/%m/%Y'), n_nome, n_email, n_tel]); st.success("Sucesso!"); time.sleep(1); st.rerun()
+                        aba_usuarios_db.append_row([n_user, n_senha, n_nivel, n_status, str(n_valor), n_venc.strftime('%d/%m/%Y'), n_nome, n_email, n_tel]); st.success("Cliente criado!"); time.sleep(1); st.rerun()
+
+        elif menu == "Config":
+            st.title("⚙️ Configurações Globais (White-Label)")
+            st.markdown("Faça o upload do logo e configure os dados de pagamento. Tudo é atualizado em tempo real para os clientes.")
+            
+            with st.form("form_config_master"):
+                st.markdown("#### Identidade Visual")
+                c1, c2 = st.columns(2)
+                novo_nome = c1.text_input("Nome da Plataforma", value=NOME_SAAS)
+                logo_file = c2.file_uploader("Upload da Logo (PNG/JPG)", type=['png', 'jpg', 'jpeg'])
+                
+                st.markdown("#### Dados de Cobrança (PIX)")
+                c3, c4 = st.columns(2)
+                nova_chave = c3.text_input("Chave PIX", value=CHAVE_PIX)
+                novo_rec = c4.text_input("Titular do PIX", value=NOME_RECEBEDOR)
+                
+                if st.form_submit_button("SALVAR CONFIGURAÇÕES", type="primary"):
+                    ws_conf = planilha.worksheet("Configuracoes")
+                    ws_conf.update(values=[['Chave', 'Valor'], ['NOME_SAAS', novo_nome], ['CHAVE_PIX', nova_chave], ['NOME_RECEBEDOR', novo_rec]], range_name='A1:B4')
+                    
+                    if logo_file is not None:
+                        with open("logo.png", "wb") as f:
+                            f.write(logo_file.getbuffer())
+                    
+                    st.cache_data.clear()
+                    st.success("✅ Plataforma atualizada com sucesso!")
+                    time.sleep(1); st.rerun()
 
     # ==========================================
     # PAINEL DO CLIENTE E PAYWALL
     # ==========================================
     else:
-        if meu_status == "bloqueado":
-            opcoes_menu = {"💳  Regularizar Assinatura": "Assinatura"}
-            st.error("⛔ ACESSO SUSPENSO: Identificamos uma pendência na sua assinatura.")
-        else:
-            opcoes_menu = {"📊  Painel Geral": "Painel", "🔮  Previsão": "Previsão", "📅  Calendário": "Calendário", "📝  Novo Lançamento": "Lançar", "📋  Histórico": "Histórico", "💳  Minha Assinatura": "Assinatura"}
-        
-        menu = opcoes_menu[st.sidebar.radio("Navegação", list(opcoes_menu.keys()), label_visibility="collapsed")]
-
         if menu == "Assinatura":
             st.title("💳 Minha Assinatura")
             v_str = str(meu_cadastro.iloc[0]["Valor"]).replace(',','.').strip()
