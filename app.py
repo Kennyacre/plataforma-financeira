@@ -13,7 +13,6 @@ from dateutil.relativedelta import relativedelta
 
 st.set_page_config(page_title="Plataforma SaaS", layout="wide")
 
-# Criação do diretório de comprovativos (Preparação para o Docker no ZimaOS)
 os.makedirs("comprovativos", exist_ok=True)
 
 # --- 1. CONEXÃO SEGURA COM O GOOGLE SHEETS E MOTOR DE CONFIGURAÇÃO ---
@@ -37,7 +36,7 @@ def carregar_configuracoes():
     try: ws_config = planilha.worksheet("Configuracoes")
     except gspread.exceptions.WorksheetNotFound:
         ws_config = planilha.add_worksheet(title="Configuracoes", rows="10", cols="2")
-        ws_config.update(values=[['Chave', 'Valor'], ['NOME_SAAS', 'MT Connect Stays'], ['CHAVE_PIX', 'seu-email@pix.com.br'], ['NOME_RECEBEDOR', 'Kenny / MT Connect']], range_name='A1:B4')
+        ws_config.update(values=[['Chave', 'Valor'], ['NOME_SAAS', 'MT Connect Stays'], ['LOGO_URL', 'local'], ['CHAVE_PIX', 'seu-email@pix.com.br'], ['NOME_RECEBEDOR', 'Kenny / MT Connect']], range_name='A1:B5')
     return {row['Chave']: row['Valor'] for row in ws_config.get_all_records()}
 
 config_app = carregar_configuracoes()
@@ -70,7 +69,7 @@ if not st.session_state.logado:
     with col2:
         st.write(""); st.write("")
         if st.session_state.tela_atual == "login":
-            st.markdown(f"<div style='text-align: center;'>{renderizar_logo(60)}</div><h2 style='text-align: center; margin-bottom: 5px;'>{NOME_SAAS}</h2><p style='text-align: center; margin-bottom: 30px;'>Acesse a sua plataforma</p>", unsafe_allow_html=True)
+            st.markdown(f"<div style='text-align: center;'>{renderizar_logo(60)}</div><h2 style='text-align: center; margin-bottom: 5px;'>{NOME_SAAS}</h2><p style='text-align: center; margin-bottom: 30px;'>Acesse a sua plataforma financeira</p>", unsafe_allow_html=True)
             with st.form("form_login_dark"):
                 login_input = st.text_input("✉️ E-mail ou Login")
                 senha_input = st.text_input("🔒 Senha", type="password")
@@ -123,7 +122,6 @@ else:
     meu_cadastro = df_users_master[df_users_master["Usuario"] == usuario_ativo]
     meu_status = meu_cadastro.iloc[0]["Status"].lower() if not meu_cadastro.empty else "bloqueado"
 
-    # --- SIDEBAR ---
     st.sidebar.markdown(f"<div style='display:flex; align-items:center; gap:10px; padding: 10px 0;'>{renderizar_logo(45)}<span style='font-weight:bold; font-size:18px; color:white;'>{NOME_SAAS}</span></div>", unsafe_allow_html=True)
     st.sidebar.markdown("---")
     
@@ -139,7 +137,6 @@ else:
     if is_master and st.session_state.ghost_mode == "":
         opcoes_menu = {"📊 Dashboard": "Dashboard", "📋 Gestão de Clientes": "Gestao", "➕ Novo Cliente": "Novo", "⚙️ Configurações": "Config"}
         
-        # FORMULÁRIO LATERAL DE CONFIG (COM KEYS ÚNICAS)
         with st.sidebar.expander("⚙️ Atalho de Configurações"):
             with st.form("form_config_sidebar"):
                 novo_nome_side = st.text_input("Plataforma", value=NOME_SAAS, key="side_nome")
@@ -148,8 +145,9 @@ else:
                 novo_rec_side = st.text_input("Titular", value=NOME_RECEBEDOR, key="side_rec")
                 
                 if st.form_submit_button("Guardar"):
+                    # CORREÇÃO APLICADA AQUI (A1:B5 preservando a ordem)
                     ws_conf = planilha.worksheet("Configuracoes")
-                    ws_conf.update(values=[['Chave', 'Valor'], ['NOME_SAAS', novo_nome_side], ['CHAVE_PIX', nova_chave_side], ['NOME_RECEBEDOR', novo_rec_side]], range_name='A1:B4')
+                    ws_conf.update(values=[['Chave', 'Valor'], ['NOME_SAAS', novo_nome_side], ['LOGO_URL', 'local'], ['CHAVE_PIX', nova_chave_side], ['NOME_RECEBEDOR', novo_rec_side]], range_name='A1:B5')
                     if logo_file_side is not None:
                         with open("logo.png", "wb") as f: f.write(logo_file_side.getbuffer())
                     st.cache_data.clear(); st.success("Atualizado!"); time.sleep(1); st.rerun()
@@ -270,7 +268,6 @@ else:
         elif menu == "Config":
             st.title("⚙️ Configurações Globais (White-Label)")
             with st.form("form_config_main"):
-                # FORMULÁRIO PRINCIPAL DE CONFIG (COM KEYS ÚNICAS)
                 c1, c2 = st.columns(2)
                 novo_nome = c1.text_input("Nome da Plataforma", value=NOME_SAAS, key="main_nome")
                 logo_file = c2.file_uploader("Upload da Logo (PNG/JPG)", type=['png', 'jpg', 'jpeg'], key="main_logo")
@@ -279,8 +276,9 @@ else:
                 novo_rec = c4.text_input("Titular do PIX", value=NOME_RECEBEDOR, key="main_rec")
                 
                 if st.form_submit_button("SALVAR CONFIGURAÇÕES", type="primary"):
+                    # CORREÇÃO APLICADA AQUI (A1:B5 preservando a ordem)
                     ws_conf = planilha.worksheet("Configuracoes")
-                    ws_conf.update(values=[['Chave', 'Valor'], ['NOME_SAAS', novo_nome], ['CHAVE_PIX', nova_chave], ['NOME_RECEBEDOR', novo_rec]], range_name='A1:B4')
+                    ws_conf.update(values=[['Chave', 'Valor'], ['NOME_SAAS', novo_nome], ['LOGO_URL', 'local'], ['CHAVE_PIX', nova_chave], ['NOME_RECEBEDOR', novo_rec]], range_name='A1:B5')
                     if logo_file is not None:
                         with open("logo.png", "wb") as f: f.write(logo_file.getbuffer())
                     st.cache_data.clear(); st.success("Atualizada com sucesso!"); time.sleep(1); st.rerun()
@@ -344,7 +342,6 @@ else:
             if not pendentes_hoje.empty:
                 st.warning(f"🔔 **Lembrete:** Você tem {len(pendentes_hoje)} conta(s) pendentes que vencem hoje ou nos próximos 2 dias!")
 
-            # --- AQUI: RENDERIZAÇÃO DA ABA DE ASSINATURA PARA O CLIENTE ATIVO ---
             if menu == "Assinatura":
                 st.title("💳 Minha Assinatura")
                 v_str = str(meu_cadastro.iloc[0]["Valor"]).replace(',','.').strip()
