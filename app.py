@@ -33,9 +33,11 @@ if "logado" not in st.session_state:
     st.session_state.nivel = ""
 if "tela_atual" not in st.session_state:
     st.session_state.tela_atual = "login"
+if "edit_user" not in st.session_state:
+    st.session_state.edit_user = ""
 
 # ==========================================
-# ROTA 1: TELA INICIAL (LOGIN E CADASTRO - DARK MODE PREMIUM)
+# ROTA 1: TELA INICIAL (LOGIN E CADASTRO)
 # ==========================================
 if not st.session_state.logado:
     st.markdown("""
@@ -81,7 +83,6 @@ if not st.session_state.logado:
                 st.markdown("""
                     <div style="border: 1px solid #334155; padding: 10px; border-radius: 4px; width: 250px; margin: 15px auto; background-color: #f8fafc; color: #000;">
                         <input type="checkbox" style="transform: scale(1.5); margin-right: 10px;"> Não sou um robô
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/RecaptchaLogo.svg/1200px-RecaptchaLogo.svg.png" width="30" style="float: right;">
                     </div>
                 """, unsafe_allow_html=True)
                 
@@ -155,6 +156,7 @@ else:
         div[data-testid="stMetric"] div[data-testid="stMetricValue"] { color: #ffffff !important; }
         .stTextInput input, .stNumberInput input, .stDateInput input { background-color: #1e293b !important; color: #ffffff !important; border: 1px solid #334155 !important; }
         .stSelectbox>div>div>div { background-color: #1e293b !important; color: #ffffff !important; border: 1px solid #334155 !important; }
+        /* Botões do Painel Logado */
         button[kind="primary"] { background-color: #2563eb !important; color: white !important; border: none !important; border-radius: 4px !important; font-weight: bold !important; width: 100% !important; }
         button[kind="primary"]:hover { background-color: #1d4ed8 !important; }
         </style>
@@ -175,6 +177,7 @@ else:
         
         tab1, tab2, tab3 = st.tabs(["📋 Lista de Clientes", "➕ Cadastrar Master", "✏️ Editar / Bloquear"])
 
+        # --- A NOVA TABELA INTERATIVA DE CLIENTES ---
         with tab1:
             st.markdown("### Visão Geral de Assinantes")
             
@@ -185,74 +188,104 @@ else:
             c_f3.button("Limpar Filtro")
             
             df_show = df_users.copy()
-            if filtro_status != "Todos":
-                df_show = df_show[df_show['Status'].str.lower() == filtro_status.lower()]
-            if busca:
-                df_show = df_show[df_show['Usuario'].astype(str).str.contains(busca, case=False) | df_show['Nome'].astype(str).str.contains(busca, case=False)]
+            if filtro_status != "Todos": df_show = df_show[df_show['Status'].str.lower() == filtro_status.lower()]
+            if busca: df_show = df_show[df_show['Usuario'].astype(str).str.contains(busca, case=False) | df_show['Nome'].astype(str).str.contains(busca, case=False)]
 
-            # HTML sem indentação (espaços à esquerda) para o Streamlit não transformar em código puro
-            tabela_html = """
-<style>
-.tb-custom { width: 100%; border-collapse: collapse; font-family: 'Segoe UI', sans-serif; font-size: 14px; background-color: #111827; border-radius: 8px; overflow: hidden; }
-.tb-custom th { text-align: left; padding: 15px; color: #6b7280; font-weight: 600; font-size: 11px; text-transform: uppercase; border-bottom: 1px solid #1f2937; }
-.tb-custom td { padding: 15px; border-bottom: 1px solid #1f2937; vertical-align: middle; color: #d1d5db; }
-.tb-custom tr:hover { background-color: #1f2937; }
-.badge-green { border: 1px solid #10b981; color: #10b981; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
-.badge-red { border: 1px solid #ef4444; color: #ef4444; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
-.badge-purple { background-color: #6366f1; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
-.btn-ico { display: inline-block; width: 28px; height: 28px; line-height: 28px; text-align: center; border-radius: 4px; margin-right: 4px; font-size: 12px; cursor: pointer; }
-</style>
-<div style="border: 1px solid #1f2937; border-radius: 8px; overflow-x: auto;">
-<table class="tb-custom">
-<thead>
-<tr>
-<th>Usuário</th>
-<th>Datas</th>
-<th>Situação</th>
-<th>Detalhes</th>
-<th style="text-align: right;">Ações</th>
-</tr>
-</thead>
-<tbody>
-"""
+            # Cabeçalho da Tabela
+            st.markdown("""
+            <div style="display: flex; justify-content: space-between; padding: 12px 15px; background-color: #111827; border-radius: 8px 8px 0 0; border-bottom: 1px solid #1f2937; color: #6b7280; font-weight: 600; font-size: 11px; text-transform: uppercase;">
+                <div style="width: 25%;">USUÁRIO</div>
+                <div style="width: 20%;">DATAS</div>
+                <div style="width: 15%;">SITUAÇÃO</div>
+                <div style="width: 25%;">DETALHES</div>
+                <div style="width: 15%; text-align: center;">AÇÕES</div>
+            </div>
+            """, unsafe_allow_html=True)
             
+            # Corpo da Tabela Linha por Linha
             for _, row in df_show.iterrows():
-                cor_badge = "badge-green" if str(row.get("Status", "")).lower() == "ativo" else "badge-red"
-                val = float(str(row.get("Valor", "0")).replace(',','.')) if str(row.get("Valor", "")) != "" else 0.0
+                user = str(row.get("Usuario", "-"))
+                email = str(row.get("Email", "-"))
+                nivel = str(row.get("Nivel", "Cliente"))
+                venc = str(row.get("Vencimento", "-"))
+                status = str(row.get("Status", "N/A"))
+                nome = str(row.get("Nome", "Sem Nome"))
+                valor_str = str(row.get("Valor", "0")).replace(',', '.').strip()
+                valor = float(valor_str) if valor_str != "" else 0.0
+                tel = str(row.get("Telefone", "-"))
+
+                cor_bdg = "border: 1px solid #10b981; color: #10b981;" if status.lower() == "ativo" else "border: 1px solid #ef4444; color: #ef4444;"
+                btn_status = "🟢" if status.lower() == "ativo" else "🔴"
                 
-                # Zero espaços à esquerda para blindar contra o erro do Markdown
-                tabela_html += f"""<tr>
-<td>
-<span style="color: #3b82f6; font-weight: bold; font-size: 15px;">{row.get("Usuario", "-")}</span><br>
-<span style="color: #6b7280; font-size: 12px;">{row.get("Email", "-")}</span><br>
-<span style="color: #6b7280; font-size: 11px;">Nível: {row.get("Nivel", "Cliente")}</span>
-</td>
-<td>
-<span style="color: #d1d5db;">{row.get("Vencimento", "-")}</span><br>
-<span style="color: #6b7280; font-size: 11px;">Data de Vencimento</span>
-</td>
-<td>
-<span class="{cor_badge}">{str(row.get("Status", "N/A")).upper()}</span><br><br>
-<span class="badge-purple">SaaS</span>
-</td>
-<td>
-<span style="color: #d1d5db;">{row.get("Nome", "Sem Nome")}</span><br>
-<span style="color: #9ca3af; font-size: 12px;">Plano: R$ {val:,.2f}</span><br>
-<span style="color: #9ca3af; font-size: 12px;">Tel: {row.get("Telefone", "-")}</span>
-</td>
-<td style="text-align: right; min-width: 150px;">
-<span class="btn-ico" style="background-color: #4b5563; color: white;">✏️</span>
-<span class="btn-ico" style="background-color: #3b82f6; color: white;">🖥️</span>
-<span class="btn-ico" style="background-color: #eab308; color: white;">📅</span>
-<span class="btn-ico" style="background-color: #10b981; color: white;">🟢</span>
-<div style="display:inline-block; background-color:#2563eb; color:white; padding:4px 12px; border-radius:4px; font-weight:bold; font-size:12px; margin-left:5px;">Ações</div>
-</td>
-</tr>"""
+                # Linha separadora
+                st.markdown("<div style='border-top: 1px solid #1f2937;'></div>", unsafe_allow_html=True)
+                
+                c1, c2, c3, c4, c5 = st.columns([2.5, 2, 1.5, 2.5, 1.5])
+                
+                with c1:
+                    st.markdown(f"""
+                    <div style="padding: 10px 0;">
+                        <span style="color: #3b82f6; font-weight: bold; font-size: 15px;">{user}</span><br>
+                        <span style="color: #6b7280; font-size: 12px;">{email}</span><br>
+                        <span style="color: #6b7280; font-size: 11px;">Nível: {nivel}</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                with c2:
+                    st.markdown(f"""
+                    <div style="padding: 10px 0;">
+                        <span style="color: #d1d5db; font-size: 14px;">{venc}</span><br>
+                        <span style="color: #6b7280; font-size: 11px;">Data de Vencimento</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                with c3:
+                    st.markdown(f"""
+                    <div style="padding: 10px 0;">
+                        <span style="{cor_bdg} padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">{status.upper()}</span><br><br>
+                        <span style="background-color: #6366f1; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">SaaS</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                with c4:
+                    st.markdown(f"""
+                    <div style="padding: 10px 0;">
+                        <span style="color: #d1d5db; font-size: 14px;">{nome}</span><br>
+                        <span style="color: #9ca3af; font-size: 12px;">Plano: R$ {valor:,.2f}</span><br>
+                        <span style="color: #9ca3af; font-size: 12px;">Tel: {tel}</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                with c5:
+                    st.markdown("<div style='padding-top: 15px;'></div>", unsafe_allow_html=True)
+                    # Botões de Ação Reais (Lado a Lado)
+                    b1, b2, b3 = st.columns(3)
+                    
+                    if b1.button("✏️", key=f"edit_{user}", help="Editar Cliente"):
+                        st.session_state.edit_user = user
+                        st.success(f"⚠️ Cliente **{user}** selecionado! Vá para a aba 'Editar / Bloquear' logo acima para alterar os dados.")
+                        
+                    if b2.button("🖥️", key=f"ren_{user}", help="Renovar Plano (+1 Mês)"):
+                        try:
+                            v_atual = pd.to_datetime(venc, format='%d/%m/%Y')
+                        except:
+                            v_atual = pd.Timestamp.today()
+                        novo_v = (v_atual + relativedelta(months=1)).strftime('%d/%m/%Y')
+                        
+                        cel = aba_usuarios_db.find(user, in_column=1)
+                        aba_usuarios_db.update_cell(cel.row, 6, novo_v)
+                        st.success(f"Plano renovado para: {novo_v}")
+                        time.sleep(1); st.rerun()
+
+                    if b3.button(btn_status, key=f"stat_{user}", help="Ativar/Bloquear Acesso"):
+                        n_stat = "Bloqueado" if status.lower() == "ativo" else "Ativo"
+                        cel = aba_usuarios_db.find(user, in_column=1)
+                        aba_usuarios_db.update_cell(cel.row, 4, n_stat)
+                        st.warning(f"Status do cliente alterado para: {n_stat}")
+                        time.sleep(1); st.rerun()
             
-            tabela_html += "</tbody></table></div>"
-            st.markdown(tabela_html, unsafe_allow_html=True)
-            
-            st.info("💡 **Dica de Sistema:** Por segurança, as edições reais de senhas e bloqueios devem ser feitas na aba **✏️ Editar / Bloquear**.")
+            # Fundo da tabela para fechar o quadro
+            st.markdown("<div style='background-color: #111827; padding: 5px; border-radius: 0 0 8px 8px;'></div>", unsafe_allow_html=True)
 
         with tab2:
             st.markdown("### Cadastrar Cliente Manualmente")
@@ -275,7 +308,15 @@ else:
 
         with tab3:
             st.markdown("### Gerenciar Cliente (Financeiro e Acesso)")
-            cliente_sel = st.selectbox("Selecione o Cliente:", [""] + df_users["Usuario"].tolist())
+            lista_clientes = [""] + df_users["Usuario"].tolist()
+            
+            # Lógica para auto-selecionar o cliente se clicou no Lápis (✏️)
+            idx_padrao = 0
+            if st.session_state.edit_user in lista_clientes:
+                idx_padrao = lista_clientes.index(st.session_state.edit_user)
+                
+            cliente_sel = st.selectbox("Selecione o Cliente:", lista_clientes, index=idx_padrao)
+            
             if cliente_sel:
                 row_data = df_users[df_users["Usuario"] == cliente_sel].iloc[0]
                 with st.form("editar_cliente"):
@@ -303,6 +344,7 @@ else:
                         aba_usuarios_db.update_cell(linha, 2, e_senha); aba_usuarios_db.update_cell(linha, 3, e_nivel); aba_usuarios_db.update_cell(linha, 4, e_status)
                         aba_usuarios_db.update_cell(linha, 5, str(e_valor)); aba_usuarios_db.update_cell(linha, 6, e_venc.strftime('%d/%m/%Y'))
                         aba_usuarios_db.update_cell(linha, 7, e_nome); aba_usuarios_db.update_cell(linha, 8, e_email); aba_usuarios_db.update_cell(linha, 9, e_tel)
+                        st.session_state.edit_user = "" # Limpa a seleção
                         st.success(f"Dados atualizados com sucesso!"); time.sleep(1); st.rerun()
 
     # === PAINEL DO CLIENTE ===
