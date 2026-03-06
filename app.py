@@ -29,93 +29,99 @@ except Exception as e:
 # --- 2. CONTROLE DE SESSÃO ---
 if "logado" not in st.session_state:
     st.session_state.logado = False
-    st.session_state.usuario = "" # Agora será o Email
+    st.session_state.usuario = "" 
     st.session_state.nivel = ""
 if "tela_atual" not in st.session_state:
     st.session_state.tela_atual = "login"
 
 # ==========================================
-# ROTA 1: TELA INICIAL (LOGIN E CADASTRO - LIGHT MODE)
+# ROTA 1: TELA INICIAL (LOGIN E CADASTRO - LIGHT MODE FORÇADO)
 # ==========================================
 if not st.session_state.logado:
-    # --- CSS: DESIGN MODERNO CLARO PARA LOGIN ---
     st.markdown("""
         <style>
-        .stApp { background-color: #f4f7f6 !important; }
-        /* Centraliza e estiliza a caixa do formulário */
+        /* Força o fundo da página inteiro para claro */
+        .stApp { background-color: #f8fafc !important; }
+        
+        /* Estiliza a caixa do formulário (Branca com sombra) */
         div[data-testid="stForm"] { 
-            background-color: #ffffff; 
-            padding: 40px; 
-            border-radius: 15px; 
-            box-shadow: 0px 10px 30px rgba(0,0,0,0.08); 
-            border: 1px solid #eaeaea;
+            background-color: #ffffff !important; 
+            padding: 40px 30px !important; 
+            border-radius: 12px !important; 
+            box-shadow: 0px 8px 24px rgba(149, 157, 165, 0.2) !important; 
+            border: 1px solid #e2e8f0 !important;
         }
-        h1, h2, h3, p, label { color: #1e293b !important; font-family: 'Segoe UI', sans-serif; }
-        /* Inputs arredondados */
-        .stTextInput>div>div>input { 
-            border-radius: 8px !important; 
+        
+        /* Força TODOS os textos do login para cor escura */
+        .stApp h1, .stApp p, .stApp label, .stApp span { color: #1e293b !important; font-family: 'Segoe UI', sans-serif !important; }
+        
+        /* Inputs bonitos (Brancos com borda cinza e texto preto) */
+        .stTextInput input { 
+            background-color: #ffffff !important; 
+            color: #0f172a !important; 
             border: 1px solid #cbd5e1 !important; 
-            background-color: #f8fafc !important; 
-            color: #334155 !important; 
-            padding: 12px 15px !important;
+            border-radius: 8px !important;
+            padding: 12px !important;
         }
-        /* Botão Azulão principal */
-        .stButton>button { 
+        .stTextInput input:focus { border-color: #3b82f6 !important; box-shadow: 0 0 0 1px #3b82f6 !important; }
+        
+        /* Botão Primário Azulão (Entrar / Criar Conta) */
+        button[kind="primary"] { 
             background-color: #3b82f6 !important; 
             color: white !important; 
             border: none !important; 
             border-radius: 8px !important; 
-            font-weight: 600 !important; 
-            width: 100% !important; 
-            padding: 10px 0 !important;
-            transition: 0.3s;
+            font-weight: bold !important; 
+            padding: 8px 0 !important;
         }
-        .stButton>button:hover { background-color: #2563eb !important; }
-        /* Link azul de texto */
-        .link-text { color: #3b82f6; text-decoration: none; font-weight: 500; cursor: pointer; }
-        .link-text:hover { text-decoration: underline; }
+        button[kind="primary"]:hover { background-color: #2563eb !important; }
+        
+        /* Botão Secundário Transparente (Links de navegação) */
+        button[kind="secondary"] { 
+            background-color: transparent !important; 
+            color: #3b82f6 !important; 
+            border: none !important; 
+            box-shadow: none !important;
+            font-weight: 600 !important;
+        }
+        button[kind="secondary"]:hover { text-decoration: underline !important; color: #2563eb !important; background-color: transparent !important; }
+        
+        /* Checkbox do reCAPTCHA fake */
+        div[data-testid="stCheckbox"] label span { color: #1e293b !important; }
         </style>
         """, unsafe_allow_html=True)
 
-    # Centralizando a caixa na tela usando colunas
     col1, col2, col3 = st.columns([1, 1.2, 1])
     
     with col2:
-        st.write("") # Espaçamento
+        st.write("") 
         st.write("")
         
         # --- TELA DE LOGIN ---
         if st.session_state.tela_atual == "login":
-            st.markdown("<h1 style='text-align: center; margin-bottom: 5px;'>Entrar na sua Conta</h1>", unsafe_allow_html=True)
-            st.markdown("<p style='text-align: center; color: #64748b !important; margin-bottom: 25px;'>Bem-vindo de volta! por favor, insira seus dados</p>", unsafe_allow_html=True)
+            st.markdown("<h1 style='text-align: center; margin-bottom: 5px; color:#0f172a;'>Entrar na sua Conta</h1>", unsafe_allow_html=True)
+            st.markdown("<p style='text-align: center; color: #64748b !important; margin-bottom: 20px;'>Bem-vindo de volta! Por favor, insira seus dados</p>", unsafe_allow_html=True)
             
             with st.form("form_login_moderno"):
-                login_input = st.text_input("✉️ Login (E-mail ou Usuário)", placeholder="Seu e-mail cadastrado")
-                senha_input = st.text_input("🔒 Senha", type="password", placeholder="Sua senha secreta")
+                login_input = st.text_input("✉️ Login (E-mail ou Usuário)")
+                senha_input = st.text_input("🔒 Senha", type="password")
                 
-                # Links "Esqueceu a senha" falsos para design
                 st.markdown("""
                     <div style="text-align: right; margin-top: -10px; margin-bottom: 15px;">
-                        <a href="#" class="link-text" style="font-size: 14px;">Esqueceu a senha?</a><br>
-                        <a href="#" class="link-text" style="font-size: 14px;">Reenviar verificação de email</a>
+                        <a href="#" style="color: #3b82f6; text-decoration: none; font-size: 14px; font-weight: 500;">Esqueceu a senha?</a>
                     </div>
                 """, unsafe_allow_html=True)
                 
-                # Simulador visual de reCAPTCHA nativo
                 st.checkbox("Não sou um robô")
                 st.write("")
                 
-                btn_login = st.form_submit_button("Entrar")
+                # Botão Primário (Fica azul por causa do CSS)
+                btn_login = st.form_submit_button("Entrar", type="primary")
 
                 if btn_login:
                     df_users = pd.DataFrame(aba_usuarios_db.get_all_records())
                     if "Email" not in df_users.columns: df_users["Email"] = ""
-                    
-                    user_match = df_users[
-                        ((df_users["Usuario"].astype(str) == login_input) | (df_users["Email"].astype(str) == login_input)) & 
-                        (df_users["Senha"].astype(str) == senha_input)
-                    ]
-
+                    user_match = df_users[((df_users["Usuario"].astype(str) == login_input) | (df_users["Email"].astype(str) == login_input)) & (df_users["Senha"].astype(str) == senha_input)]
                     if not user_match.empty:
                         status = user_match.iloc[0]["Status"]
                         if status.lower() == "ativo":
@@ -123,32 +129,30 @@ if not st.session_state.logado:
                             st.session_state.usuario = user_match.iloc[0]["Usuario"]
                             st.session_state.nivel = user_match.iloc[0]["Nivel"]
                             st.rerun()
-                        else:
-                            st.error("⛔ Conta bloqueada. Contate o suporte.")
-                    else:
-                        st.error("❌ Credenciais incorretas.")
+                        else: st.error("⛔ Conta bloqueada.")
+                    else: st.error("❌ Credenciais incorretas.")
             
-            # Botão invisível para trocar de tela
+            # Botão Secundário (Fica transparente igual link)
             st.write("")
-            c_bt1, c_bt2, c_bt3 = st.columns([1, 2, 1])
-            if c_bt2.button("Não tem uma conta? Inscrever-se", use_container_width=True):
+            c_bt1, c_bt2, c_bt3 = st.columns([0.5, 2, 0.5])
+            if c_bt2.button("Não tem uma conta? Inscrever-se", type="secondary", use_container_width=True):
                 st.session_state.tela_atual = "cadastro"
                 st.rerun()
 
         # --- TELA DE CADASTRO ---
         elif st.session_state.tela_atual == "cadastro":
-            st.markdown("<h1 style='text-align: center; margin-bottom: 5px;'>Criar Conta</h1>", unsafe_allow_html=True)
-            st.markdown("<p style='text-align: center; color: #64748b !important; margin-bottom: 25px;'>Bem-vindo! Por favor, insira seus dados</p>", unsafe_allow_html=True)
+            st.markdown("<h1 style='text-align: center; margin-bottom: 5px; color:#0f172a;'>Criar Conta</h1>", unsafe_allow_html=True)
+            st.markdown("<p style='text-align: center; color: #64748b !important; margin-bottom: 20px;'>Bem-vindo! Por favor, insira seus dados</p>", unsafe_allow_html=True)
             
             with st.form("form_cadastro_moderno"):
-                c_nome = st.text_input("👤 Nome Completo", placeholder="Ex: João da Silva")
-                c_email = st.text_input("✉️ Seu E-mail", placeholder="joao@email.com")
-                c_tel = st.text_input("📞 Nº celular com WhatsApp", placeholder="(00) 00000-0000")
+                c_nome = st.text_input("👤 Nome Completo")
+                c_email = st.text_input("✉️ Seu E-mail")
+                c_tel = st.text_input("📞 Nº celular com WhatsApp")
                 c_senha = st.text_input("🔒 Crie sua Senha", type="password")
                 c_senha_confirma = st.text_input("🔒 Confirme sua Senha", type="password")
                 
                 st.write("")
-                btn_cadastrar = st.form_submit_button("Criar Conta")
+                btn_cadastrar = st.form_submit_button("Criar Conta", type="primary")
 
                 if btn_cadastrar:
                     if not c_nome or not c_email or not c_senha or not c_senha_confirma:
@@ -158,12 +162,9 @@ if not st.session_state.logado:
                     else:
                         df_u = pd.DataFrame(aba_usuarios_db.get_all_records())
                         if "Email" not in df_u.columns: df_u["Email"] = ""
-                        
-                        # Usamos o Email como ID do usuário também
                         if c_email in df_u["Email"].astype(str).values:
                             st.error("❌ Esse E-mail já está cadastrado.")
                         else:
-                            # Ordem: Usuario | Senha | Nivel | Status | Valor | Vencimento | Nome | Email | Telefone
                             aba_usuarios_db.append_row([c_email, c_senha, "Cliente", "Ativo", "0", "", c_nome, c_email, c_tel])
                             st.success("✅ Conta criada! Você já pode entrar.")
                             time.sleep(2)
@@ -172,16 +173,14 @@ if not st.session_state.logado:
 
             st.write("")
             c_bt1, c_bt2, c_bt3 = st.columns([1, 1, 1])
-            if c_bt2.button("Voltar", use_container_width=True):
+            if c_bt2.button("← Voltar para Login", type="secondary", use_container_width=True):
                 st.session_state.tela_atual = "login"
                 st.rerun()
-
 
 # ==========================================
 # ROTA 2: SISTEMA LOGADO (DARK MODE)
 # ==========================================
 else:
-    # --- CSS: DESIGN INDUSTRIAL DARK GERAL PARA O DASHBOARD ---
     st.markdown("""
         <style>
         .stApp { background-color: #121212 !important; }
@@ -202,9 +201,18 @@ else:
         div[data-testid="stMetric"] div[data-testid="stMetricValue"] { color: #ffffff !important; }
         div[data-testid="stDataFrame"] { background-color: #1e1e1e !important; border: 1px solid #333; border-radius: 8px; padding: 5px; }
         div[data-testid="stDataFrame"] * { color: #e0e0e0 !important; }
-        .stTextInput>div>div>input, .stNumberInput>div>div>input, .stDateInput>div>div>input, .stSelectbox>div>div>div { background-color: #1e1e1e !important; color: #ffffff !important; border: 1px solid #333 !important; }
-        .stButton>button { background-color: #2e7d32 !important; color: white !important; border: none !important; border-radius: 4px !important; font-weight: bold !important; width: 100% !important; }
-        .stButton>button:hover { background-color: #4CAF50 !important; }
+        .stTextInput input, .stNumberInput input, .stDateInput input { background-color: #1e1e1e !important; color: #ffffff !important; border: 1px solid #333 !important; }
+        .stSelectbox>div>div>div { background-color: #1e1e1e !important; color: #ffffff !important; border: 1px solid #333 !important; }
+        /* Botões no modo Dark */
+        button[kind="primary"], button[kind="secondary"] { 
+            background-color: #2e7d32 !important; 
+            color: white !important; 
+            border: none !important; 
+            border-radius: 4px !important; 
+            font-weight: bold !important; 
+            width: 100% !important; 
+        }
+        button[kind="primary"]:hover, button[kind="secondary"]:hover { background-color: #4CAF50 !important; text-decoration: none !important; }
         </style>
         """, unsafe_allow_html=True)
 
@@ -239,12 +247,10 @@ else:
                 n_valor = c2.number_input("Mensalidade (R$)", min_value=0.0, step=10.0)
                 n_venc = c3.date_input("Data de Vencimento")
                 if st.form_submit_button("SALVAR CLIENTE"):
-                    if n_user in df_users["Usuario"].values:
-                        st.error("Usuário já existe!")
+                    if n_user in df_users["Usuario"].values: st.error("Usuário já existe!")
                     elif n_user and n_senha:
                         aba_usuarios_db.append_row([n_user, n_senha, n_nivel, n_status, str(n_valor), n_venc.strftime('%d/%m/%Y'), n_nome, n_email, n_tel])
-                        st.success("Cliente cadastrado com sucesso!")
-                        time.sleep(1); st.rerun()
+                        st.success("Cliente cadastrado com sucesso!"); time.sleep(1); st.rerun()
 
         with tab3:
             st.markdown("### Gerenciar Cliente (Financeiro e Acesso)")
