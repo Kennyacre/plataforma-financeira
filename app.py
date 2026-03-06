@@ -18,7 +18,7 @@ def conectar_google():
 try:
     planilha = conectar_google()
 except Exception as e:
-    st.error("🚨 Falha na conexão com o Banco de Dados. Verifique as credenciais.")
+    st.error(f"🚨 Falha na conexão: {e}")
     st.stop()
 
 # --- 2. CONTROLE DE SESSÃO (LOGIN) ---
