@@ -37,7 +37,7 @@ if "edit_user" not in st.session_state:
     st.session_state.edit_user = ""
 
 # ==========================================
-# ROTA 1: TELA INICIAL (LOGIN E CADASTRO)
+# ROTA 1: TELA INICIAL (LOGIN E CADASTRO - DARK MODE PREMIUM)
 # ==========================================
 if not st.session_state.logado:
     st.markdown("""
@@ -156,7 +156,6 @@ else:
         div[data-testid="stMetric"] div[data-testid="stMetricValue"] { color: #ffffff !important; }
         .stTextInput input, .stNumberInput input, .stDateInput input { background-color: #1e293b !important; color: #ffffff !important; border: 1px solid #334155 !important; }
         .stSelectbox>div>div>div { background-color: #1e293b !important; color: #ffffff !important; border: 1px solid #334155 !important; }
-        /* Botões do Painel Logado */
         button[kind="primary"] { background-color: #2563eb !important; color: white !important; border: none !important; border-radius: 4px !important; font-weight: bold !important; width: 100% !important; }
         button[kind="primary"]:hover { background-color: #1d4ed8 !important; }
         </style>
@@ -175,155 +174,28 @@ else:
         st.title("👑 Central de Comando SaaS")
         df_users = pd.DataFrame(aba_usuarios_db.get_all_records())
         
-        tab1, tab2, tab3 = st.tabs(["📋 Lista de Clientes", "➕ Cadastrar Master", "✏️ Editar / Bloquear"])
+        # AGORA SÓ TEMOS 2 ABAS!
+        tab1, tab2 = st.tabs(["📋 Gestão de Clientes", "➕ Novo Cliente Master"])
 
-        # --- A NOVA TABELA INTERATIVA DE CLIENTES ---
         with tab1:
-            st.markdown("### Visão Geral de Assinantes")
-            
-            c_f1, c_f2, c_f3 = st.columns([2, 1, 1])
-            busca = c_f1.text_input("🔍 Pesquisar por usuário ou nome")
-            filtro_status = c_f2.selectbox("Situação", ["Todos", "Ativo", "Bloqueado"])
-            c_f3.write("")
-            c_f3.button("Limpar Filtro")
-            
-            df_show = df_users.copy()
-            if filtro_status != "Todos": df_show = df_show[df_show['Status'].str.lower() == filtro_status.lower()]
-            if busca: df_show = df_show[df_show['Usuario'].astype(str).str.contains(busca, case=False) | df_show['Nome'].astype(str).str.contains(busca, case=False)]
-
-            # Cabeçalho da Tabela
-            st.markdown("""
-            <div style="display: flex; justify-content: space-between; padding: 12px 15px; background-color: #111827; border-radius: 8px 8px 0 0; border-bottom: 1px solid #1f2937; color: #6b7280; font-weight: 600; font-size: 11px; text-transform: uppercase;">
-                <div style="width: 25%;">USUÁRIO</div>
-                <div style="width: 20%;">DATAS</div>
-                <div style="width: 15%;">SITUAÇÃO</div>
-                <div style="width: 25%;">DETALHES</div>
-                <div style="width: 15%; text-align: center;">AÇÕES</div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            # Corpo da Tabela Linha por Linha
-            for _, row in df_show.iterrows():
-                user = str(row.get("Usuario", "-"))
-                email = str(row.get("Email", "-"))
-                nivel = str(row.get("Nivel", "Cliente"))
-                venc = str(row.get("Vencimento", "-"))
-                status = str(row.get("Status", "N/A"))
-                nome = str(row.get("Nome", "Sem Nome"))
-                valor_str = str(row.get("Valor", "0")).replace(',', '.').strip()
-                valor = float(valor_str) if valor_str != "" else 0.0
-                tel = str(row.get("Telefone", "-"))
-
-                cor_bdg = "border: 1px solid #10b981; color: #10b981;" if status.lower() == "ativo" else "border: 1px solid #ef4444; color: #ef4444;"
-                btn_status = "🟢" if status.lower() == "ativo" else "🔴"
+            # LÓGICA DE EDIÇÃO INLINE (Se clicou no lápis, mostra o formulário)
+            if st.session_state.edit_user != "":
+                cliente_sel = st.session_state.edit_user
                 
-                # Linha separadora
-                st.markdown("<div style='border-top: 1px solid #1f2937;'></div>", unsafe_allow_html=True)
+                # Botão de Voltar
+                if st.button("⬅️ Cancelar / Voltar para a Tabela"):
+                    st.session_state.edit_user = ""
+                    st.rerun()
+                    
+                st.markdown(f"### ✏️ Editando Cliente: <span style='color:#3b82f6;'>{cliente_sel}</span>", unsafe_allow_html=True)
                 
-                c1, c2, c3, c4, c5 = st.columns([2.5, 2, 1.5, 2.5, 1.5])
-                
-                with c1:
-                    st.markdown(f"""
-                    <div style="padding: 10px 0;">
-                        <span style="color: #3b82f6; font-weight: bold; font-size: 15px;">{user}</span><br>
-                        <span style="color: #6b7280; font-size: 12px;">{email}</span><br>
-                        <span style="color: #6b7280; font-size: 11px;">Nível: {nivel}</span>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
-                with c2:
-                    st.markdown(f"""
-                    <div style="padding: 10px 0;">
-                        <span style="color: #d1d5db; font-size: 14px;">{venc}</span><br>
-                        <span style="color: #6b7280; font-size: 11px;">Data de Vencimento</span>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
-                with c3:
-                    st.markdown(f"""
-                    <div style="padding: 10px 0;">
-                        <span style="{cor_bdg} padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">{status.upper()}</span><br><br>
-                        <span style="background-color: #6366f1; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">SaaS</span>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
-                with c4:
-                    st.markdown(f"""
-                    <div style="padding: 10px 0;">
-                        <span style="color: #d1d5db; font-size: 14px;">{nome}</span><br>
-                        <span style="color: #9ca3af; font-size: 12px;">Plano: R$ {valor:,.2f}</span><br>
-                        <span style="color: #9ca3af; font-size: 12px;">Tel: {tel}</span>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
-                with c5:
-                    st.markdown("<div style='padding-top: 15px;'></div>", unsafe_allow_html=True)
-                    # Botões de Ação Reais (Lado a Lado)
-                    b1, b2, b3 = st.columns(3)
-                    
-                    if b1.button("✏️", key=f"edit_{user}", help="Editar Cliente"):
-                        st.session_state.edit_user = user
-                        st.success(f"⚠️ Cliente **{user}** selecionado! Vá para a aba 'Editar / Bloquear' logo acima para alterar os dados.")
-                        
-                    if b2.button("🖥️", key=f"ren_{user}", help="Renovar Plano (+1 Mês)"):
-                        try:
-                            v_atual = pd.to_datetime(venc, format='%d/%m/%Y')
-                        except:
-                            v_atual = pd.Timestamp.today()
-                        novo_v = (v_atual + relativedelta(months=1)).strftime('%d/%m/%Y')
-                        
-                        cel = aba_usuarios_db.find(user, in_column=1)
-                        aba_usuarios_db.update_cell(cel.row, 6, novo_v)
-                        st.success(f"Plano renovado para: {novo_v}")
-                        time.sleep(1); st.rerun()
-
-                    if b3.button(btn_status, key=f"stat_{user}", help="Ativar/Bloquear Acesso"):
-                        n_stat = "Bloqueado" if status.lower() == "ativo" else "Ativo"
-                        cel = aba_usuarios_db.find(user, in_column=1)
-                        aba_usuarios_db.update_cell(cel.row, 4, n_stat)
-                        st.warning(f"Status do cliente alterado para: {n_stat}")
-                        time.sleep(1); st.rerun()
-            
-            # Fundo da tabela para fechar o quadro
-            st.markdown("<div style='background-color: #111827; padding: 5px; border-radius: 0 0 8px 8px;'></div>", unsafe_allow_html=True)
-
-        with tab2:
-            st.markdown("### Cadastrar Cliente Manualmente")
-            with st.form("novo_cliente_master"):
-                c1, c2, c3 = st.columns(3)
-                n_nome = c1.text_input("Nome")
-                n_email = c2.text_input("E-mail")
-                n_tel = c3.text_input("Telefone")
-                n_user = c1.text_input("Usuário (Login)")
-                n_senha = c2.text_input("Senha")
-                n_nivel = c3.selectbox("Nível", ["Cliente", "Master"])
-                n_status = c1.selectbox("Status", ["Ativo", "Bloqueado"])
-                n_valor = c2.number_input("Mensalidade (R$)", min_value=0.0, step=10.0)
-                n_venc = c3.date_input("Data de Vencimento")
-                if st.form_submit_button("SALVAR CLIENTE"):
-                    if n_user in df_users["Usuario"].values: st.error("Usuário já existe!")
-                    elif n_user and n_senha:
-                        aba_usuarios_db.append_row([n_user, n_senha, n_nivel, n_status, str(n_valor), n_venc.strftime('%d/%m/%Y'), n_nome, n_email, n_tel])
-                        st.success("Cliente cadastrado com sucesso!"); time.sleep(1); st.rerun()
-
-        with tab3:
-            st.markdown("### Gerenciar Cliente (Financeiro e Acesso)")
-            lista_clientes = [""] + df_users["Usuario"].tolist()
-            
-            # Lógica para auto-selecionar o cliente se clicou no Lápis (✏️)
-            idx_padrao = 0
-            if st.session_state.edit_user in lista_clientes:
-                idx_padrao = lista_clientes.index(st.session_state.edit_user)
-                
-            cliente_sel = st.selectbox("Selecione o Cliente:", lista_clientes, index=idx_padrao)
-            
-            if cliente_sel:
                 row_data = df_users[df_users["Usuario"] == cliente_sel].iloc[0]
-                with st.form("editar_cliente"):
+                with st.form("editar_cliente_inline"):
                     c1, c2, c3 = st.columns(3)
                     e_nome = c1.text_input("Nome", value=str(row_data.get("Nome", "")))
                     e_email = c2.text_input("E-mail", value=str(row_data.get("Email", "")))
                     e_tel = c3.text_input("Telefone", value=str(row_data.get("Telefone", "")))
+                    
                     c4, c5, c6 = st.columns(3)
                     e_senha = c4.text_input("Senha", value=str(row_data.get("Senha", "")))
                     e_nivel = c5.selectbox("Nível", ["Cliente", "Master"], index=0 if row_data.get("Nivel", "") == "Cliente" else 1)
@@ -338,16 +210,142 @@ else:
                     except: venc_formatado = date.today()
                     e_venc = c8.date_input("Vencimento da Assinatura", value=venc_formatado)
 
-                    if st.form_submit_button("ATUALIZAR DADOS"):
+                    if st.form_submit_button("SALVAR ALTERAÇÕES", type="primary"):
                         celula = aba_usuarios_db.find(cliente_sel, in_column=1)
                         linha = celula.row
                         aba_usuarios_db.update_cell(linha, 2, e_senha); aba_usuarios_db.update_cell(linha, 3, e_nivel); aba_usuarios_db.update_cell(linha, 4, e_status)
                         aba_usuarios_db.update_cell(linha, 5, str(e_valor)); aba_usuarios_db.update_cell(linha, 6, e_venc.strftime('%d/%m/%Y'))
                         aba_usuarios_db.update_cell(linha, 7, e_nome); aba_usuarios_db.update_cell(linha, 8, e_email); aba_usuarios_db.update_cell(linha, 9, e_tel)
-                        st.session_state.edit_user = "" # Limpa a seleção
-                        st.success(f"Dados atualizados com sucesso!"); time.sleep(1); st.rerun()
+                        
+                        st.success(f"Dados atualizados! Voltando...")
+                        time.sleep(1)
+                        st.session_state.edit_user = "" # Limpa para voltar à tabela
+                        st.rerun()
+            
+            # SE NÃO CLICOU EM EDITAR, MOSTRA A TABELA NORMAL
+            else:
+                st.markdown("### Visão Geral de Assinantes")
+                
+                c_f1, c_f2, c_f3 = st.columns([2, 1, 1])
+                busca = c_f1.text_input("🔍 Pesquisar por usuário ou nome")
+                filtro_status = c_f2.selectbox("Situação", ["Todos", "Ativo", "Bloqueado"])
+                c_f3.write("")
+                if c_f3.button("Atualizar / Recarregar"):
+                    st.rerun()
+                
+                df_show = df_users.copy()
+                if filtro_status != "Todos": df_show = df_show[df_show['Status'].str.lower() == filtro_status.lower()]
+                if busca: df_show = df_show[df_show['Usuario'].astype(str).str.contains(busca, case=False) | df_show['Nome'].astype(str).str.contains(busca, case=False)]
 
-    # === PAINEL DO CLIENTE ===
+                st.markdown("""
+                <div style="display: flex; justify-content: space-between; padding: 12px 15px; background-color: #111827; border-radius: 8px 8px 0 0; border-bottom: 1px solid #1f2937; color: #6b7280; font-weight: 600; font-size: 11px; text-transform: uppercase;">
+                    <div style="width: 25%;">USUÁRIO</div>
+                    <div style="width: 20%;">DATAS</div>
+                    <div style="width: 15%;">SITUAÇÃO</div>
+                    <div style="width: 25%;">DETALHES</div>
+                    <div style="width: 15%; text-align: center;">AÇÕES</div>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                for _, row in df_show.iterrows():
+                    user = str(row.get("Usuario", "-"))
+                    email = str(row.get("Email", "-"))
+                    nivel = str(row.get("Nivel", "Cliente"))
+                    venc = str(row.get("Vencimento", "-"))
+                    status = str(row.get("Status", "N/A"))
+                    nome = str(row.get("Nome", "Sem Nome"))
+                    valor_str = str(row.get("Valor", "0")).replace(',', '.').strip()
+                    valor = float(valor_str) if valor_str != "" else 0.0
+                    tel = str(row.get("Telefone", "-"))
+
+                    cor_bdg = "border: 1px solid #10b981; color: #10b981;" if status.lower() == "ativo" else "border: 1px solid #ef4444; color: #ef4444;"
+                    btn_status = "🟢" if status.lower() == "ativo" else "🔴"
+                    
+                    st.markdown("<div style='border-top: 1px solid #1f2937;'></div>", unsafe_allow_html=True)
+                    
+                    c1, c2, c3, c4, c5 = st.columns([2.5, 2, 1.5, 2.5, 1.5])
+                    
+                    with c1:
+                        st.markdown(f"""
+                        <div style="padding: 10px 0;">
+                            <span style="color: #3b82f6; font-weight: bold; font-size: 15px;">{user}</span><br>
+                            <span style="color: #6b7280; font-size: 12px;">{email}</span><br>
+                            <span style="color: #6b7280; font-size: 11px;">Nível: {nivel}</span>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                    with c2:
+                        st.markdown(f"""
+                        <div style="padding: 10px 0;">
+                            <span style="color: #d1d5db; font-size: 14px;">{venc}</span><br>
+                            <span style="color: #6b7280; font-size: 11px;">Data de Vencimento</span>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                    with c3:
+                        st.markdown(f"""
+                        <div style="padding: 10px 0;">
+                            <span style="{cor_bdg} padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">{status.upper()}</span><br><br>
+                            <span style="background-color: #6366f1; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">SaaS</span>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                    with c4:
+                        st.markdown(f"""
+                        <div style="padding: 10px 0;">
+                            <span style="color: #d1d5db; font-size: 14px;">{nome}</span><br>
+                            <span style="color: #9ca3af; font-size: 12px;">Plano: R$ {valor:,.2f}</span><br>
+                            <span style="color: #9ca3af; font-size: 12px;">Tel: {tel}</span>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                    with c5:
+                        st.markdown("<div style='padding-top: 15px;'></div>", unsafe_allow_html=True)
+                        b1, b2, b3 = st.columns(3)
+                        
+                        if b1.button("✏️", key=f"edit_{user}", help="Editar Cliente"):
+                            st.session_state.edit_user = user
+                            st.rerun() # Aciona a mágica de recarregar a tela no modo edição
+                            
+                        if b2.button("🖥️", key=f"ren_{user}", help="Renovar Plano (+1 Mês)"):
+                            try: v_atual = pd.to_datetime(venc, format='%d/%m/%Y')
+                            except: v_atual = pd.Timestamp.today()
+                            novo_v = (v_atual + relativedelta(months=1)).strftime('%d/%m/%Y')
+                            
+                            cel = aba_usuarios_db.find(user, in_column=1)
+                            aba_usuarios_db.update_cell(cel.row, 6, novo_v)
+                            st.success(f"Renovado para: {novo_v}")
+                            time.sleep(1); st.rerun()
+
+                        if b3.button(btn_status, key=f"stat_{user}", help="Ativar/Bloquear Acesso"):
+                            n_stat = "Bloqueado" if status.lower() == "ativo" else "Ativo"
+                            cel = aba_usuarios_db.find(user, in_column=1)
+                            aba_usuarios_db.update_cell(cel.row, 4, n_stat)
+                            st.warning(f"Status alterado para: {n_stat}")
+                            time.sleep(1); st.rerun()
+                
+                st.markdown("<div style='background-color: #111827; padding: 5px; border-radius: 0 0 8px 8px;'></div>", unsafe_allow_html=True)
+
+        with tab2:
+            st.markdown("### Cadastrar Cliente Manualmente")
+            with st.form("novo_cliente_master"):
+                c1, c2, c3 = st.columns(3)
+                n_nome = c1.text_input("Nome")
+                n_email = c2.text_input("E-mail")
+                n_tel = c3.text_input("Telefone")
+                n_user = c1.text_input("Usuário (Login)")
+                n_senha = c2.text_input("Senha")
+                n_nivel = c3.selectbox("Nível", ["Cliente", "Master"])
+                n_status = c1.selectbox("Status", ["Ativo", "Bloqueado"])
+                n_valor = c2.number_input("Mensalidade (R$)", min_value=0.0, step=10.0)
+                n_venc = c3.date_input("Data de Vencimento")
+                if st.form_submit_button("SALVAR CLIENTE", type="primary"):
+                    if n_user in df_users["Usuario"].values: st.error("Usuário já existe!")
+                    elif n_user and n_senha:
+                        aba_usuarios_db.append_row([n_user, n_senha, n_nivel, n_status, str(n_valor), n_venc.strftime('%d/%m/%Y'), n_nome, n_email, n_tel])
+                        st.success("Cliente cadastrado com sucesso!"); time.sleep(1); st.rerun()
+
+    # === PAINEL DO CLIENTE (GESTOR FINANCEIRO) ===
     else:
         def get_aba_cliente():
             nome_aba = f"Dados_{st.session_state.usuario}"
@@ -431,7 +429,7 @@ else:
                 dt = c2.date_input("Data", value=hoje)
                 cat, fop = c1.selectbox("Categoria", CATEGORIAS), c2.selectbox("Forma", PAGAMENTOS)
                 rep = st.selectbox("Repetir?", ["Não", "Mensal"]); qtd = st.number_input("Vezes", 1, 60, 1)
-                if st.form_submit_button("SALVAR REGISTRO"):
+                if st.form_submit_button("SALVAR REGISTRO", type="primary"):
                     novos = []
                     bid = pd.Timestamp.now().strftime('%H%M%S')
                     for i in range(qtd if rep != "Não" else 1):
@@ -451,7 +449,7 @@ else:
                     ed = c1.text_input("Descrição", df.at[idx,'Descrição'])
                     ev = c2.number_input("Valor", float(df.at[idx,'Valor']))
                     es = st.selectbox("Status", ["Pago", "Pendente"], index=0 if df.at[idx,'Status']=="Pago" else 1)
-                    if st.form_submit_button("SALVAR"):
+                    if st.form_submit_button("SALVAR", type="primary"):
                         df.at[idx,'Descrição'] = ed; df.at[idx,'Valor'] = ev; df.at[idx,'Status'] = es
                         salvar_dados(df); st.success("Atualizado!"); time.sleep(0.5); st.rerun()
                     if st.form_submit_button("EXCLUIR"):
