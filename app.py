@@ -6,6 +6,8 @@ from google.oauth2.service_account import Credentials
 import json
 import time
 import calendar
+import os
+import base64
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 
@@ -27,45 +29,37 @@ except Exception as e:
     st.error(f"🚨 Falha na conexão com a Base de Dados. Detalhe: {e}")
     st.stop()
 
-# Função para carregar as configurações de marca dinamicamente
-@st.cache_data(ttl=30) # Atualiza o cache a cada 30s ou quando limpado manualmente
+# Carrega configurações dinâmicas do Sheets (Nome e PIX)
+@st.cache_data(ttl=30)
 def carregar_configuracoes():
-    try:
-        ws_config = planilha.worksheet("Configuracoes")
+    try: ws_config = planilha.worksheet("Configuracoes")
     except gspread.exceptions.WorksheetNotFound:
-        # Se a aba não existir, o sistema cria ela automaticamente!
         ws_config = planilha.add_worksheet(title="Configuracoes", rows="10", cols="2")
-        dados_iniciais = [
-            ['Chave', 'Valor'],
-            ['NOME_SAAS', 'MT Connect Stays'],
-            ['LOGO_URL', 'https://cdn-icons-png.flaticon.com/512/2942/2942269.png'],
-            ['CHAVE_PIX', 'seu-email-ou-cpf@pix.com.br'],
-            ['NOME_RECEBEDOR', 'Kenny / MT Connect']
-        ]
-        ws_config.update(values=dados_iniciais, range_name='A1:B5')
-    
-    records = ws_config.get_all_records()
-    return {row['Chave']: row['Valor'] for row in records}
+        ws_config.update(values=[['Chave', 'Valor'], ['NOME_SAAS', 'MT Connect Stays'], ['CHAVE_PIX', 'seu-email@pix.com.br'], ['NOME_RECEBEDOR', 'Kenny / MT Connect']], range_name='A1:B4')
+    return {row['Chave']: row['Valor'] for row in ws_config.get_all_records()}
 
-# Carrega as variáveis globais a partir do Google Sheets
 config_app = carregar_configuracoes()
 NOME_SAAS = config_app.get('NOME_SAAS', 'Plataforma SaaS')
-LOGO_URL = config_app.get('LOGO_URL', 'https://cdn-icons-png.flaticon.com/512/2942/2942269.png')
 CHAVE_PIX = config_app.get('CHAVE_PIX', 'Sem chave cadastrada')
 NOME_RECEBEDOR = config_app.get('NOME_RECEBEDOR', 'Sem recebedor')
 
+# Renderizador de Logo Dinâmico (Lê o PNG salvo no servidor)
+def renderizar_logo(width=40):
+    if os.path.exists("logo.png"):
+        with open("logo.png", "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode()
+        return f"<img src='data:image/png;base64,{encoded_string}' width='{width}' style='border-radius: 8px;'>"
+    else:
+        return f"<img src='https://cdn-icons-png.flaticon.com/512/2942/2942269.png' width='{width}'>"
 
 # --- 2. CONTROLE DE SESSÃO ---
 if "logado" not in st.session_state:
     st.session_state.logado = False
     st.session_state.usuario = "" 
     st.session_state.nivel = ""
-if "tela_atual" not in st.session_state:
-    st.session_state.tela_atual = "login"
-if "edit_user" not in st.session_state:
-    st.session_state.edit_user = ""
-if "edit_conta" not in st.session_state:
-    st.session_state.edit_conta = ""
+if "tela_atual" not in st.session_state: st.session_state.tela_atual = "login"
+if "edit_user" not in st.session_state: st.session_state.edit_user = ""
+if "edit_conta" not in st.session_state: st.session_state.edit_conta = ""
 
 # ==========================================
 # ROTA 1: TELA INICIAL (LOGIN E CADASTRO)
@@ -88,23 +82,19 @@ if not st.session_state.logado:
         """, unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns([1, 1.2, 1])
-    
     with col2:
         st.write(""); st.write("")
-        
         if st.session_state.tela_atual == "login":
-            st.markdown(f"<div style='text-align: center;'><img src='{LOGO_URL}' width='60'></div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='text-align: center;'>{renderizar_logo(60)}</div>", unsafe_allow_html=True)
             st.markdown(f"<h2 style='text-align: center; margin-bottom: 5px;'>{NOME_SAAS}</h2>", unsafe_allow_html=True)
             st.markdown("<p style='text-align: center; margin-bottom: 30px;'>Acesse a sua plataforma financeira</p>", unsafe_allow_html=True)
             
             with st.form("form_login_dark"):
                 login_input = st.text_input("✉️ E-mail ou Login")
                 senha_input = st.text_input("🔒 Senha", type="password")
-                
                 c_chk, c_links = st.columns([1, 1])
                 with c_chk: st.checkbox("Lembrar-me")
                 with c_links: st.markdown('<div style="text-align: right; margin-top: 5px;"><a href="#" class="link-azul">Esqueceu a senha?</a></div>', unsafe_allow_html=True)
-                
                 btn_login = st.form_submit_button("Entrar", type="primary")
 
                 if btn_login:
@@ -124,19 +114,14 @@ if not st.session_state.logado:
                 st.session_state.tela_atual = "cadastro"; st.rerun()
 
         elif st.session_state.tela_atual == "cadastro":
-            st.markdown(f"<div style='text-align: center;'><img src='{LOGO_URL}' width='50'></div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='text-align: center;'>{renderizar_logo(50)}</div>", unsafe_allow_html=True)
             st.markdown("<h2 style='text-align: center; margin-bottom: 5px;'>Criar Conta</h2>", unsafe_allow_html=True)
             st.markdown("<p style='text-align: center; margin-bottom: 30px;'>Registre-se para usar o sistema</p>", unsafe_allow_html=True)
             
             with st.form("form_cadastro_dark"):
-                c_nome = st.text_input("👤 Nome Completo")
-                c_email = st.text_input("✉️ Seu E-mail")
-                c_tel = st.text_input("📞 Nº celular com WhatsApp")
-                c_senha = st.text_input("🔒 Crie a sua Senha", type="password")
-                c_senha_confirma = st.text_input("🔒 Confirme a sua Senha", type="password")
-                btn_cadastrar = st.form_submit_button("Finalizar Registro", type="primary")
-
-                if btn_cadastrar:
+                c_nome = st.text_input("👤 Nome Completo"); c_email = st.text_input("✉️ Seu E-mail"); c_tel = st.text_input("📞 Nº celular com WhatsApp")
+                c_senha = st.text_input("🔒 Crie a sua Senha", type="password"); c_senha_confirma = st.text_input("🔒 Confirme a sua Senha", type="password")
+                if st.form_submit_button("Finalizar Registro", type="primary"):
                     if not c_nome or not c_email or not c_senha: st.warning("⚠️ Preencha os campos.")
                     elif c_senha != c_senha_confirma: st.error("❌ As senhas não coincidem.")
                     else:
@@ -147,8 +132,7 @@ if not st.session_state.logado:
                             aba_usuarios_db.append_row([c_email, c_senha, "Cliente", "Ativo", "0", "", c_nome, c_email, c_tel])
                             st.success("✅ Conta criada! Já pode entrar."); time.sleep(2); st.session_state.tela_atual = "login"; st.rerun()
             c_bt1, c_bt2, c_bt3 = st.columns([1, 1, 1])
-            if c_bt2.button("← Voltar", type="secondary", use_container_width=True):
-                st.session_state.tela_atual = "login"; st.rerun()
+            if c_bt2.button("← Voltar", type="secondary", use_container_width=True): st.session_state.tela_atual = "login"; st.rerun()
 
 # ==========================================
 # ROTA 2: SISTEMA LOGADO
@@ -180,11 +164,44 @@ else:
     meu_cadastro = df_users_master[df_users_master["Usuario"] == st.session_state.usuario]
     meu_status = meu_cadastro.iloc[0]["Status"].lower() if not meu_cadastro.empty else "bloqueado"
 
-    st.sidebar.markdown(f"<div style='text-align: center;'><img src='{LOGO_URL}' width='40'> <span style='font-weight:bold; font-size:18px; color:white;'>{NOME_SAAS}</span></div><br>", unsafe_allow_html=True)
+    # --- SIDEBAR HEADER ---
+    st.sidebar.markdown(f"""
+        <div style='display:flex; align-items:center; gap:10px; padding: 10px 0;'>
+            {renderizar_logo(45)}
+            <span style='font-weight:bold; font-size:18px; color:white;'>{NOME_SAAS}</span>
+        </div>
+    """, unsafe_allow_html=True)
+    st.sidebar.markdown("---")
+    
     st.sidebar.markdown(f"👤 **{st.session_state.usuario}**")
     cor_st = "#10b981" if meu_status == "ativo" else "#ef4444"
     st.sidebar.markdown(f"<span style='color:{cor_st}; font-weight:bold;'>Status: {meu_status.upper()}</span>", unsafe_allow_html=True)
     st.sidebar.write("")
+    
+    # --- ⚙️ MENU DE CONFIGURAÇÃO NA SIDEBAR (APENAS MASTER) ---
+    if st.session_state.nivel.lower() == "master":
+        st.sidebar.markdown("<br>", unsafe_allow_html=True)
+        with st.sidebar.expander("⚙️ Configurações (Marca/PIX)"):
+            with st.form("form_config_sidebar"):
+                novo_nome = st.text_input("Nome da Plataforma", value=NOME_SAAS)
+                logo_file = st.file_uploader("Upload da Logo (PNG/JPG)", type=['png', 'jpg', 'jpeg'])
+                nova_chave = st.text_input("Chave PIX", value=CHAVE_PIX)
+                novo_rec = st.text_input("Titular do PIX", value=NOME_RECEBEDOR)
+                
+                if st.form_submit_button("Guardar"):
+                    # Atualiza os textos no Google Sheets
+                    ws_conf = planilha.worksheet("Configuracoes")
+                    ws_conf.update(values=[['Chave', 'Valor'], ['NOME_SAAS', novo_nome], ['CHAVE_PIX', nova_chave], ['NOME_RECEBEDOR', novo_rec]], range_name='A1:B4')
+                    
+                    # Salva a imagem enviada localmente
+                    if logo_file is not None:
+                        with open("logo.png", "wb") as f:
+                            f.write(logo_file.getbuffer())
+                    
+                    st.cache_data.clear()
+                    st.success("Atualizado!")
+                    time.sleep(1); st.rerun()
+
     if st.sidebar.button("Sair / Logout"):
         st.session_state.logado = False; st.rerun()
     st.sidebar.markdown("---")
@@ -220,8 +237,8 @@ else:
         
         st.markdown("---")
         
-        # --- AQUI: NOVA ABA DE CONFIGURAÇÕES INCLUÍDA ---
-        tab1, tab2, tab3 = st.tabs(["📋 Gestão de Clientes", "➕ Novo Cliente Master", "⚙️ Configurações do Sistema"])
+        # Voltei para 2 abas principais na área de trabalho
+        tab1, tab2 = st.tabs(["📋 Gestão de Clientes", "➕ Novo Cliente Master"])
 
         with tab1:
             if st.session_state.edit_user != "":
@@ -295,35 +312,6 @@ else:
                     if n_user in df_users["Usuario"].values: st.error("Usuário já existe!")
                     elif n_user and n_senha:
                         aba_usuarios_db.append_row([n_user, n_senha, n_nivel, n_status, str(n_valor), n_venc.strftime('%d/%m/%Y'), n_nome, n_email, n_tel]); st.success("Sucesso!"); time.sleep(1); st.rerun()
-
-        # --- AQUI: TELA DO PAINEL DE CONFIGURAÇÕES ---
-        with tab3:
-            st.markdown("### ⚙️ Configurações Globais (White-Label)")
-            st.markdown("Altere os dados da sua marca aqui. As mudanças serão aplicadas para todos os clientes instantaneamente.")
-            
-            with st.form("form_config"):
-                c1, c2 = st.columns(2)
-                novo_nome = c1.text_input("Nome da Plataforma", value=NOME_SAAS)
-                nova_logo = c2.text_input("URL da Logo (Link direto para imagem)", value=LOGO_URL)
-                
-                c3, c4 = st.columns(2)
-                nova_chave = c3.text_input("Chave PIX de Cobrança", value=CHAVE_PIX)
-                novo_recebedor = c4.text_input("Nome do Titular do PIX", value=NOME_RECEBEDOR)
-                
-                if st.form_submit_button("SALVAR CONFIGURAÇÕES", type="primary"):
-                    ws_conf = planilha.worksheet("Configuracoes")
-                    ws_conf.update(values=[
-                        ['Chave', 'Valor'],
-                        ['NOME_SAAS', novo_nome],
-                        ['LOGO_URL', nova_logo],
-                        ['CHAVE_PIX', nova_chave],
-                        ['NOME_RECEBEDOR', novo_recebedor]
-                    ], range_name='A1:B5')
-                    
-                    st.cache_data.clear() # Limpa o cache para o sistema ler os dados novos no banco
-                    st.success("✅ Configurações salvas com sucesso! Recarregando plataforma...")
-                    time.sleep(1.5)
-                    st.rerun()
 
     # ==========================================
     # PAINEL DO CLIENTE E PAYWALL
