@@ -158,8 +158,29 @@ else:
         div[data-testid="stMetric"] div[data-testid="stMetricValue"] { color: #ffffff !important; }
         .stTextInput input, .stNumberInput input, .stDateInput input { background-color: #1e293b !important; color: #ffffff !important; border: 1px solid #334155 !important; }
         .stSelectbox>div>div>div { background-color: #1e293b !important; color: #ffffff !important; border: 1px solid #334155 !important; }
+        
+        /* CSS PARA OS BOTÕES PRIMÁRIOS (Ações Principais) */
         button[kind="primary"] { background-color: #2563eb !important; color: white !important; border: none !important; border-radius: 4px !important; font-weight: bold !important; width: 100% !important; }
         button[kind="primary"]:hover { background-color: #1d4ed8 !important; }
+        
+        /* CSS MÁGICO PARA OS BOTÕES SECUNDÁRIOS DA TABELA NÃO QUEBRAREM */
+        button[kind="secondary"] { 
+            background-color: #1e293b !important; 
+            color: #ffffff !important; 
+            border: 1px solid #334155 !important; 
+            border-radius: 6px !important; 
+            padding: 5px !important; /* Padding mínimo para não esmagar */
+            width: 100% !important;
+            min-height: 38px !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            transition: all 0.2s ease;
+        }
+        button[kind="secondary"]:hover { 
+            background-color: #334155 !important; 
+            border-color: #4b5563 !important; 
+        }
         </style>
         """, unsafe_allow_html=True)
 
@@ -176,7 +197,6 @@ else:
         st.title("👑 Central de Comando SaaS")
         df_users = pd.DataFrame(aba_usuarios_db.get_all_records())
         
-        # --- DASHBOARD MASTER ---
         st.markdown("### 📊 Dashboard de Desempenho (MRR)")
         df_ativos = df_users[df_users['Status'].str.lower() == 'ativo']
         receita_total = sum([float(str(v).replace(',', '.').strip()) if str(v) != "" else 0.0 for v in df_ativos['Valor']])
@@ -232,7 +252,7 @@ else:
 
                 st.markdown("""
                 <div style="display: flex; justify-content: space-between; padding: 12px 15px; background-color: #111827; border-radius: 8px 8px 0 0; border-bottom: 1px solid #1f2937; color: #6b7280; font-weight: 600; font-size: 11px; text-transform: uppercase;">
-                    <div style="width: 25%;">USUÁRIO</div><div style="width: 20%;">DATAS</div><div style="width: 15%;">SITUAÇÃO</div><div style="width: 25%;">DETALHES</div><div style="width: 15%; text-align: center;">AÇÕES</div>
+                    <div style="width: 25%;">USUÁRIO</div><div style="width: 20%;">DATAS</div><div style="width: 15%;">SITUAÇÃO</div><div style="width: 20%;">DETALHES</div><div style="width: 20%; text-align: center;">AÇÕES</div>
                 </div>
                 """, unsafe_allow_html=True)
                 
@@ -244,14 +264,16 @@ else:
                     btn_status = "🟢" if status.lower() == "ativo" else "🔴"
                     
                     st.markdown("<div style='border-top: 1px solid #1f2937;'></div>", unsafe_allow_html=True)
-                    c1, c2, c3, c4, c5 = st.columns([2.5, 2, 1.5, 2.5, 1.5])
+                    
+                    # AQUI: Aumentamos o peso da última coluna de 1.5 para 2.0 para dar folga aos botões!
+                    c1, c2, c3, c4, c5 = st.columns([2.5, 2, 1.5, 2.0, 2.0])
                     with c1: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #3b82f6; font-weight: bold; font-size: 15px;">{user}</span><br><span style="color: #6b7280; font-size: 12px;">{email}</span><br><span style="color: #6b7280; font-size: 11px;">Nível: {nivel}</span></div>', unsafe_allow_html=True)
                     with c2: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #d1d5db; font-size: 14px;">{venc}</span><br><span style="color: #6b7280; font-size: 11px;">Data de Vencimento</span></div>', unsafe_allow_html=True)
                     with c3: st.markdown(f'<div style="padding: 10px 0;"><span style="{cor_bdg} padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">{status.upper()}</span><br><br><span style="background-color: #6366f1; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">SaaS</span></div>', unsafe_allow_html=True)
                     with c4: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #d1d5db; font-size: 14px;">{nome}</span><br><span style="color: #9ca3af; font-size: 12px;">Plano: R$ {valor:,.2f}</span><br><span style="color: #9ca3af; font-size: 12px;">Tel: {tel}</span></div>', unsafe_allow_html=True)
                     with c5:
                         st.markdown("<div style='padding-top: 15px;'></div>", unsafe_allow_html=True)
-                        b1, b2, b3 = st.columns(3)
+                        b1, b2, b3 = st.columns([1,1,1]) # Força 3 partes iguais
                         if b1.button("✏️", key=f"edit_{user}"): st.session_state.edit_user = user; st.rerun()
                         if b2.button("🖥️", key=f"ren_{user}"):
                             try: v_atual = pd.to_datetime(venc, format='%d/%m/%Y')
@@ -379,7 +401,6 @@ else:
                     salvar_dados(pd.concat([df, pd.DataFrame(novos)]))
                     st.success("Salvo!"); time.sleep(1); st.rerun()
 
-        # --- NOVA TABELA PREMIUM PARA O CLIENTE ---
         elif menu == "Histórico":
             st.title("📋 Histórico e Gestão")
             
@@ -416,7 +437,7 @@ else:
 
                 st.markdown("""
                 <div style="display: flex; justify-content: space-between; padding: 12px 15px; background-color: #111827; border-radius: 8px 8px 0 0; border-bottom: 1px solid #1f2937; color: #6b7280; font-weight: 600; font-size: 11px; text-transform: uppercase;">
-                    <div style="width: 30%;">DESCRIÇÃO</div><div style="width: 20%;">VENCIMENTO</div><div style="width: 20%;">CATEGORIA</div><div style="width: 15%;">VALOR</div><div style="width: 15%; text-align: center;">AÇÕES</div>
+                    <div style="width: 30%;">DESCRIÇÃO</div><div style="width: 20%;">VENCIMENTO</div><div style="width: 15%;">CATEGORIA</div><div style="width: 15%;">VALOR</div><div style="width: 20%; text-align: center;">AÇÕES</div>
                 </div>
                 """, unsafe_allow_html=True)
 
@@ -430,14 +451,16 @@ else:
                     btn_status = "🟢" if status.lower() == "pago" else "🔴"
                     
                     st.markdown("<div style='border-top: 1px solid #1f2937;'></div>", unsafe_allow_html=True)
-                    c1, c2, c3, c4, c5 = st.columns([3, 2, 2, 1.5, 1.5])
+                    
+                    # Coluna de Ações com peso 2.0 para dar mais folga aos botões pequenos
+                    c1, c2, c3, c4, c5 = st.columns([3, 2, 1.5, 1.5, 2.0])
                     with c1: st.markdown(f'<div style="padding: 10px 0;"><span style="color: {cor_tipo}; font-weight: bold; font-size: 15px;">{desc}</span><br><span style="color: #6b7280; font-size: 11px;">{tipo} via {forma}</span></div>', unsafe_allow_html=True)
                     with c2: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #d1d5db; font-size: 14px;">{venc}</span></div>', unsafe_allow_html=True)
                     with c3: st.markdown(f'<div style="padding: 10px 0;"><span style="background-color: #334155; color: #cbd5e1; padding: 2px 8px; border-radius: 4px; font-size: 11px;">{cat}</span></div>', unsafe_allow_html=True)
                     with c4: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #d1d5db; font-size: 14px;">R$ {val:,.2f}</span><br><span style="{cor_bdg} padding: 1px 6px; border-radius: 4px; font-weight: bold; font-size: 10px;">{status.upper()}</span></div>', unsafe_allow_html=True)
                     with c5:
                         st.markdown("<div style='padding-top: 15px;'></div>", unsafe_allow_html=True)
-                        b1, b2, b3 = st.columns(3)
+                        b1, b2, b3 = st.columns([1,1,1])
                         if b1.button("✏️", key=f"e_{cid}"): st.session_state.edit_conta = cid; st.rerun()
                         if b2.button(btn_status, key=f"s_{cid}"):
                             df.loc[df['ID'] == cid, 'Status'] = "Pendente" if status.lower() == "pago" else "Pago"
