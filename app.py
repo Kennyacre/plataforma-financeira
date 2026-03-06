@@ -40,7 +40,6 @@ if "tela_atual" not in st.session_state:
 if not st.session_state.logado:
     st.markdown("""
         <style>
-        /* Fundo escuro premium */
         .stApp { background-color: #1e2532 !important; }
         div[data-testid="stForm"] { background-color: transparent !important; border: none !important; padding: 0 !important; box-shadow: none !important; }
         .stApp h1 { color: #ffffff !important; font-weight: 700 !important; font-family: 'Segoe UI', sans-serif !important; }
@@ -143,28 +142,27 @@ if not st.session_state.logado:
 else:
     st.markdown("""
         <style>
-        .stApp { background-color: #121212 !important; }
-        section[data-testid="stSidebar"] { background-color: #000000 !important; border-right: 1px solid #333; }
+        .stApp { background-color: #0f172a !important; }
+        section[data-testid="stSidebar"] { background-color: #0b1121 !important; border-right: 1px solid #1e293b; }
         h1, h2, h3 { color: #ffffff !important; font-family: 'Segoe UI', sans-serif; }
-        p, label, span { color: #e0e0e0 !important; }
+        p, label, span { color: #cbd5e1 !important; }
         div[role="radiogroup"] > label > div:first-child { display: none !important; }
         div[role="radiogroup"] label { padding: 12px 15px; border-radius: 6px; margin-bottom: 5px; background-color: transparent; color: #888888 !important; border: 1px solid transparent; transition: 0.3s; }
-        div[role="radiogroup"] label:hover { background-color: #1f1f1f; color: #ffffff !important; }
-        div[role="radiogroup"] label[data-checked="true"] { background-color: #1f1f1f !important; color: #4CAF50 !important; border-left: 4px solid #4CAF50 !important; font-weight: bold; }
-        div[data-testid="stMetric"] { background-color: #1e1e1e !important; border: 1px solid #333 !important; border-radius: 8px !important; padding: 15px !important; }
-        div[data-testid="stMetric"] label { color: #888 !important; }
+        div[role="radiogroup"] label:hover { background-color: #1e293b; color: #ffffff !important; }
+        div[role="radiogroup"] label[data-checked="true"] { background-color: #1e293b !important; color: #3b82f6 !important; border-left: 4px solid #3b82f6 !important; font-weight: bold; }
+        div[data-testid="stMetric"] { background-color: #1e293b !important; border: 1px solid #334155 !important; border-radius: 8px !important; padding: 15px !important; }
+        div[data-testid="stMetric"] label { color: #94a3b8 !important; }
         div[data-testid="stMetric"] div[data-testid="stMetricValue"] { color: #ffffff !important; }
-        div[data-testid="stDataFrame"] { background-color: #1e1e1e !important; border: 1px solid #333; border-radius: 8px; padding: 5px; }
-        div[data-testid="stDataFrame"] * { color: #e0e0e0 !important; }
-        .stTextInput input, .stNumberInput input, .stDateInput input { background-color: #1e1e1e !important; color: #ffffff !important; border: 1px solid #333 !important; }
-        .stSelectbox>div>div>div { background-color: #1e1e1e !important; color: #ffffff !important; border: 1px solid #333 !important; }
-        button[kind="primary"], button[kind="secondary"] { background-color: #2e7d32 !important; color: white !important; border: none !important; border-radius: 4px !important; font-weight: bold !important; width: 100% !important; }
-        button[kind="primary"]:hover, button[kind="secondary"]:hover { background-color: #4CAF50 !important; text-decoration: none !important; }
+        .stTextInput input, .stNumberInput input, .stDateInput input { background-color: #1e293b !important; color: #ffffff !important; border: 1px solid #334155 !important; }
+        .stSelectbox>div>div>div { background-color: #1e293b !important; color: #ffffff !important; border: 1px solid #334155 !important; }
+        button[kind="primary"] { background-color: #2563eb !important; color: white !important; border: none !important; border-radius: 4px !important; font-weight: bold !important; width: 100% !important; }
+        button[kind="primary"]:hover { background-color: #1d4ed8 !important; }
         </style>
         """, unsafe_allow_html=True)
 
-    st.sidebar.title(f"👤 Olá, {st.session_state.usuario}")
-    st.sidebar.markdown(f"**Nível:** {st.session_state.nivel}")
+    st.sidebar.title(f"👤 {st.session_state.usuario}")
+    st.sidebar.markdown(f"<span style='color:#3b82f6; font-weight:bold;'>Nível:</span> {st.session_state.nivel}", unsafe_allow_html=True)
+    st.sidebar.write("")
     if st.sidebar.button("Sair / Logout"):
         st.session_state.logado = False
         st.rerun()
@@ -174,11 +172,90 @@ else:
     if st.session_state.nivel.lower() == "master":
         st.title("👑 Central de Comando SaaS")
         df_users = pd.DataFrame(aba_usuarios_db.get_all_records())
+        
         tab1, tab2, tab3 = st.tabs(["📋 Lista de Clientes", "➕ Cadastrar Master", "✏️ Editar / Bloquear"])
 
+        # --- NOVA LISTA DE CLIENTES ESTILO IPTV ---
         with tab1:
             st.markdown("### Visão Geral de Assinantes")
-            st.dataframe(df_users, use_container_width=True)
+            
+            # Barra de Filtros
+            c_f1, c_f2, c_f3 = st.columns([2, 1, 1])
+            busca = c_f1.text_input("🔍 Pesquisar por usuário ou nome")
+            filtro_status = c_f2.selectbox("Situação", ["Todos", "Ativo", "Bloqueado"])
+            c_f3.write("")
+            c_f3.button("Limpar Filtro")
+            
+            # Aplicando filtros
+            df_show = df_users.copy()
+            if filtro_status != "Todos":
+                df_show = df_show[df_show['Status'].str.lower() == filtro_status.lower()]
+            if busca:
+                df_show = df_show[df_show['Usuario'].astype(str).str.contains(busca, case=False) | df_show['Nome'].astype(str).str.contains(busca, case=False)]
+
+            # Construção da Tabela HTML Personalizada
+            tabela_html = """
+            <style>
+            .tb-custom { width: 100%; border-collapse: collapse; font-family: 'Segoe UI', sans-serif; font-size: 14px; background-color: #111827; border-radius: 8px; overflow: hidden; }
+            .tb-custom th { text-align: left; padding: 15px; color: #6b7280; font-weight: 600; font-size: 11px; text-transform: uppercase; border-bottom: 1px solid #1f2937; }
+            .tb-custom td { padding: 15px; border-bottom: 1px solid #1f2937; vertical-align: middle; color: #d1d5db; }
+            .tb-custom tr:hover { background-color: #1f2937; }
+            .badge-green { border: 1px solid #10b981; color: #10b981; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
+            .badge-red { border: 1px solid #ef4444; color: #ef4444; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
+            .badge-purple { background-color: #6366f1; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
+            .btn-ico { display: inline-block; width: 28px; height: 28px; line-height: 28px; text-align: center; border-radius: 4px; margin-right: 4px; font-size: 12px; cursor: pointer; }
+            </style>
+            <div style="border: 1px solid #1f2937; border-radius: 8px; overflow-x: auto;">
+            <table class="tb-custom">
+                <thead>
+                    <tr>
+                        <th>Usuário</th>
+                        <th>Datas</th>
+                        <th>Situação</th>
+                        <th>Detalhes</th>
+                        <th style="text-align: right;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+            """
+            
+            for _, row in df_show.iterrows():
+                cor_badge = "badge-green" if str(row.get("Status", "")).lower() == "ativo" else "badge-red"
+                val = float(str(row.get("Valor", "0")).replace(',','.')) if str(row.get("Valor", "")) != "" else 0.0
+                
+                tabela_html += f"""
+                <tr>
+                    <td>
+                        <span style="color: #3b82f6; font-weight: bold; font-size: 15px;">{row.get("Usuario", "-")}</span><br>
+                        <span style="color: #6b7280; font-size: 12px;">{row.get("Email", "-")}</span><br>
+                        <span style="color: #6b7280; font-size: 11px;">Nível: {row.get("Nivel", "Cliente")}</span>
+                    </td>
+                    <td>
+                        <span style="color: #d1d5db;">{row.get("Vencimento", "-")}</span><br>
+                        <span style="color: #6b7280; font-size: 11px;">Data de Vencimento</span>
+                    </td>
+                    <td>
+                        <span class="{cor_badge}">{str(row.get("Status", "N/A")).upper()}</span><br><br>
+                        <span class="badge-purple">SaaS</span>
+                    </td>
+                    <td>
+                        <span style="color: #d1d5db;">{row.get("Nome", "Sem Nome")}</span><br>
+                        <span style="color: #9ca3af; font-size: 12px;">Plano: R$ {val:,.2f}</span><br>
+                        <span style="color: #9ca3af; font-size: 12px;">Tel: {row.get("Telefone", "-")}</span>
+                    </td>
+                    <td style="text-align: right; min-width: 150px;">
+                        <span class="btn-ico" style="background-color: #4b5563; color: white;">✏️</span>
+                        <span class="btn-ico" style="background-color: #3b82f6; color: white;">🖥️</span>
+                        <span class="btn-ico" style="background-color: #eab308; color: white;">📅</span>
+                        <span class="btn-ico" style="background-color: #10b981; color: white;">🟢</span>
+                        <div style="display:inline-block; background-color:#2563eb; color:white; padding:4px 12px; border-radius:4px; font-weight:bold; font-size:12px; margin-left:5px;">Ações</div>
+                    </td>
+                </tr>
+                """
+            
+            tabela_html += "</tbody></table></div>"
+            st.markdown(tabela_html, unsafe_allow_html=True)
+            st.info("💡 **Dica de Sistema:** Por segurança, as edições reais de senhas e bloqueios devem ser feitas na aba **✏️ Editar / Bloquear**.")
 
         with tab2:
             st.markdown("### Cadastrar Cliente Manualmente")
@@ -214,7 +291,6 @@ else:
                     e_nivel = c5.selectbox("Nível", ["Cliente", "Master"], index=0 if row_data.get("Nivel", "") == "Cliente" else 1)
                     e_status = c6.selectbox("Status", ["Ativo", "Bloqueado"], index=0 if row_data.get("Status", "") == "Ativo" else 1)
                     
-                    # --- CORREÇÃO DA CÉLULA VAZIA NO VALOR AQUI ---
                     c7, c8 = st.columns(2)
                     valor_str = str(row_data.get("Valor", "0")).replace(',', '.').strip()
                     valor_float = float(valor_str) if valor_str != "" else 0.0
@@ -281,10 +357,10 @@ else:
             else:
                 for _, r in pend.head(5).iterrows():
                     dv = r['Vencimento'].date()
-                    cor = "#ff5252" if dv < hoje else "#69f0ae"
+                    cor = "#ef4444" if dv < hoje else "#10b981"
                     c_dt, c_desc, c_val, c_btn = st.columns([1, 3, 2, 1])
                     c_dt.markdown(f"<span style='color:{cor}; font-weight:bold; font-size:1.1em'>{dv.strftime('%d/%m')}</span>", unsafe_allow_html=True)
-                    c_desc.markdown(f"**{r['Descrição']}** - <small style='color:#888'>{r['Categoria']}</small>", unsafe_allow_html=True)
+                    c_desc.markdown(f"**{r['Descrição']}** - <small style='color:#94a3b8'>{r['Categoria']}</small>", unsafe_allow_html=True)
                     c_val.markdown(f"**R$ {r['Valor']:,.2f}**")
                     if c_btn.button("PAGAR", key=f"pay_d_{r['ID']}"):
                         df.loc[df['ID'] == r['ID'], 'Status'] = 'Pago'; salvar_dados(df); st.balloons(); time.sleep(0.5); st.rerun()
@@ -298,7 +374,7 @@ else:
                 else:
                     futuro['Mes_Ano'] = futuro['Vencimento'].dt.strftime('%Y-%m')
                     chart = alt.Chart(futuro.groupby(['Mes_Ano', 'Tipo'])['Valor'].sum().reset_index()).mark_bar().encode(
-                        x='Mes_Ano', y='Valor', color=alt.Color('Tipo', scale=alt.Scale(domain=['Recebimento', 'Gasto'], range=['#4CAF50', '#ff5252']))
+                        x='Mes_Ano', y='Valor', color=alt.Color('Tipo', scale=alt.Scale(domain=['Recebimento', 'Gasto'], range=['#10b981', '#ef4444']))
                     ).properties(height=300)
                     st.altair_chart(chart, use_container_width=True)
 
