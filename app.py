@@ -175,86 +175,83 @@ else:
         
         tab1, tab2, tab3 = st.tabs(["📋 Lista de Clientes", "➕ Cadastrar Master", "✏️ Editar / Bloquear"])
 
-        # --- NOVA LISTA DE CLIENTES ESTILO IPTV ---
         with tab1:
             st.markdown("### Visão Geral de Assinantes")
             
-            # Barra de Filtros
             c_f1, c_f2, c_f3 = st.columns([2, 1, 1])
             busca = c_f1.text_input("🔍 Pesquisar por usuário ou nome")
             filtro_status = c_f2.selectbox("Situação", ["Todos", "Ativo", "Bloqueado"])
             c_f3.write("")
             c_f3.button("Limpar Filtro")
             
-            # Aplicando filtros
             df_show = df_users.copy()
             if filtro_status != "Todos":
                 df_show = df_show[df_show['Status'].str.lower() == filtro_status.lower()]
             if busca:
                 df_show = df_show[df_show['Usuario'].astype(str).str.contains(busca, case=False) | df_show['Nome'].astype(str).str.contains(busca, case=False)]
 
-            # Construção da Tabela HTML Personalizada
+            # HTML sem indentação (espaços à esquerda) para o Streamlit não transformar em código puro
             tabela_html = """
-            <style>
-            .tb-custom { width: 100%; border-collapse: collapse; font-family: 'Segoe UI', sans-serif; font-size: 14px; background-color: #111827; border-radius: 8px; overflow: hidden; }
-            .tb-custom th { text-align: left; padding: 15px; color: #6b7280; font-weight: 600; font-size: 11px; text-transform: uppercase; border-bottom: 1px solid #1f2937; }
-            .tb-custom td { padding: 15px; border-bottom: 1px solid #1f2937; vertical-align: middle; color: #d1d5db; }
-            .tb-custom tr:hover { background-color: #1f2937; }
-            .badge-green { border: 1px solid #10b981; color: #10b981; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
-            .badge-red { border: 1px solid #ef4444; color: #ef4444; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
-            .badge-purple { background-color: #6366f1; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
-            .btn-ico { display: inline-block; width: 28px; height: 28px; line-height: 28px; text-align: center; border-radius: 4px; margin-right: 4px; font-size: 12px; cursor: pointer; }
-            </style>
-            <div style="border: 1px solid #1f2937; border-radius: 8px; overflow-x: auto;">
-            <table class="tb-custom">
-                <thead>
-                    <tr>
-                        <th>Usuário</th>
-                        <th>Datas</th>
-                        <th>Situação</th>
-                        <th>Detalhes</th>
-                        <th style="text-align: right;">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-            """
+<style>
+.tb-custom { width: 100%; border-collapse: collapse; font-family: 'Segoe UI', sans-serif; font-size: 14px; background-color: #111827; border-radius: 8px; overflow: hidden; }
+.tb-custom th { text-align: left; padding: 15px; color: #6b7280; font-weight: 600; font-size: 11px; text-transform: uppercase; border-bottom: 1px solid #1f2937; }
+.tb-custom td { padding: 15px; border-bottom: 1px solid #1f2937; vertical-align: middle; color: #d1d5db; }
+.tb-custom tr:hover { background-color: #1f2937; }
+.badge-green { border: 1px solid #10b981; color: #10b981; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
+.badge-red { border: 1px solid #ef4444; color: #ef4444; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
+.badge-purple { background-color: #6366f1; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
+.btn-ico { display: inline-block; width: 28px; height: 28px; line-height: 28px; text-align: center; border-radius: 4px; margin-right: 4px; font-size: 12px; cursor: pointer; }
+</style>
+<div style="border: 1px solid #1f2937; border-radius: 8px; overflow-x: auto;">
+<table class="tb-custom">
+<thead>
+<tr>
+<th>Usuário</th>
+<th>Datas</th>
+<th>Situação</th>
+<th>Detalhes</th>
+<th style="text-align: right;">Ações</th>
+</tr>
+</thead>
+<tbody>
+"""
             
             for _, row in df_show.iterrows():
                 cor_badge = "badge-green" if str(row.get("Status", "")).lower() == "ativo" else "badge-red"
                 val = float(str(row.get("Valor", "0")).replace(',','.')) if str(row.get("Valor", "")) != "" else 0.0
                 
-                tabela_html += f"""
-                <tr>
-                    <td>
-                        <span style="color: #3b82f6; font-weight: bold; font-size: 15px;">{row.get("Usuario", "-")}</span><br>
-                        <span style="color: #6b7280; font-size: 12px;">{row.get("Email", "-")}</span><br>
-                        <span style="color: #6b7280; font-size: 11px;">Nível: {row.get("Nivel", "Cliente")}</span>
-                    </td>
-                    <td>
-                        <span style="color: #d1d5db;">{row.get("Vencimento", "-")}</span><br>
-                        <span style="color: #6b7280; font-size: 11px;">Data de Vencimento</span>
-                    </td>
-                    <td>
-                        <span class="{cor_badge}">{str(row.get("Status", "N/A")).upper()}</span><br><br>
-                        <span class="badge-purple">SaaS</span>
-                    </td>
-                    <td>
-                        <span style="color: #d1d5db;">{row.get("Nome", "Sem Nome")}</span><br>
-                        <span style="color: #9ca3af; font-size: 12px;">Plano: R$ {val:,.2f}</span><br>
-                        <span style="color: #9ca3af; font-size: 12px;">Tel: {row.get("Telefone", "-")}</span>
-                    </td>
-                    <td style="text-align: right; min-width: 150px;">
-                        <span class="btn-ico" style="background-color: #4b5563; color: white;">✏️</span>
-                        <span class="btn-ico" style="background-color: #3b82f6; color: white;">🖥️</span>
-                        <span class="btn-ico" style="background-color: #eab308; color: white;">📅</span>
-                        <span class="btn-ico" style="background-color: #10b981; color: white;">🟢</span>
-                        <div style="display:inline-block; background-color:#2563eb; color:white; padding:4px 12px; border-radius:4px; font-weight:bold; font-size:12px; margin-left:5px;">Ações</div>
-                    </td>
-                </tr>
-                """
+                # Zero espaços à esquerda para blindar contra o erro do Markdown
+                tabela_html += f"""<tr>
+<td>
+<span style="color: #3b82f6; font-weight: bold; font-size: 15px;">{row.get("Usuario", "-")}</span><br>
+<span style="color: #6b7280; font-size: 12px;">{row.get("Email", "-")}</span><br>
+<span style="color: #6b7280; font-size: 11px;">Nível: {row.get("Nivel", "Cliente")}</span>
+</td>
+<td>
+<span style="color: #d1d5db;">{row.get("Vencimento", "-")}</span><br>
+<span style="color: #6b7280; font-size: 11px;">Data de Vencimento</span>
+</td>
+<td>
+<span class="{cor_badge}">{str(row.get("Status", "N/A")).upper()}</span><br><br>
+<span class="badge-purple">SaaS</span>
+</td>
+<td>
+<span style="color: #d1d5db;">{row.get("Nome", "Sem Nome")}</span><br>
+<span style="color: #9ca3af; font-size: 12px;">Plano: R$ {val:,.2f}</span><br>
+<span style="color: #9ca3af; font-size: 12px;">Tel: {row.get("Telefone", "-")}</span>
+</td>
+<td style="text-align: right; min-width: 150px;">
+<span class="btn-ico" style="background-color: #4b5563; color: white;">✏️</span>
+<span class="btn-ico" style="background-color: #3b82f6; color: white;">🖥️</span>
+<span class="btn-ico" style="background-color: #eab308; color: white;">📅</span>
+<span class="btn-ico" style="background-color: #10b981; color: white;">🟢</span>
+<div style="display:inline-block; background-color:#2563eb; color:white; padding:4px 12px; border-radius:4px; font-weight:bold; font-size:12px; margin-left:5px;">Ações</div>
+</td>
+</tr>"""
             
             tabela_html += "</tbody></table></div>"
             st.markdown(tabela_html, unsafe_allow_html=True)
+            
             st.info("💡 **Dica de Sistema:** Por segurança, as edições reais de senhas e bloqueios devem ser feitas na aba **✏️ Editar / Bloquear**.")
 
         with tab2:
