@@ -76,11 +76,8 @@ if not st.session_state.logado:
             if btn_login:
                 try:
                     df_users = pd.DataFrame(aba_usuarios_db.get_all_records())
-                    
-                    # Garante que as colunas existam mesmo se a planilha estiver desatualizada
                     if "Email" not in df_users.columns: df_users["Email"] = ""
                     
-                    # Filtro de Dual-Login: Procura no campo Usuario OU no campo Email
                     user_match = df_users[
                         ((df_users["Usuario"].astype(str) == login_input) | (df_users["Email"].astype(str) == login_input)) & 
                         (df_users["Senha"].astype(str) == senha_input)
@@ -90,7 +87,7 @@ if not st.session_state.logado:
                         status = user_match.iloc[0]["Status"]
                         if status.lower() == "ativo":
                             st.session_state.logado = True
-                            st.session_state.usuario = user_match.iloc[0]["Usuario"] # Salva sempre o ID do Usuario
+                            st.session_state.usuario = user_match.iloc[0]["Usuario"]
                             st.session_state.nivel = user_match.iloc[0]["Nivel"]
                             st.rerun()
                         else:
@@ -109,24 +106,28 @@ if not st.session_state.logado:
             c_email = c2.text_input("E-mail")
             c_tel = c1.text_input("Telefone / WhatsApp")
             c_user = c2.text_input("Criar Nome de Usuário (Login)")
-            c_senha = st.text_input("Criar Senha", type="password")
+            
+            # --- ATUALIZAÇÃO: CONFIRMAÇÃO DE SENHA ---
+            c3, c4 = st.columns(2)
+            c_senha = c3.text_input("Criar Senha", type="password")
+            c_senha_confirma = c4.text_input("Confirmar Senha", type="password")
             
             btn_cadastrar = st.form_submit_button("CRIAR MINHA CONTA")
 
             if btn_cadastrar:
-                if not c_nome or not c_email or not c_user or not c_senha:
+                if not c_nome or not c_email or not c_user or not c_senha or not c_senha_confirma:
                     st.warning("⚠️ Por favor, preencha todos os campos obrigatórios.")
+                elif c_senha != c_senha_confirma:
+                    st.error("❌ As senhas digitadas não coincidem. Tente novamente.")
                 else:
                     df_u = pd.DataFrame(aba_usuarios_db.get_all_records())
                     if "Email" not in df_u.columns: df_u["Email"] = ""
                     
-                    # Validação de duplicidade
                     if c_user in df_u["Usuario"].astype(str).values:
                         st.error("❌ Esse Nome de Usuário já está em uso. Escolha outro.")
                     elif c_email in df_u["Email"].astype(str).values:
                         st.error("❌ Esse E-mail já está cadastrado.")
                     else:
-                        # Ordem: Usuario | Senha | Nivel | Status | Valor | Vencimento | Nome | Email | Telefone
                         aba_usuarios_db.append_row([c_user, c_senha, "Cliente", "Ativo", "0", "", c_nome, c_email, c_tel])
                         st.success("✅ Conta criada com sucesso! Vá para a aba 'Acessar Sistema' e faça o login.")
                         time.sleep(2)
@@ -206,7 +207,6 @@ else:
                     if st.form_submit_button("ATUALIZAR DADOS"):
                         celula = aba_usuarios_db.find(cliente_sel, in_column=1)
                         linha = celula.row
-                        # Atualiza todas as colunas da linha
                         aba_usuarios_db.update_cell(linha, 2, e_senha)
                         aba_usuarios_db.update_cell(linha, 3, e_nivel)
                         aba_usuarios_db.update_cell(linha, 4, e_status)
@@ -223,7 +223,6 @@ else:
     # ROTA B: PAINEL DO CLIENTE (GESTOR FINANCEIRO)
     # ==========================================
     else:
-        # --- FUNÇÕES DE BANCO DE DADOS DO CLIENTE ---
         def get_aba_cliente():
             nome_aba = f"Dados_{st.session_state.usuario}"
             try:
