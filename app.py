@@ -11,16 +11,7 @@ from dateutil.relativedelta import relativedelta
 
 st.set_page_config(page_title="Plataforma SaaS", layout="wide")
 
-# ==========================================
-# ⚙️ CONFIGURAÇÕES DA SUA MARCA E PAGAMENTO (WHITE-LABEL)
-# ==========================================
-NOME_SAAS = "MT Connect Stays" # Altere para o nome da sua empresa
-LOGO_URL = "https://cdn-icons-png.flaticon.com/512/2942/2942269.png" # Link de uma imagem PNG para a sua logo
-CHAVE_PIX = "seu-email-ou-cpf@pix.com.br"
-NOME_RECEBEDOR = "Kenny / MT Connect"
-# ==========================================
-
-# --- 1. CONEXÃO SEGURA COM O GOOGLE SHEETS ---
+# --- 1. CONEXÃO SEGURA COM O GOOGLE SHEETS E MOTOR DE CONFIGURAÇÃO ---
 @st.cache_resource
 def conectar_google():
     scopes = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
@@ -35,6 +26,34 @@ try:
 except Exception as e:
     st.error(f"🚨 Falha na conexão com a Base de Dados. Detalhe: {e}")
     st.stop()
+
+# Função para carregar as configurações de marca dinamicamente
+@st.cache_data(ttl=30) # Atualiza o cache a cada 30s ou quando limpado manualmente
+def carregar_configuracoes():
+    try:
+        ws_config = planilha.worksheet("Configuracoes")
+    except gspread.exceptions.WorksheetNotFound:
+        # Se a aba não existir, o sistema cria ela automaticamente!
+        ws_config = planilha.add_worksheet(title="Configuracoes", rows="10", cols="2")
+        dados_iniciais = [
+            ['Chave', 'Valor'],
+            ['NOME_SAAS', 'MT Connect Stays'],
+            ['LOGO_URL', 'https://cdn-icons-png.flaticon.com/512/2942/2942269.png'],
+            ['CHAVE_PIX', 'seu-email-ou-cpf@pix.com.br'],
+            ['NOME_RECEBEDOR', 'Kenny / MT Connect']
+        ]
+        ws_config.update(values=dados_iniciais, range_name='A1:B5')
+    
+    records = ws_config.get_all_records()
+    return {row['Chave']: row['Valor'] for row in records}
+
+# Carrega as variáveis globais a partir do Google Sheets
+config_app = carregar_configuracoes()
+NOME_SAAS = config_app.get('NOME_SAAS', 'Plataforma SaaS')
+LOGO_URL = config_app.get('LOGO_URL', 'https://cdn-icons-png.flaticon.com/512/2942/2942269.png')
+CHAVE_PIX = config_app.get('CHAVE_PIX', 'Sem chave cadastrada')
+NOME_RECEBEDOR = config_app.get('NOME_RECEBEDOR', 'Sem recebedor')
+
 
 # --- 2. CONTROLE DE SESSÃO ---
 if "logado" not in st.session_state:
@@ -74,7 +93,6 @@ if not st.session_state.logado:
         st.write(""); st.write("")
         
         if st.session_state.tela_atual == "login":
-            # Aplicação do Branding (Marca)
             st.markdown(f"<div style='text-align: center;'><img src='{LOGO_URL}' width='60'></div>", unsafe_allow_html=True)
             st.markdown(f"<h2 style='text-align: center; margin-bottom: 5px;'>{NOME_SAAS}</h2>", unsafe_allow_html=True)
             st.markdown("<p style='text-align: center; margin-bottom: 30px;'>Acesse a sua plataforma financeira</p>", unsafe_allow_html=True)
@@ -85,8 +103,7 @@ if not st.session_state.logado:
                 
                 c_chk, c_links = st.columns([1, 1])
                 with c_chk: st.checkbox("Lembrar-me")
-                with c_links:
-                    st.markdown('<div style="text-align: right; margin-top: 5px;"><a href="#" class="link-azul">Esqueceu a senha?</a></div>', unsafe_allow_html=True)
+                with c_links: st.markdown('<div style="text-align: right; margin-top: 5px;"><a href="#" class="link-azul">Esqueceu a senha?</a></div>', unsafe_allow_html=True)
                 
                 btn_login = st.form_submit_button("Entrar", type="primary")
 
@@ -96,7 +113,6 @@ if not st.session_state.logado:
                     user_match = df_users[((df_users["Usuario"].astype(str) == login_input) | (df_users["Email"].astype(str) == login_input)) & (df_users["Senha"].astype(str) == senha_input)]
                     
                     if not user_match.empty:
-                        # O SISTEMA AGORA PERMITE O LOGIN MESMO BLOQUEADO (PAYWALL)
                         st.session_state.logado = True
                         st.session_state.usuario = user_match.iloc[0]["Usuario"]
                         st.session_state.nivel = user_match.iloc[0]["Nivel"]
@@ -110,15 +126,15 @@ if not st.session_state.logado:
         elif st.session_state.tela_atual == "cadastro":
             st.markdown(f"<div style='text-align: center;'><img src='{LOGO_URL}' width='50'></div>", unsafe_allow_html=True)
             st.markdown("<h2 style='text-align: center; margin-bottom: 5px;'>Criar Conta</h2>", unsafe_allow_html=True)
-            st.markdown("<p style='text-align: center; margin-bottom: 30px;'>Registe-se para usar o sistema</p>", unsafe_allow_html=True)
+            st.markdown("<p style='text-align: center; margin-bottom: 30px;'>Registre-se para usar o sistema</p>", unsafe_allow_html=True)
             
             with st.form("form_cadastro_dark"):
                 c_nome = st.text_input("👤 Nome Completo")
                 c_email = st.text_input("✉️ Seu E-mail")
-                c_tel = st.text_input("📞 Nº telemóvel com WhatsApp")
+                c_tel = st.text_input("📞 Nº celular com WhatsApp")
                 c_senha = st.text_input("🔒 Crie a sua Senha", type="password")
                 c_senha_confirma = st.text_input("🔒 Confirme a sua Senha", type="password")
-                btn_cadastrar = st.form_submit_button("Finalizar Registo", type="primary")
+                btn_cadastrar = st.form_submit_button("Finalizar Registro", type="primary")
 
                 if btn_cadastrar:
                     if not c_nome or not c_email or not c_senha: st.warning("⚠️ Preencha os campos.")
@@ -126,7 +142,7 @@ if not st.session_state.logado:
                     else:
                         df_u = pd.DataFrame(aba_usuarios_db.get_all_records())
                         if "Email" not in df_u.columns: df_u["Email"] = ""
-                        if c_email in df_u["Email"].astype(str).values: st.error("❌ E-mail já registado.")
+                        if c_email in df_u["Email"].astype(str).values: st.error("❌ E-mail já registrado.")
                         else:
                             aba_usuarios_db.append_row([c_email, c_senha, "Cliente", "Ativo", "0", "", c_nome, c_email, c_tel])
                             st.success("✅ Conta criada! Já pode entrar."); time.sleep(2); st.session_state.tela_atual = "login"; st.rerun()
@@ -155,24 +171,19 @@ else:
         button[kind="secondary"] { background-color: #1e293b !important; color: #ffffff !important; border: 1px solid #334155 !important; border-radius: 6px !important; padding: 0 !important; min-width: 0 !important; width: 100% !important; height: 36px !important; display: flex !important; justify-content: center !important; align-items: center !important; transition: all 0.2s ease; }
         button[kind="secondary"]:hover { background-color: #334155 !important; border-color: #4b5563 !important; }
         .break-text { word-break: break-all !important; white-space: normal !important; }
-        
-        /* Estilo da Caixa de Cobrança (Paywall) */
         .paywall-box { background-color: #1e293b; border: 2px dashed #ef4444; border-radius: 12px; padding: 30px; text-align: center; margin-top: 20px; }
         .pix-code { background-color: #0f172a; padding: 15px; border-radius: 8px; font-family: monospace; color: #10b981; font-size: 18px; font-weight: bold; letter-spacing: 1px; border: 1px solid #334155; display: inline-block; margin: 15px 0; }
         </style>
         """, unsafe_allow_html=True)
 
-    # Verifica os dados do utilizador logado em tempo real
     df_users_master = pd.DataFrame(aba_usuarios_db.get_all_records())
     meu_cadastro = df_users_master[df_users_master["Usuario"] == st.session_state.usuario]
     meu_status = meu_cadastro.iloc[0]["Status"].lower() if not meu_cadastro.empty else "bloqueado"
 
     st.sidebar.markdown(f"<div style='text-align: center;'><img src='{LOGO_URL}' width='40'> <span style='font-weight:bold; font-size:18px; color:white;'>{NOME_SAAS}</span></div><br>", unsafe_allow_html=True)
     st.sidebar.markdown(f"👤 **{st.session_state.usuario}**")
-    
     cor_st = "#10b981" if meu_status == "ativo" else "#ef4444"
     st.sidebar.markdown(f"<span style='color:{cor_st}; font-weight:bold;'>Status: {meu_status.upper()}</span>", unsafe_allow_html=True)
-    
     st.sidebar.write("")
     if st.sidebar.button("Sair / Logout"):
         st.session_state.logado = False; st.rerun()
@@ -199,10 +210,8 @@ else:
         cg1, cg2 = st.columns(2)
         with cg1:
             st.markdown("**Proporção de Clientes**")
-            status_cont = df_users['Status'].value_counts().reset_index()
-            status_cont.columns = ['Status', 'Total']
+            status_cont = df_users['Status'].value_counts().reset_index(); status_cont.columns = ['Status', 'Total']
             st.altair_chart(alt.Chart(status_cont).mark_arc(innerRadius=60).encode(theta=alt.Theta(field="Total", type="quantitative"), color=alt.Color(field="Status", type="nominal", scale=alt.Scale(domain=['Ativo', 'Bloqueado', 'ativo', 'bloqueado'], range=['#10b981', '#ef4444', '#10b981', '#ef4444'])), tooltip=['Status', 'Total']).properties(height=250), use_container_width=True)
-            
         with cg2:
             st.markdown("**Receita por Nível (Apenas Ativos)**")
             if not df_ativos.empty:
@@ -210,7 +219,9 @@ else:
                 st.altair_chart(alt.Chart(rev_nivel).mark_bar().encode(x=alt.X('Nivel:N', title=''), y=alt.Y('ValorNum:Q', title='R$'), color=alt.Color('Nivel:N', legend=None, scale=alt.Scale(range=['#3b82f6', '#6366f1'])), tooltip=['Nivel', 'ValorNum']).properties(height=250), use_container_width=True)
         
         st.markdown("---")
-        tab1, tab2 = st.tabs(["📋 Gestão de Clientes", "➕ Novo Cliente Master"])
+        
+        # --- AQUI: NOVA ABA DE CONFIGURAÇÕES INCLUÍDA ---
+        tab1, tab2, tab3 = st.tabs(["📋 Gestão de Clientes", "➕ Novo Cliente Master", "⚙️ Configurações do Sistema"])
 
         with tab1:
             if st.session_state.edit_user != "":
@@ -239,7 +250,7 @@ else:
                 c_f1, c_f2, c_f3 = st.columns([2, 1, 1])
                 busca = c_f1.text_input("🔍 Pesquisar por utilizador ou nome")
                 filtro_status = c_f2.selectbox("Situação", ["Todos", "Ativo", "Bloqueado"])
-                c_f3.write(""); c_f3.button("Atualizar")
+                c_f3.write(""); c_f3.button("Atualizar / Limpar")
                 
                 df_show = df_users.copy()
                 if filtro_status != "Todos": df_show = df_show[df_show['Status'].str.lower() == filtro_status.lower()]
@@ -255,10 +266,10 @@ else:
                     
                     st.markdown("<div style='border-top: 1px solid #1f2937;'></div>", unsafe_allow_html=True)
                     c1, c2, c3, c4, c5 = st.columns([2.5, 1.5, 1.5, 2.5, 2.0])
-                    with c1: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #3b82f6; font-weight: bold; font-size: 15px;">{user}</span><br><span class="break-text" style="color: #6b7280; font-size: 12px;">{email}</span></div>', unsafe_allow_html=True)
-                    with c2: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #d1d5db; font-size: 14px;">{venc}</span></div>', unsafe_allow_html=True)
-                    with c3: st.markdown(f'<div style="padding: 10px 0;"><span style="{cor_bdg} padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">{status.upper()}</span></div>', unsafe_allow_html=True)
-                    with c4: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #d1d5db; font-size: 14px;">R$ {valor:,.2f}</span></div>', unsafe_allow_html=True)
+                    with c1: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #3b82f6; font-weight: bold; font-size: 15px;">{user}</span><br><span class="break-text" style="color: #6b7280; font-size: 12px;">{email}</span><br><span style="color: #6b7280; font-size: 11px;">Nível: {nivel}</span></div>', unsafe_allow_html=True)
+                    with c2: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #d1d5db; font-size: 14px;">{venc}</span><br><span style="color: #6b7280; font-size: 11px;">Vencimento</span></div>', unsafe_allow_html=True)
+                    with c3: st.markdown(f'<div style="padding: 10px 0;"><span style="{cor_bdg} padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">{status.upper()}</span><br><br><span style="background-color: #6366f1; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">SaaS</span></div>', unsafe_allow_html=True)
+                    with c4: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #d1d5db; font-size: 14px;">{nome}</span><br><span style="color: #9ca3af; font-size: 12px;">R$ {valor:,.2f}</span><br><span style="color: #9ca3af; font-size: 12px;">{tel}</span></div>', unsafe_allow_html=True)
                     with c5:
                         st.markdown("<div style='padding-top: 15px;'></div>", unsafe_allow_html=True)
                         b1, b2, b3 = st.columns([1,1,1])
@@ -267,10 +278,10 @@ else:
                             try: v_atual = pd.to_datetime(venc, format='%d/%m/%Y')
                             except: v_atual = pd.Timestamp.today()
                             novo_v = (v_atual + relativedelta(months=1)).strftime('%d/%m/%Y')
-                            aba_usuarios_db.update_cell(aba_usuarios_db.find(user, in_column=1).row, 6, novo_v); st.rerun()
+                            aba_usuarios_db.update_cell(aba_usuarios_db.find(user, in_column=1).row, 6, novo_v); st.success(f"Renovado!"); time.sleep(0.5); st.rerun()
                         if b3.button(btn_status, key=f"stat_{user}"):
                             n_stat = "Bloqueado" if status.lower() == "ativo" else "Ativo"
-                            aba_usuarios_db.update_cell(aba_usuarios_db.find(user, in_column=1).row, 4, n_stat); st.rerun()
+                            aba_usuarios_db.update_cell(aba_usuarios_db.find(user, in_column=1).row, 4, n_stat); st.warning(f"Alterado."); time.sleep(0.5); st.rerun()
                 st.markdown("<div style='background-color: #111827; padding: 5px; border-radius: 0 0 8px 8px;'></div>", unsafe_allow_html=True)
 
         with tab2:
@@ -285,20 +296,47 @@ else:
                     elif n_user and n_senha:
                         aba_usuarios_db.append_row([n_user, n_senha, n_nivel, n_status, str(n_valor), n_venc.strftime('%d/%m/%Y'), n_nome, n_email, n_tel]); st.success("Sucesso!"); time.sleep(1); st.rerun()
 
+        # --- AQUI: TELA DO PAINEL DE CONFIGURAÇÕES ---
+        with tab3:
+            st.markdown("### ⚙️ Configurações Globais (White-Label)")
+            st.markdown("Altere os dados da sua marca aqui. As mudanças serão aplicadas para todos os clientes instantaneamente.")
+            
+            with st.form("form_config"):
+                c1, c2 = st.columns(2)
+                novo_nome = c1.text_input("Nome da Plataforma", value=NOME_SAAS)
+                nova_logo = c2.text_input("URL da Logo (Link direto para imagem)", value=LOGO_URL)
+                
+                c3, c4 = st.columns(2)
+                nova_chave = c3.text_input("Chave PIX de Cobrança", value=CHAVE_PIX)
+                novo_recebedor = c4.text_input("Nome do Titular do PIX", value=NOME_RECEBEDOR)
+                
+                if st.form_submit_button("SALVAR CONFIGURAÇÕES", type="primary"):
+                    ws_conf = planilha.worksheet("Configuracoes")
+                    ws_conf.update(values=[
+                        ['Chave', 'Valor'],
+                        ['NOME_SAAS', novo_nome],
+                        ['LOGO_URL', nova_logo],
+                        ['CHAVE_PIX', nova_chave],
+                        ['NOME_RECEBEDOR', novo_recebedor]
+                    ], range_name='A1:B5')
+                    
+                    st.cache_data.clear() # Limpa o cache para o sistema ler os dados novos no banco
+                    st.success("✅ Configurações salvas com sucesso! Recarregando plataforma...")
+                    time.sleep(1.5)
+                    st.rerun()
+
     # ==========================================
     # PAINEL DO CLIENTE E PAYWALL
     # ==========================================
     else:
-        # --- A BARREIRA DE PAGAMENTO (PAYWALL) ---
         if meu_status == "bloqueado":
             opcoes_menu = {"💳  Regularizar Assinatura": "Assinatura"}
-            st.error("⛔ ACESSO SUSPENSO: Identificámos uma pendência na sua assinatura.")
+            st.error("⛔ ACESSO SUSPENSO: Identificamos uma pendência na sua assinatura.")
         else:
             opcoes_menu = {"📊  Painel Geral": "Painel", "🔮  Previsão": "Previsão", "📅  Calendário": "Calendário", "📝  Novo Lançamento": "Lançar", "📋  Histórico": "Histórico", "💳  Minha Assinatura": "Assinatura"}
         
         menu = opcoes_menu[st.sidebar.radio("Navegação", list(opcoes_menu.keys()), label_visibility="collapsed")]
 
-        # TELA DE ASSINATURA E COBRANÇA
         if menu == "Assinatura":
             st.title("💳 Minha Assinatura")
             v_str = str(meu_cadastro.iloc[0]["Valor"]).replace(',','.').strip()
@@ -318,13 +356,12 @@ else:
                     <div class="pix-code">{CHAVE_PIX}</div>
                     <p style="color:#cbd5e1; font-size:14px;"><strong>Recebedor:</strong> {NOME_RECEBEDOR}</p>
                     <br>
-                    <p style="color:#10b981; font-size:13px;">✅ O seu acesso será libertado imediatamente após a confirmação pelo Administrador.</p>
+                    <p style="color:#10b981; font-size:13px;">✅ O seu acesso será liberado imediatamente após a confirmação pelo Administrador.</p>
                 </div>
                 """, unsafe_allow_html=True)
             else:
                 st.success("🎉 O seu plano atual é gratuito ou não possui mensalidade configurada.")
 
-        # RESTANTE DO SISTEMA FINANCEIRO DO CLIENTE (Bloqueado se dever)
         elif meu_status == "ativo":
             def get_aba_cliente():
                 nome_aba = f"Dados_{st.session_state.usuario}"
@@ -427,14 +464,11 @@ else:
 
             elif menu == "Histórico":
                 st.title("📋 Histórico e Gestão")
-                
                 if not df.empty:
-                    df_export = df.copy()
-                    df_export['Vencimento'] = df_export['Vencimento'].dt.strftime('%d/%m/%Y')
+                    df_export = df.copy(); df_export['Vencimento'] = df_export['Vencimento'].dt.strftime('%d/%m/%Y')
                     csv = df_export.to_csv(index=False, sep=';').encode('utf-8-sig')
                     st.download_button(label="📥 Descarregar Relatório em Excel", data=csv, file_name=f"Relatorio_Financeiro_{hoje.strftime('%d-%m-%Y')}.csv", mime='text/csv')
                 st.markdown("---")
-                
                 if st.session_state.edit_conta != "":
                     idx_edit = df[df['ID'] == st.session_state.edit_conta].index[0]
                     st.markdown(f"### ✏️ Editando Lançamento: <span style='color:#3b82f6;'>{df.at[idx_edit,'Descrição']}</span>", unsafe_allow_html=True)
