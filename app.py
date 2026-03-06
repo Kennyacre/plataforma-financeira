@@ -13,7 +13,6 @@ from dateutil.relativedelta import relativedelta
 
 st.set_page_config(page_title="Plataforma SaaS", layout="wide")
 
-# Criação do diretório de comprovativos (Preparação para o Docker no ZimaOS)
 os.makedirs("comprovativos", exist_ok=True)
 
 # --- 1. CONEXÃO SEGURA COM O GOOGLE SHEETS E MOTOR DE CONFIGURAÇÃO ---
@@ -59,7 +58,7 @@ if "logado" not in st.session_state:
 if "tela_atual" not in st.session_state: st.session_state.tela_atual = "login"
 if "edit_user" not in st.session_state: st.session_state.edit_user = ""
 if "edit_conta" not in st.session_state: st.session_state.edit_conta = ""
-if "ghost_mode" not in st.session_state: st.session_state.ghost_mode = "" # NOVO: MODO SUPORTE
+if "ghost_mode" not in st.session_state: st.session_state.ghost_mode = "" 
 
 # ==========================================
 # ROTA 1: TELA INICIAL (LOGIN E CADASTRO)
@@ -108,15 +107,14 @@ if not st.session_state.logado:
 # ROTA 2: SISTEMA LOGADO
 # ==========================================
 else:
-    st.markdown("""<style>.stApp { background-color: #0f172a !important; } section[data-testid="stSidebar"] { background-color: #0b1121 !important; border-right: 1px solid #1e293b; } h1, h2, h3 { color: #ffffff !important; font-family: 'Segoe UI', sans-serif; } p, label, span { color: #cbd5e1 !important; } div[role="radiogroup"] label { padding: 12px 15px; border-radius: 6px; margin-bottom: 5px; background-color: transparent; color: #888888 !important; border: 1px solid transparent; transition: 0.3s; } div[role="radiogroup"] label:hover { background-color: #1e293b; color: #ffffff !important; } div[role="radiogroup"] label[data-checked="true"] { background-color: #1e293b !important; color: #3b82f6 !important; border-left: 4px solid #3b82f6 !important; font-weight: bold; } div[data-testid="stMetric"] { background-color: #1e293b !important; border: 1px solid #334155 !important; border-radius: 8px !important; padding: 15px !important; } div[data-testid="stMetric"] label { color: #94a3b8 !important; font-weight: bold !important; font-size: 14px !important; } .stTextInput input, .stNumberInput input, .stDateInput input, .stSelectbox>div>div>div { background-color: #1e293b !important; color: #ffffff !important; border: 1px solid #334155 !important; } button[kind="primary"] { background-color: #2563eb !important; color: white !important; border: none !important; border-radius: 4px !important; font-weight: bold !important; width: 100% !important; } button[kind="primary"]:hover { background-color: #1d4ed8 !important; } button[kind="secondary"] { background-color: #1e293b !important; color: #ffffff !important; border: 1px solid #334155 !important; border-radius: 6px !important; padding: 0 !important; min-width: 0 !important; width: 100% !important; height: 36px !important; display: flex !important; justify-content: center !important; align-items: center !important; transition: all 0.2s ease; } button[kind="secondary"]:hover { background-color: #334155 !important; border-color: #4b5563 !important; } .break-text { word-break: break-all !important; white-space: normal !important; } .paywall-box { background-color: #1e293b; border: 2px dashed #ef4444; border-radius: 12px; padding: 30px; text-align: center; margin-top: 20px; } .pix-code { background-color: #0f172a; padding: 15px; border-radius: 8px; font-family: monospace; color: #10b981; font-size: 18px; font-weight: bold; letter-spacing: 1px; border: 1px solid #334155; display: inline-block; margin: 15px 0; } .ghost-banner { background-color: #ef4444; color: white; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; margin-bottom: 20px; animation: pulse 2s infinite; } @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }</style>""", unsafe_allow_html=True)
+    st.markdown("""<style>.stApp { background-color: #0f172a !important; } section[data-testid="stSidebar"] { background-color: #0b1121 !important; border-right: 1px solid #1e293b; } h1, h2, h3 { color: #ffffff !important; font-family: 'Segoe UI', sans-serif; } p, label, span { color: #cbd5e1 !important; } div[role="radiogroup"] label { padding: 12px 15px; border-radius: 6px; margin-bottom: 5px; background-color: transparent; color: #888888 !important; border: 1px solid transparent; transition: 0.3s; } div[role="radiogroup"] label:hover { background-color: #1e293b; color: #ffffff !important; } div[role="radiogroup"] label[data-checked="true"] { background-color: #1e293b !important; color: #3b82f6 !important; border-left: 4px solid #3b82f6 !important; font-weight: bold; } div[data-testid="stMetric"] { background-color: #1e293b !important; border: 1px solid #334155 !important; border-radius: 8px !important; padding: 15px !important; } div[data-testid="stMetric"] label { color: #94a3b8 !important; font-weight: bold !important; font-size: 14px !important; } .stTextInput input, .stNumberInput input, .stDateInput input, .stSelectbox>div>div>div { background-color: #1e293b !important; color: #ffffff !important; border: 1px solid #334155 !important; } button[kind="primary"] { background-color: #2563eb !important; color: white !important; border: none !important; border-radius: 4px !important; font-weight: bold !important; width: 100% !important; } button[kind="primary"]:hover { background-color: #1d4ed8 !important; } button[kind="secondary"] { background-color: #1e293b !important; color: #ffffff !important; border: 1px solid #334155 !important; border-radius: 6px !important; padding: 0 !important; min-width: 0 !important; width: 100% !important; height: 36px !important; display: flex !important; justify-content: center !important; align-items: center !important; transition: all 0.2s ease; } button[kind="secondary"]:hover { background-color: #334155 !important; border-color: #4b5563 !important; } .break-text { word-break: break-all !important; white-space: normal !important; } .paywall-box { background-color: #1e293b; border: 2px dashed #ef4444; border-radius: 12px; padding: 30px; text-align: center; margin-top: 20px; } .paywall-box-blue { background-color: #1e293b; border: 2px dashed #3b82f6; border-radius: 12px; padding: 30px; text-align: center; margin-top: 20px; } .pix-code { background-color: #0f172a; padding: 15px; border-radius: 8px; font-family: monospace; color: #10b981; font-size: 18px; font-weight: bold; letter-spacing: 1px; border: 1px solid #334155; display: inline-block; margin: 15px 0; } .ghost-banner { background-color: #ef4444; color: white; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; margin-bottom: 20px; animation: pulse 2s infinite; } @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }</style>""", unsafe_allow_html=True)
 
     df_users_master = pd.DataFrame(aba_usuarios_db.get_all_records())
     
-    # --- LOGICA DE ROTEAMENTO (GHOST MODE) ---
     is_master = (st.session_state.nivel.lower() == "master")
     if is_master and st.session_state.ghost_mode != "":
         usuario_ativo = st.session_state.ghost_mode
-        nivel_ativo = "cliente" # Força nível de cliente para renderizar o painel financeiro
+        nivel_ativo = "cliente"
     else:
         usuario_ativo = st.session_state.usuario
         nivel_ativo = st.session_state.nivel.lower()
@@ -124,7 +122,6 @@ else:
     meu_cadastro = df_users_master[df_users_master["Usuario"] == usuario_ativo]
     meu_status = meu_cadastro.iloc[0]["Status"].lower() if not meu_cadastro.empty else "bloqueado"
 
-    # --- SIDEBAR ---
     st.sidebar.markdown(f"<div style='display:flex; align-items:center; gap:10px; padding: 10px 0;'>{renderizar_logo(45)}<span style='font-weight:bold; font-size:18px; color:white;'>{NOME_SAAS}</span></div>", unsafe_allow_html=True)
     st.sidebar.markdown("---")
     
@@ -155,7 +152,6 @@ else:
     if is_master and st.session_state.ghost_mode == "":
         df_users = df_users_master.copy()
 
-        # 🔔 NOTIFICAÇÕES MASTER
         cli_bloqueados = len(df_users[df_users['Status'].str.lower() == 'bloqueado'])
         if cli_bloqueados > 0:
             st.warning(f"🔔 **Atenção:** Você possui {cli_bloqueados} cliente(s) com a assinatura bloqueada.")
@@ -227,7 +223,7 @@ else:
                     with c4: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #d1d5db; font-size: 14px;">{nome}</span><br><span style="color: #9ca3af; font-size: 12px;">R$ {valor:,.2f}</span><br><span style="color: #9ca3af; font-size: 12px;">{tel}</span></div>', unsafe_allow_html=True)
                     with c5:
                         st.markdown("<div style='padding-top: 15px;'></div>", unsafe_allow_html=True)
-                        b1, b2, b3, b4 = st.columns(4) # NOVO: 4 Botões
+                        b1, b2, b3, b4 = st.columns(4)
                         if b1.button("✏️", key=f"edit_{user}", help="Editar"): st.session_state.edit_user = user; st.rerun()
                         if b2.button("🖥️", key=f"ren_{user}", help="Renovar 1 Mês"):
                             try: v_atual = pd.to_datetime(venc, format='%d/%m/%Y')
@@ -238,7 +234,7 @@ else:
                             n_stat = "Bloqueado" if status.lower() == "ativo" else "Ativo"
                             aba_usuarios_db.update_cell(aba_usuarios_db.find(user, in_column=1).row, 4, n_stat); st.rerun()
                         if b4.button("👁️", key=f"ghost_{user}", help="Acessar conta do cliente"):
-                            st.session_state.ghost_mode = user; st.rerun() # ATIVA O GHOST MODE
+                            st.session_state.ghost_mode = user; st.rerun()
                 st.markdown("<div style='background-color: #111827; padding: 5px; border-radius: 0 0 8px 8px;'></div>", unsafe_allow_html=True)
 
         elif menu == "Novo":
@@ -272,7 +268,6 @@ else:
     # PAINEL DO CLIENTE (E GHOST MODE DO MASTER)
     # ==========================================
     else:
-        # AVISO GHOST MODE
         if st.session_state.ghost_mode != "":
             st.markdown(f"<div class='ghost-banner'>👁️ MODO SUPORTE: Você está atuando como o cliente {usuario_ativo}</div>", unsafe_allow_html=True)
             if st.button("⬅️ Sair do Modo Suporte e voltar ao Painel Master", type="primary"):
@@ -289,7 +284,6 @@ else:
                 st.markdown(f"""<div class="paywall-box"><h2 style="color:white; margin-bottom:10px;">Pagamento via PIX</h2><p style="color:#94a3b8;">Utilize a chave abaixo para renovar o seu acesso à plataforma {NOME_SAAS}.</p><div class="pix-code">{CHAVE_PIX}</div><p style="color:#cbd5e1; font-size:14px;"><strong>Recebedor:</strong> {NOME_RECEBEDOR}</p><br><p style="color:#10b981; font-size:13px;">✅ O seu acesso será liberado imediatamente após a confirmação pelo Administrador.</p></div>""", unsafe_allow_html=True)
         
         elif meu_status == "ativo":
-            # GESTÃO DE BD DO CLIENTE (COM COLUNA NOVINHA PARA COMPROVATIVOS)
             def get_aba_cliente():
                 nome_aba = f"Dados_{usuario_ativo}"
                 try: return planilha.worksheet(nome_aba)
@@ -314,7 +308,6 @@ else:
                 df_s['Vencimento'] = df_s['Vencimento'].dt.strftime('%Y-%m-%d'); df_s = df_s.fillna("")
                 ws.clear(); ws.update(values=[df_s.columns.tolist()] + df_s.values.tolist(), range_name='A1')
 
-            # MOTOR DE METAS (BUDGETING)
             def get_metas():
                 try: return planilha.worksheet("Metas")
                 except gspread.exceptions.WorksheetNotFound:
@@ -326,12 +319,37 @@ else:
             CATEGORIAS = ["Consultoria", "Energia/Enel", "Internet", "Moradia", "Salário", "Serviços", "Outros"]
             PAGAMENTOS = ["Pix", "Cartão", "Dinheiro", "Boleto", "Outros"]
 
-            # 🔔 NOTIFICAÇÕES CLIENTE
+            # Notificações Ativas
             pendentes_hoje = df[(df["Status"] == "Pendente") & (df["Vencimento"].dt.date <= hoje + timedelta(days=2))]
             if not pendentes_hoje.empty:
                 st.warning(f"🔔 **Lembrete:** Você tem {len(pendentes_hoje)} conta(s) pendentes que vencem hoje ou nos próximos 2 dias!")
 
-            if menu == "Painel":
+            # --- AQUI: RENDERIZAÇÃO DA ABA DE ASSINATURA PARA O CLIENTE ATIVO ---
+            if menu == "Assinatura":
+                st.title("💳 Minha Assinatura")
+                v_str = str(meu_cadastro.iloc[0]["Valor"]).replace(',','.').strip()
+                valor_plano = float(v_str) if v_str != "" else 0.0
+                dt_venc = str(meu_cadastro.iloc[0]["Vencimento"])
+                
+                c1, c2, c3 = st.columns(3)
+                c1.metric("Valor do Plano", f"R$ {valor_plano:,.2f}")
+                c2.metric("Vencimento", f"{dt_venc}")
+                c3.metric("Situação Atual", f"{meu_status.upper()}")
+                
+                st.markdown("---")
+                if valor_plano > 0:
+                    st.markdown(f"""
+                    <div class="paywall-box-blue">
+                        <h2 style="color:white; margin-bottom:10px;">Renovação Antecipada via PIX</h2>
+                        <p style="color:#94a3b8;">Deseja renovar o seu plano antes do vencimento? Utilize a chave abaixo.</p>
+                        <div class="pix-code">{CHAVE_PIX}</div>
+                        <p style="color:#cbd5e1; font-size:14px;"><strong>Recebedor:</strong> {NOME_RECEBEDOR}</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.success("🎉 O seu plano atual é gratuito ou não possui mensalidade configurada.")
+
+            elif menu == "Painel":
                 st.title("Painel de Controle")
                 if df.empty: st.info("👋 Olá! O seu financeiro está vazio. Vá em **Novo Lançamento**.")
                 df_m = df[(df['Vencimento'].dt.month == hoje.month) & (df['Vencimento'].dt.year == hoje.year)].copy()
@@ -366,7 +384,6 @@ else:
                     cat_meta = c_m1.selectbox("Categoria", CATEGORIAS)
                     val_meta = c_m2.number_input("Limite (R$)", min_value=0.0, step=50.0)
                     if st.form_submit_button("Definir Meta", type="primary"):
-                        # Remove a meta antiga se existir e adiciona a nova
                         if not df_metas_geral.empty:
                             df_metas_geral = df_metas_geral[~((df_metas_geral['Usuario'] == usuario_ativo) & (df_metas_geral['Categoria'] == cat_meta))]
                         nova_linha = pd.DataFrame([{"Usuario": usuario_ativo, "Categoria": cat_meta, "Limite": val_meta}])
@@ -381,16 +398,12 @@ else:
                 else:
                     df_gasto_mes = df[(df['Vencimento'].dt.month == hoje.month) & (df['Vencimento'].dt.year == hoje.year) & (df['Tipo'] == 'Gasto')]
                     for _, row_meta in minhas_metas.iterrows():
-                        cat = row_meta['Categoria']
-                        limite = float(row_meta['Limite'])
+                        cat = row_meta['Categoria']; limite = float(row_meta['Limite'])
                         gasto_atual = df_gasto_mes[df_gasto_mes['Categoria'] == cat]['Valor'].sum()
-                        
                         perc = (gasto_atual / limite) * 100 if limite > 0 else 0
                         cor_prog = "green" if perc < 75 else "orange" if perc < 100 else "red"
-                        perc_clamp = min(perc, 100) # Previne erro na barra se passar de 100%
-                        
                         st.markdown(f"**{cat}** - Gasto: R$ {gasto_atual:,.2f} de R$ {limite:,.2f} ({perc:.1f}%)")
-                        st.progress(int(perc_clamp))
+                        st.progress(int(min(perc, 100)))
                         st.markdown("<br>", unsafe_allow_html=True)
 
             elif menu == "Previsão":
@@ -451,7 +464,6 @@ else:
                     st.download_button(label="📥 Descarregar Relatório", data=csv, file_name=f"Relatorio_{hoje.strftime('%d-%m-%Y')}.csv", mime='text/csv')
                 st.markdown("---")
                 
-                # --- 📎 EDIÇÃO COM UPLOAD DE COMPROVATIVO ---
                 if st.session_state.edit_conta != "":
                     idx_edit = df[df['ID'] == st.session_state.edit_conta].index[0]
                     st.markdown(f"### ✏️ Editando Lançamento: <span style='color:#3b82f6;'>{df.at[idx_edit,'Descrição']}</span>", unsafe_allow_html=True)
@@ -464,21 +476,17 @@ else:
                         ef = c4.selectbox("Pagamento", PAGAMENTOS, index=PAGAMENTOS.index(df.at[idx_edit,'Forma_Pagamento']) if df.at[idx_edit,'Forma_Pagamento'] in PAGAMENTOS else 0)
                         es = c5.selectbox("Status", ["Pago", "Pendente"], index=0 if df.at[idx_edit,'Status']=="Pago" else 1)
                         
-                        st.markdown("#### 📎 Anexar Comprovativo (Recibo, PDF ou Imagem)")
+                        st.markdown("#### 📎 Anexar Comprovativo")
                         nome_comp_atual = df.at[idx_edit, 'Comprovativo'] if 'Comprovativo' in df.columns else ""
                         if nome_comp_atual: st.info(f"Arquivo atual: {nome_comp_atual}")
                         novo_comp = st.file_uploader("Fazer Upload", type=['png', 'jpg', 'pdf'])
 
                         if st.form_submit_button("GUARDAR ALTERAÇÕES", type="primary"):
                             df.at[idx_edit,'Descrição'] = ed; df.at[idx_edit,'Valor'] = ev; df.at[idx_edit,'Categoria'] = ec; df.at[idx_edit,'Forma_Pagamento'] = ef; df.at[idx_edit,'Status'] = es
-                            
-                            # Salva o arquivo fisicamente na pasta comprovativos
                             if novo_comp is not None:
                                 file_name = f"{st.session_state.edit_conta}_{novo_comp.name}"
-                                with open(os.path.join("comprovativos", file_name), "wb") as f:
-                                    f.write(novo_comp.getbuffer())
+                                with open(os.path.join("comprovativos", file_name), "wb") as f: f.write(novo_comp.getbuffer())
                                 df.at[idx_edit, 'Comprovativo'] = file_name
-                            
                             salvar_dados(df); st.session_state.edit_conta = ""; st.success("Atualizado!"); time.sleep(1); st.rerun()
                 else:
                     c_f1, c_f2, c_f3 = st.columns([1, 1, 1.5])
