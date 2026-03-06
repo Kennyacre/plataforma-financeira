@@ -35,48 +35,49 @@ if "tela_atual" not in st.session_state:
     st.session_state.tela_atual = "login"
 
 # ==========================================
-# ROTA 1: TELA INICIAL (LOGIN E CADASTRO - LIGHT MODE FORÇADO)
+# ROTA 1: TELA INICIAL (LOGIN E CADASTRO - DARK MODE PREMIUM)
 # ==========================================
 if not st.session_state.logado:
     st.markdown("""
         <style>
-        /* Força o fundo da página inteiro para claro */
-        .stApp { background-color: #f8fafc !important; }
+        /* Fundo escuro premium (Azul Ardósia escuro) */
+        .stApp { background-color: #1e2532 !important; }
         
-        /* Estiliza a caixa do formulário (Branca com sombra) */
+        /* Remove a borda da caixa do formulário para flutuar no fundo */
         div[data-testid="stForm"] { 
-            background-color: #ffffff !important; 
-            padding: 40px 30px !important; 
-            border-radius: 12px !important; 
-            box-shadow: 0px 8px 24px rgba(149, 157, 165, 0.2) !important; 
-            border: 1px solid #e2e8f0 !important;
+            background-color: transparent !important; 
+            border: none !important;
+            padding: 0 !important;
+            box-shadow: none !important;
         }
         
-        /* Força TODOS os textos do login para cor escura */
-        .stApp h1, .stApp p, .stApp label, .stApp span { color: #1e293b !important; font-family: 'Segoe UI', sans-serif !important; }
+        /* Textos e Títulos */
+        .stApp h1 { color: #ffffff !important; font-weight: 700 !important; font-family: 'Segoe UI', sans-serif !important; }
+        .stApp p, .stApp label, .stApp span { color: #cbd5e1 !important; font-family: 'Segoe UI', sans-serif !important; }
         
-        /* Inputs bonitos (Brancos com borda cinza e texto preto) */
+        /* Inputs Escuros com Borda Fina */
         .stTextInput input { 
-            background-color: #ffffff !important; 
-            color: #0f172a !important; 
-            border: 1px solid #cbd5e1 !important; 
+            background-color: #1a202c !important; 
+            color: #ffffff !important; 
+            border: 1px solid #334155 !important; 
             border-radius: 8px !important;
-            padding: 12px !important;
+            padding: 12px 15px !important;
         }
         .stTextInput input:focus { border-color: #3b82f6 !important; box-shadow: 0 0 0 1px #3b82f6 !important; }
         
-        /* Botão Primário Azulão (Entrar / Criar Conta) */
+        /* Botão Primário Azulão */
         button[kind="primary"] { 
-            background-color: #3b82f6 !important; 
+            background-color: #2563eb !important; 
             color: white !important; 
             border: none !important; 
             border-radius: 8px !important; 
-            font-weight: bold !important; 
-            padding: 8px 0 !important;
+            font-weight: 600 !important; 
+            padding: 10px 0 !important;
+            margin-top: 15px !important;
         }
-        button[kind="primary"]:hover { background-color: #2563eb !important; }
+        button[kind="primary"]:hover { background-color: #1d4ed8 !important; }
         
-        /* Botão Secundário Transparente (Links de navegação) */
+        /* Botão Secundário (Links textuais como "Inscrever-se") */
         button[kind="secondary"] { 
             background-color: transparent !important; 
             color: #3b82f6 !important; 
@@ -84,10 +85,11 @@ if not st.session_state.logado:
             box-shadow: none !important;
             font-weight: 600 !important;
         }
-        button[kind="secondary"]:hover { text-decoration: underline !important; color: #2563eb !important; background-color: transparent !important; }
+        button[kind="secondary"]:hover { color: #60a5fa !important; text-decoration: underline !important; background-color: transparent !important; }
         
-        /* Checkbox do reCAPTCHA fake */
-        div[data-testid="stCheckbox"] label span { color: #1e293b !important; }
+        /* Links em Azul no HTML */
+        .link-azul { color: #3b82f6 !important; text-decoration: none; font-size: 14px; font-weight: 500; }
+        .link-azul:hover { color: #60a5fa !important; text-decoration: underline; }
         </style>
         """, unsafe_allow_html=True)
 
@@ -96,26 +98,37 @@ if not st.session_state.logado:
     with col2:
         st.write("") 
         st.write("")
+        st.write("")
         
         # --- TELA DE LOGIN ---
         if st.session_state.tela_atual == "login":
-            st.markdown("<h1 style='text-align: center; margin-bottom: 5px; color:#0f172a;'>Entrar na sua Conta</h1>", unsafe_allow_html=True)
-            st.markdown("<p style='text-align: center; color: #64748b !important; margin-bottom: 20px;'>Bem-vindo de volta! Por favor, insira seus dados</p>", unsafe_allow_html=True)
+            st.markdown("<h1 style='text-align: left; margin-bottom: 5px;'>Entrar na sua Conta</h1>", unsafe_allow_html=True)
+            st.markdown("<p style='text-align: left; margin-bottom: 30px;'>Bem-vindo de volta! por favor, insira seus dados</p>", unsafe_allow_html=True)
             
-            with st.form("form_login_moderno"):
-                login_input = st.text_input("✉️ Login (E-mail ou Usuário)")
+            with st.form("form_login_dark"):
+                login_input = st.text_input("✉️ login")
                 senha_input = st.text_input("🔒 Senha", type="password")
                 
+                # Layout do "Lembrar-me" e Links (Simulando a sua foto)
+                c_chk, c_links = st.columns([1, 1])
+                with c_chk:
+                    st.checkbox("Lembrar-me")
+                with c_links:
+                    st.markdown("""
+                        <div style="text-align: right; margin-top: 5px;">
+                            <a href="#" class="link-azul">Esqueceu a senha?</a><br>
+                            <a href="#" class="link-azul">Reenviar verificação de email</a>
+                        </div>
+                    """, unsafe_allow_html=True)
+                
+                # Fake reCAPTCHA
                 st.markdown("""
-                    <div style="text-align: right; margin-top: -10px; margin-bottom: 15px;">
-                        <a href="#" style="color: #3b82f6; text-decoration: none; font-size: 14px; font-weight: 500;">Esqueceu a senha?</a>
+                    <div style="border: 1px solid #334155; padding: 10px; border-radius: 4px; width: 250px; margin: 15px auto; background-color: #f8fafc; color: #000;">
+                        <input type="checkbox" style="transform: scale(1.5); margin-right: 10px;"> Não sou um robô
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/RecaptchaLogo.svg/1200px-RecaptchaLogo.svg.png" width="30" style="float: right;">
                     </div>
                 """, unsafe_allow_html=True)
                 
-                st.checkbox("Não sou um robô")
-                st.write("")
-                
-                # Botão Primário (Fica azul por causa do CSS)
                 btn_login = st.form_submit_button("Entrar", type="primary")
 
                 if btn_login:
@@ -132,8 +145,6 @@ if not st.session_state.logado:
                         else: st.error("⛔ Conta bloqueada.")
                     else: st.error("❌ Credenciais incorretas.")
             
-            # Botão Secundário (Fica transparente igual link)
-            st.write("")
             c_bt1, c_bt2, c_bt3 = st.columns([0.5, 2, 0.5])
             if c_bt2.button("Não tem uma conta? Inscrever-se", type="secondary", use_container_width=True):
                 st.session_state.tela_atual = "cadastro"
@@ -141,17 +152,16 @@ if not st.session_state.logado:
 
         # --- TELA DE CADASTRO ---
         elif st.session_state.tela_atual == "cadastro":
-            st.markdown("<h1 style='text-align: center; margin-bottom: 5px; color:#0f172a;'>Criar Conta</h1>", unsafe_allow_html=True)
-            st.markdown("<p style='text-align: center; color: #64748b !important; margin-bottom: 20px;'>Bem-vindo! Por favor, insira seus dados</p>", unsafe_allow_html=True)
+            st.markdown("<h1 style='text-align: left; margin-bottom: 5px;'>Criar Conta</h1>", unsafe_allow_html=True)
+            st.markdown("<p style='text-align: left; margin-bottom: 30px;'>Bem-vindo! Por favor, insira seus dados</p>", unsafe_allow_html=True)
             
-            with st.form("form_cadastro_moderno"):
+            with st.form("form_cadastro_dark"):
                 c_nome = st.text_input("👤 Nome Completo")
                 c_email = st.text_input("✉️ Seu E-mail")
                 c_tel = st.text_input("📞 Nº celular com WhatsApp")
                 c_senha = st.text_input("🔒 Crie sua Senha", type="password")
                 c_senha_confirma = st.text_input("🔒 Confirme sua Senha", type="password")
                 
-                st.write("")
                 btn_cadastrar = st.form_submit_button("Criar Conta", type="primary")
 
                 if btn_cadastrar:
@@ -171,14 +181,13 @@ if not st.session_state.logado:
                             st.session_state.tela_atual = "login"
                             st.rerun()
 
-            st.write("")
             c_bt1, c_bt2, c_bt3 = st.columns([1, 1, 1])
-            if c_bt2.button("← Voltar para Login", type="secondary", use_container_width=True):
+            if c_bt2.button("← Voltar", type="secondary", use_container_width=True):
                 st.session_state.tela_atual = "login"
                 st.rerun()
 
 # ==========================================
-# ROTA 2: SISTEMA LOGADO (DARK MODE)
+# ROTA 2: SISTEMA LOGADO (DASHBOARD)
 # ==========================================
 else:
     st.markdown("""
@@ -203,7 +212,7 @@ else:
         div[data-testid="stDataFrame"] * { color: #e0e0e0 !important; }
         .stTextInput input, .stNumberInput input, .stDateInput input { background-color: #1e1e1e !important; color: #ffffff !important; border: 1px solid #333 !important; }
         .stSelectbox>div>div>div { background-color: #1e1e1e !important; color: #ffffff !important; border: 1px solid #333 !important; }
-        /* Botões no modo Dark */
+        /* Botões do Sistema Logado (Verdes para Finanças) */
         button[kind="primary"], button[kind="secondary"] { 
             background-color: #2e7d32 !important; 
             color: white !important; 
