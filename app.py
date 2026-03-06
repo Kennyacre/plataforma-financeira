@@ -115,7 +115,7 @@ if not st.session_state.logado:
             with st.form("form_cadastro_dark"):
                 c_nome = st.text_input("👤 Nome Completo")
                 c_email = st.text_input("✉️ Seu E-mail")
-                c_tel = st.text_input("📞 Nº telemóvel com WhatsApp")
+                c_tel = st.text_input("📞 Nº celular com WhatsApp")
                 c_senha = st.text_input("🔒 Crie a sua Senha", type="password")
                 c_senha_confirma = st.text_input("🔒 Confirme a sua Senha", type="password")
                 
@@ -128,7 +128,7 @@ if not st.session_state.logado:
                     else:
                         df_u = pd.DataFrame(aba_usuarios_db.get_all_records())
                         if "Email" not in df_u.columns: df_u["Email"] = ""
-                        if c_email in df_u["Email"].astype(str).values: st.error("❌ E-mail já registado.")
+                        if c_email in df_u["Email"].astype(str).values: st.error("❌ E-mail já registrado.")
                         else:
                             aba_usuarios_db.append_row([c_email, c_senha, "Cliente", "Ativo", "0", "", c_nome, c_email, c_tel])
                             st.success("✅ Conta criada! Já pode entrar.")
@@ -159,19 +159,20 @@ else:
         .stTextInput input, .stNumberInput input, .stDateInput input { background-color: #1e293b !important; color: #ffffff !important; border: 1px solid #334155 !important; }
         .stSelectbox>div>div>div { background-color: #1e293b !important; color: #ffffff !important; border: 1px solid #334155 !important; }
         
-        /* CSS PARA OS BOTÕES PRIMÁRIOS (Ações Principais) */
+        /* BOTÕES PRINCIPAIS */
         button[kind="primary"] { background-color: #2563eb !important; color: white !important; border: none !important; border-radius: 4px !important; font-weight: bold !important; width: 100% !important; }
         button[kind="primary"]:hover { background-color: #1d4ed8 !important; }
         
-        /* CSS MÁGICO PARA OS BOTÕES SECUNDÁRIOS DA TABELA NÃO QUEBRAREM */
+        /* === O SEGREDO DA RESPONSIVIDADE DOS MICRO-BOTÕES === */
         button[kind="secondary"] { 
             background-color: #1e293b !important; 
             color: #ffffff !important; 
             border: 1px solid #334155 !important; 
             border-radius: 6px !important; 
-            padding: 5px !important; /* Padding mínimo para não esmagar */
+            padding: 0 !important; /* ZERAR padding para não quebrar */
+            min-width: 0 !important; /* ZERAR largura mínima do Streamlit */
             width: 100% !important;
-            min-height: 38px !important;
+            height: 36px !important; /* Altura fixa */
             display: flex !important;
             justify-content: center !important;
             align-items: center !important;
@@ -180,6 +181,12 @@ else:
         button[kind="secondary"]:hover { 
             background-color: #334155 !important; 
             border-color: #4b5563 !important; 
+        }
+        
+        /* Ajuste extremo para textos longos (Emails) não empurrarem a tela */
+        .break-text {
+            word-break: break-all !important;
+            white-space: normal !important;
         }
         </style>
         """, unsafe_allow_html=True)
@@ -250,6 +257,7 @@ else:
                 if filtro_status != "Todos": df_show = df_show[df_show['Status'].str.lower() == filtro_status.lower()]
                 if busca: df_show = df_show[df_show['Usuario'].astype(str).str.contains(busca, case=False) | df_show['Nome'].astype(str).str.contains(busca, case=False)]
 
+                # Header Oculto em telas micro, mas vamos manter simples
                 st.markdown("""
                 <div style="display: flex; justify-content: space-between; padding: 12px 15px; background-color: #111827; border-radius: 8px 8px 0 0; border-bottom: 1px solid #1f2937; color: #6b7280; font-weight: 600; font-size: 11px; text-transform: uppercase;">
                     <div style="width: 25%;">USUÁRIO</div><div style="width: 20%;">DATAS</div><div style="width: 15%;">SITUAÇÃO</div><div style="width: 20%;">DETALHES</div><div style="width: 20%; text-align: center;">AÇÕES</div>
@@ -265,15 +273,20 @@ else:
                     
                     st.markdown("<div style='border-top: 1px solid #1f2937;'></div>", unsafe_allow_html=True)
                     
-                    # AQUI: Aumentamos o peso da última coluna de 1.5 para 2.0 para dar folga aos botões!
-                    c1, c2, c3, c4, c5 = st.columns([2.5, 2, 1.5, 2.0, 2.0])
-                    with c1: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #3b82f6; font-weight: bold; font-size: 15px;">{user}</span><br><span style="color: #6b7280; font-size: 12px;">{email}</span><br><span style="color: #6b7280; font-size: 11px;">Nível: {nivel}</span></div>', unsafe_allow_html=True)
-                    with c2: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #d1d5db; font-size: 14px;">{venc}</span><br><span style="color: #6b7280; font-size: 11px;">Data de Vencimento</span></div>', unsafe_allow_html=True)
-                    with c3: st.markdown(f'<div style="padding: 10px 0;"><span style="{cor_bdg} padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">{status.upper()}</span><br><br><span style="background-color: #6366f1; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">SaaS</span></div>', unsafe_allow_html=True)
-                    with c4: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #d1d5db; font-size: 14px;">{nome}</span><br><span style="color: #9ca3af; font-size: 12px;">Plano: R$ {valor:,.2f}</span><br><span style="color: #9ca3af; font-size: 12px;">Tel: {tel}</span></div>', unsafe_allow_html=True)
+                    # Refinamento de pesos para dar máximo de espaço aos botões sem espremer o texto
+                    c1, c2, c3, c4, c5 = st.columns([2.5, 1.5, 1.5, 2.5, 2.0])
+                    with c1: 
+                        st.markdown(f'<div style="padding: 10px 0;"><span style="color: #3b82f6; font-weight: bold; font-size: 15px;">{user}</span><br><span class="break-text" style="color: #6b7280; font-size: 12px;">{email}</span><br><span style="color: #6b7280; font-size: 11px;">Nível: {nivel}</span></div>', unsafe_allow_html=True)
+                    with c2: 
+                        st.markdown(f'<div style="padding: 10px 0;"><span style="color: #d1d5db; font-size: 14px;">{venc}</span><br><span style="color: #6b7280; font-size: 11px;">Vencimento</span></div>', unsafe_allow_html=True)
+                    with c3: 
+                        st.markdown(f'<div style="padding: 10px 0;"><span style="{cor_bdg} padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">{status.upper()}</span><br><br><span style="background-color: #6366f1; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">SaaS</span></div>', unsafe_allow_html=True)
+                    with c4: 
+                        st.markdown(f'<div style="padding: 10px 0;"><span style="color: #d1d5db; font-size: 14px;">{nome}</span><br><span style="color: #9ca3af; font-size: 12px;">R$ {valor:,.2f}</span><br><span style="color: #9ca3af; font-size: 12px;">{tel}</span></div>', unsafe_allow_html=True)
                     with c5:
                         st.markdown("<div style='padding-top: 15px;'></div>", unsafe_allow_html=True)
-                        b1, b2, b3 = st.columns([1,1,1]) # Força 3 partes iguais
+                        # O segredo: as 3 colunas recebem pesos idênticos
+                        b1, b2, b3 = st.columns(3)
                         if b1.button("✏️", key=f"edit_{user}"): st.session_state.edit_user = user; st.rerun()
                         if b2.button("🖥️", key=f"ren_{user}"):
                             try: v_atual = pd.to_datetime(venc, format='%d/%m/%Y')
@@ -281,12 +294,12 @@ else:
                             novo_v = (v_atual + relativedelta(months=1)).strftime('%d/%m/%Y')
                             cel = aba_usuarios_db.find(user, in_column=1)
                             aba_usuarios_db.update_cell(cel.row, 6, novo_v)
-                            st.success(f"Renovado para: {novo_v}"); time.sleep(1); st.rerun()
+                            st.success(f"Renovado!"); time.sleep(0.5); st.rerun()
                         if b3.button(btn_status, key=f"stat_{user}"):
                             n_stat = "Bloqueado" if status.lower() == "ativo" else "Ativo"
                             cel = aba_usuarios_db.find(user, in_column=1)
                             aba_usuarios_db.update_cell(cel.row, 4, n_stat)
-                            st.warning(f"Status alterado."); time.sleep(1); st.rerun()
+                            st.warning(f"Alterado."); time.sleep(0.5); st.rerun()
                 st.markdown("<div style='background-color: #111827; padding: 5px; border-radius: 0 0 8px 8px;'></div>", unsafe_allow_html=True)
 
         with tab2:
@@ -452,7 +465,6 @@ else:
                     
                     st.markdown("<div style='border-top: 1px solid #1f2937;'></div>", unsafe_allow_html=True)
                     
-                    # Coluna de Ações com peso 2.0 para dar mais folga aos botões pequenos
                     c1, c2, c3, c4, c5 = st.columns([3, 2, 1.5, 1.5, 2.0])
                     with c1: st.markdown(f'<div style="padding: 10px 0;"><span style="color: {cor_tipo}; font-weight: bold; font-size: 15px;">{desc}</span><br><span style="color: #6b7280; font-size: 11px;">{tipo} via {forma}</span></div>', unsafe_allow_html=True)
                     with c2: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #d1d5db; font-size: 14px;">{venc}</span></div>', unsafe_allow_html=True)
@@ -460,7 +472,7 @@ else:
                     with c4: st.markdown(f'<div style="padding: 10px 0;"><span style="color: #d1d5db; font-size: 14px;">R$ {val:,.2f}</span><br><span style="{cor_bdg} padding: 1px 6px; border-radius: 4px; font-weight: bold; font-size: 10px;">{status.upper()}</span></div>', unsafe_allow_html=True)
                     with c5:
                         st.markdown("<div style='padding-top: 15px;'></div>", unsafe_allow_html=True)
-                        b1, b2, b3 = st.columns([1,1,1])
+                        b1, b2, b3 = st.columns(3)
                         if b1.button("✏️", key=f"e_{cid}"): st.session_state.edit_conta = cid; st.rerun()
                         if b2.button(btn_status, key=f"s_{cid}"):
                             df.loc[df['ID'] == cid, 'Status'] = "Pendente" if status.lower() == "pago" else "Pago"
