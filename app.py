@@ -48,45 +48,89 @@ def conectar_google():
 
 try:
     planilha = conectar_google()
+    aba_usuarios_db = planilha.worksheet("Usuarios")
 except Exception as e:
     st.error(f"🚨 Falha na conexão com o Banco de Dados. Detalhe: {e}")
     st.stop()
 
-# --- 2. CONTROLE DE SESSÃO (LOGIN) ---
+# --- 2. CONTROLE DE SESSÃO ---
 if "logado" not in st.session_state:
     st.session_state.logado = False
     st.session_state.usuario = ""
     st.session_state.nivel = ""
 
-# --- 3. TELA DE LOGIN ---
+# --- 3. TELA INICIAL (LOGIN E CADASTRO) ---
 if not st.session_state.logado:
     st.title("🦅 Plataforma Gestor Financeiro")
-    st.markdown("Faça login para acessar o seu painel.")
+    
+    tab_login, tab_cadastro = st.tabs(["🔐 Acessar Sistema", "📝 Criar Nova Conta"])
 
-    with st.form("form_login"):
-        usuario_input = st.text_input("Usuário")
-        senha_input = st.text_input("Senha", type="password")
-        btn_login = st.form_submit_button("ENTRAR NA PLATAFORMA")
+    # --- ABA DE LOGIN ---
+    with tab_login:
+        st.markdown("Faça login com seu Usuário ou E-mail.")
+        with st.form("form_login"):
+            login_input = st.text_input("Usuário ou E-mail")
+            senha_input = st.text_input("Senha", type="password")
+            btn_login = st.form_submit_button("ENTRAR NA PLATAFORMA")
 
-        if btn_login:
-            try:
-                aba_usuarios = planilha.worksheet("Usuarios")
-                df_users = pd.DataFrame(aba_usuarios.get_all_records())
-                user_match = df_users[(df_users["Usuario"].astype(str) == usuario_input) & (df_users["Senha"].astype(str) == senha_input)]
+            if btn_login:
+                try:
+                    df_users = pd.DataFrame(aba_usuarios_db.get_all_records())
+                    
+                    # Garante que as colunas existam mesmo se a planilha estiver desatualizada
+                    if "Email" not in df_users.columns: df_users["Email"] = ""
+                    
+                    # Filtro de Dual-Login: Procura no campo Usuario OU no campo Email
+                    user_match = df_users[
+                        ((df_users["Usuario"].astype(str) == login_input) | (df_users["Email"].astype(str) == login_input)) & 
+                        (df_users["Senha"].astype(str) == senha_input)
+                    ]
 
-                if not user_match.empty:
-                    status = user_match.iloc[0]["Status"]
-                    if status.lower() == "ativo":
-                        st.session_state.logado = True
-                        st.session_state.usuario = usuario_input
-                        st.session_state.nivel = user_match.iloc[0]["Nivel"]
-                        st.rerun()
+                    if not user_match.empty:
+                        status = user_match.iloc[0]["Status"]
+                        if status.lower() == "ativo":
+                            st.session_state.logado = True
+                            st.session_state.usuario = user_match.iloc[0]["Usuario"] # Salva sempre o ID do Usuario
+                            st.session_state.nivel = user_match.iloc[0]["Nivel"]
+                            st.rerun()
+                        else:
+                            st.error("⛔ Conta bloqueada por falta de pagamento. Contate o suporte.")
                     else:
-                        st.error("⛔ Conta bloqueada por falta de pagamento. Contate o suporte.")
+                        st.error("❌ Usuário/E-mail ou senha incorretos.")
+                except Exception as e:
+                    st.error(f"Erro ao ler banco de dados: {e}")
+
+    # --- ABA DE CADASTRO (SELF-SERVICE) ---
+    with tab_cadastro:
+        st.markdown("Crie sua conta para acessar o Gestor Financeiro.")
+        with st.form("form_cadastro_cliente"):
+            c1, c2 = st.columns(2)
+            c_nome = c1.text_input("Nome Completo")
+            c_email = c2.text_input("E-mail")
+            c_tel = c1.text_input("Telefone / WhatsApp")
+            c_user = c2.text_input("Criar Nome de Usuário (Login)")
+            c_senha = st.text_input("Criar Senha", type="password")
+            
+            btn_cadastrar = st.form_submit_button("CRIAR MINHA CONTA")
+
+            if btn_cadastrar:
+                if not c_nome or not c_email or not c_user or not c_senha:
+                    st.warning("⚠️ Por favor, preencha todos os campos obrigatórios.")
                 else:
-                    st.error("❌ Usuário ou senha incorretos.")
-            except Exception as e:
-                st.error(f"Erro ao ler banco de dados: {e}")
+                    df_u = pd.DataFrame(aba_usuarios_db.get_all_records())
+                    if "Email" not in df_u.columns: df_u["Email"] = ""
+                    
+                    # Validação de duplicidade
+                    if c_user in df_u["Usuario"].astype(str).values:
+                        st.error("❌ Esse Nome de Usuário já está em uso. Escolha outro.")
+                    elif c_email in df_u["Email"].astype(str).values:
+                        st.error("❌ Esse E-mail já está cadastrado.")
+                    else:
+                        # Ordem: Usuario | Senha | Nivel | Status | Valor | Vencimento | Nome | Email | Telefone
+                        aba_usuarios_db.append_row([c_user, c_senha, "Cliente", "Ativo", "0", "", c_nome, c_email, c_tel])
+                        st.success("✅ Conta criada com sucesso! Vá para a aba 'Acessar Sistema' e faça o login.")
+                        time.sleep(2)
+                        st.rerun()
 
 # --- 4. SISTEMA LOGADO ---
 else:
@@ -102,60 +146,77 @@ else:
     # ==========================================
     if st.session_state.nivel.lower() == "master":
         st.title("👑 Central de Comando SaaS")
-        aba_usuarios = planilha.worksheet("Usuarios")
-        df_users = pd.DataFrame(aba_usuarios.get_all_records())
+        df_users = pd.DataFrame(aba_usuarios_db.get_all_records())
 
-        tab1, tab2, tab3 = st.tabs(["📋 Lista de Clientes", "➕ Cadastrar Cliente", "✏️ Editar / Bloquear"])
+        tab1, tab2, tab3 = st.tabs(["📋 Lista de Clientes", "➕ Cadastrar Master", "✏️ Editar / Bloquear"])
 
         with tab1:
             st.markdown("### Visão Geral de Assinantes")
             st.dataframe(df_users, use_container_width=True)
 
         with tab2:
-            st.markdown("### Adicionar Novo Cliente")
-            with st.form("novo_cliente"):
-                c1, c2 = st.columns(2)
-                n_user = c1.text_input("Nome de Usuário (Login)")
-                n_senha = c2.text_input("Senha")
-                n_nivel = c1.selectbox("Nível de Acesso", ["Cliente", "Master"])
-                n_status = c2.selectbox("Status da Conta", ["Ativo", "Bloqueado"])
-                n_valor = c1.number_input("Valor da Mensalidade (R$)", min_value=0.0, step=10.0)
-                n_venc = c2.date_input("Data de Vencimento")
+            st.markdown("### Cadastrar Cliente Manualmente")
+            with st.form("novo_cliente_master"):
+                c1, c2, c3 = st.columns(3)
+                n_nome = c1.text_input("Nome")
+                n_email = c2.text_input("E-mail")
+                n_tel = c3.text_input("Telefone")
                 
-                if st.form_submit_button("SALVAR NOVO CLIENTE"):
+                n_user = c1.text_input("Usuário (Login)")
+                n_senha = c2.text_input("Senha")
+                n_nivel = c3.selectbox("Nível", ["Cliente", "Master"])
+                
+                n_status = c1.selectbox("Status", ["Ativo", "Bloqueado"])
+                n_valor = c2.number_input("Mensalidade (R$)", min_value=0.0, step=10.0)
+                n_venc = c3.date_input("Data de Vencimento")
+                
+                if st.form_submit_button("SALVAR CLIENTE"):
                     if n_user in df_users["Usuario"].values:
-                        st.error("Este nome de usuário já existe! Escolha outro.")
+                        st.error("Usuário já existe!")
                     elif n_user and n_senha:
-                        aba_usuarios.append_row([n_user, n_senha, n_nivel, n_status, str(n_valor), n_venc.strftime('%d/%m/%Y')])
+                        aba_usuarios_db.append_row([n_user, n_senha, n_nivel, n_status, str(n_valor), n_venc.strftime('%d/%m/%Y'), n_nome, n_email, n_tel])
                         st.success("Cliente cadastrado com sucesso!")
+                        time.sleep(1)
                         st.rerun()
 
         with tab3:
-            st.markdown("### Gerenciar ou Bloquear Cliente")
+            st.markdown("### Gerenciar Cliente (Financeiro e Acesso)")
             cliente_sel = st.selectbox("Selecione o Cliente:", [""] + df_users["Usuario"].tolist())
             if cliente_sel:
                 row_data = df_users[df_users["Usuario"] == cliente_sel].iloc[0]
                 with st.form("editar_cliente"):
-                    c1, c2 = st.columns(2)
-                    e_senha = c1.text_input("Senha", value=str(row_data.get("Senha", "")))
-                    e_nivel = c2.selectbox("Nível", ["Cliente", "Master"], index=0 if row_data.get("Nivel", "") == "Cliente" else 1)
-                    e_status = c1.selectbox("Status", ["Ativo", "Bloqueado"], index=0 if row_data.get("Status", "") == "Ativo" else 1)
-                    e_valor = c2.number_input("Valor (R$)", value=float(str(row_data.get("Valor", 0)).replace(',','.')), step=10.0)
-                    try:
-                        venc_formatado = pd.to_datetime(row_data.get("Vencimento", ""), format='%d/%m/%Y').date()
-                    except:
-                        venc_formatado = date.today()
-                    e_venc = st.date_input("Vencimento", value=venc_formatado)
+                    st.markdown("**Dados Pessoais**")
+                    c1, c2, c3 = st.columns(3)
+                    e_nome = c1.text_input("Nome", value=str(row_data.get("Nome", "")))
+                    e_email = c2.text_input("E-mail", value=str(row_data.get("Email", "")))
+                    e_tel = c3.text_input("Telefone", value=str(row_data.get("Telefone", "")))
+                    
+                    st.markdown("**Dados de Acesso e Cobrança**")
+                    c4, c5, c6 = st.columns(3)
+                    e_senha = c4.text_input("Senha", value=str(row_data.get("Senha", "")))
+                    e_nivel = c5.selectbox("Nível", ["Cliente", "Master"], index=0 if row_data.get("Nivel", "") == "Cliente" else 1)
+                    e_status = c6.selectbox("Status", ["Ativo", "Bloqueado"], index=0 if row_data.get("Status", "") == "Ativo" else 1)
+                    
+                    c7, c8 = st.columns(2)
+                    e_valor = c7.number_input("Valor (R$)", value=float(str(row_data.get("Valor", 0)).replace(',','.')), step=10.0)
+                    try: venc_formatado = pd.to_datetime(row_data.get("Vencimento", ""), format='%d/%m/%Y').date()
+                    except: venc_formatado = date.today()
+                    e_venc = c8.date_input("Vencimento da Assinatura", value=venc_formatado)
 
                     if st.form_submit_button("ATUALIZAR DADOS"):
-                        celula = aba_usuarios.find(cliente_sel, in_column=1)
+                        celula = aba_usuarios_db.find(cliente_sel, in_column=1)
                         linha = celula.row
-                        aba_usuarios.update_cell(linha, 2, e_senha)
-                        aba_usuarios.update_cell(linha, 3, e_nivel)
-                        aba_usuarios.update_cell(linha, 4, e_status)
-                        aba_usuarios.update_cell(linha, 5, str(e_valor))
-                        aba_usuarios.update_cell(linha, 6, e_venc.strftime('%d/%m/%Y'))
-                        st.success(f"Dados atualizados!")
+                        # Atualiza todas as colunas da linha
+                        aba_usuarios_db.update_cell(linha, 2, e_senha)
+                        aba_usuarios_db.update_cell(linha, 3, e_nivel)
+                        aba_usuarios_db.update_cell(linha, 4, e_status)
+                        aba_usuarios_db.update_cell(linha, 5, str(e_valor))
+                        aba_usuarios_db.update_cell(linha, 6, e_venc.strftime('%d/%m/%Y'))
+                        aba_usuarios_db.update_cell(linha, 7, e_nome)
+                        aba_usuarios_db.update_cell(linha, 8, e_email)
+                        aba_usuarios_db.update_cell(linha, 9, e_tel)
+                        st.success(f"Dados atualizados com sucesso!")
+                        time.sleep(1)
                         st.rerun()
 
     # ==========================================
@@ -178,7 +239,6 @@ else:
             df = pd.DataFrame(registros)
             if df.empty:
                 df = pd.DataFrame(columns=["ID", "Tipo", "Descrição", "Valor", "Status", "Vencimento", "Categoria", "Forma_Pagamento"])
-                # CORREÇÃO AQUI: Força a coluna Vencimento a ser formato de Data, mesmo estando vazia.
                 df['Vencimento'] = pd.to_datetime(df['Vencimento'])
             else:
                 df['Vencimento'] = pd.to_datetime(df['Vencimento'], errors='coerce').fillna(pd.Timestamp.now())
@@ -196,11 +256,9 @@ else:
             ws.clear()
             ws.update(values=dados_lista, range_name='A1')
 
-        # Carrega os dados específicos deste cliente
         df = carregar_dados()
         hoje = date.today()
         
-        # Categorias fixas para a V1 do SaaS
         CATEGORIAS = ["Consultoria", "Energia/Enel", "Internet", "Moradia", "Salário", "Serviços", "Outros"]
         PAGAMENTOS = ["Pix", "Cartão", "Dinheiro", "Boleto", "Outros"]
 
@@ -210,11 +268,8 @@ else:
 
         if menu == "Painel":
             st.title("Painel de Controle")
+            if df.empty: st.info("👋 Olá! Seu financeiro está vazio. Vá no menu **'Novo Lançamento'** para registrar sua primeira movimentação.")
             
-            if df.empty:
-                st.info("👋 Olá! Seu financeiro está vazio. Vá no menu **'Novo Lançamento'** para registrar sua primeira movimentação.")
-            
-            # Mesmo vazio, o cálculo abaixo agora funciona sem dar erro!
             df_m = df[(df['Vencimento'].dt.month == hoje.month) & (df['Vencimento'].dt.year == hoje.year)].copy()
             c1, c2, c3 = st.columns(3)
             ent = df_m[df_m['Tipo']=='Recebimento']['Valor'].sum()
@@ -242,8 +297,7 @@ else:
 
         elif menu == "Previsão":
             st.title("🔮 Previsão Futura")
-            if df.empty:
-                st.info("Sem dados suficientes para gerar previsões.")
+            if df.empty: st.info("Sem dados suficientes para gerar previsões.")
             else:
                 futuro = df[df['Vencimento'].dt.date > hoje].copy()
                 if futuro.empty: st.info("Sem dados futuros cadastrados.")
@@ -259,8 +313,7 @@ else:
 
         elif menu == "Calendário":
             st.title("Calendário de Vencimentos")
-            if df.empty:
-                st.info("Nenhuma movimentação para exibir no calendário.")
+            if df.empty: st.info("Nenhuma movimentação para exibir no calendário.")
             else:
                 pend = df[(df["Status"] == "Pendente") & (df["Tipo"] == "Gasto")].sort_values(by="Vencimento")
                 if not pend.empty:
@@ -319,8 +372,7 @@ else:
 
         elif menu == "Histórico / Editar":
             st.title("Histórico")
-            if df.empty:
-                st.info("Nenhuma movimentação registrada no histórico.")
+            if df.empty: st.info("Nenhuma movimentação registrada no histórico.")
             else:
                 df_exibicao = df.copy()
                 if not df_exibicao.empty:
