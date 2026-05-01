@@ -12,112 +12,153 @@
     
     <style>
         :root {
-            --primary: #3b82f6;
-            --primary-dark: #2563eb;
-            --bg-dark: #0f172a;
+            --primary: #ffffff;
+            --primary-dark: #e4e4e7;
+            --bg-dark: #09090b;
+            --card-bg: #18181b;
             --text-main: #ffffff;
-            --text-muted: #94a3b8;
+            --text-muted: #a1a1aa;
+            --accent: #ffffff;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0f172a;
-            background-image: linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.7)), url('assets/img/login-bg.jpg');
-            background-size: cover;
-            background-position: center;
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at center, rgba(255,255,255,0.03) 0%, transparent 100%);
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: #ffffff;
+            color: var(--text-main);
         }
 
         .login-box {
-            background: rgba(30, 41, 59, 0.9);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             padding: 40px;
-            border-radius: 20px;
+            border-radius: 24px;
             width: 100%;
-            max-width: 400px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            max-width: 420px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             text-align: center;
+            backdrop-filter: blur(10px);
         }
 
-        .logo {
-            font-size: 32px;
+        .logo-container {
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .logo-img {
+            width: 120px;
+            height: 120px;
+            border-radius: 20px;
+            object-fit: cover;
+            border: 2px solid rgba(255,255,255,0.1);
+            margin-bottom: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+        }
+
+        .logo-text {
+            font-family: 'Outfit', sans-serif;
+            font-size: 28px;
             font-weight: 800;
-            color: var(--primary);
-            margin-bottom: 8px;
-            letter-spacing: 1px;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
         }
 
         .subtitle {
             color: var(--text-muted);
             font-size: 14px;
-            margin-bottom: 30px;
+            margin-bottom: 35px;
+            font-weight: 400;
         }
 
-        .form-group { text-align: left; margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 8px; color: #cbd5e1; font-size: 14px; }
+        .form-group { text-align: left; margin-bottom: 24px; }
+        .form-group label { display: block; margin-bottom: 10px; color: var(--text-muted); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 
         .input-wrapper { position: relative; display: flex; align-items: center; }
         .input-wrapper .material-symbols-rounded {
             position: absolute;
-            left: 12px;
+            left: 14px;
             color: var(--text-muted);
             font-size: 20px;
         }
 
         .form-control {
             width: 100%;
-            padding: 12px 12px 12px 42px;
-            border-radius: 10px;
+            padding: 14px 14px 14px 46px;
+            border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            background: #0f172a;
+            background: #09090b;
             color: white;
             font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.5);
+            background: #000000;
+            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05);
         }
 
         .error-msg {
-            color: #ef4444;
+            color: #ff4d4d;
             font-size: 13px;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
             display: none;
             justify-content: center;
             align-items: center;
-            gap: 5px;
-            background: rgba(239, 68, 68, 0.1);
-            padding: 10px;
-            border-radius: 8px;
+            gap: 8px;
+            background: rgba(255, 77, 77, 0.05);
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 77, 77, 0.1);
         }
 
         .btn-login {
             width: 100%;
-            background: var(--primary);
-            color: white;
+            background: #ffffff;
+            color: #000000;
             border: none;
-            padding: 14px;
-            border-radius: 10px;
-            font-weight: 600;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 700;
             font-size: 16px;
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .register-link { margin-top: 25px; }
-        .register-link a { color: var(--primary); text-decoration: none; font-weight: 600; }
+        .btn-login:hover {
+            background: #e4e4e7;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .register-link { margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px; }
+        .register-link p { color: var(--text-muted); font-size: 14px; }
+        .register-link a { color: #ffffff; text-decoration: none; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.2); transition: 0.3s; }
+        .register-link a:hover { border-bottom-color: #ffffff; }
     </style>
 
     <!-- PWA Core -->
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" type="image/png" href="/static/icon-512.png">
     <link rel="apple-touch-icon" href="/static/icon-512.png">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#09090b">
     <meta name="mobile-web-app-capable" content="yes">
 
     <!-- iOS Support -->
@@ -139,8 +180,11 @@
 <body>
 
     <div class="login-box">
-        <div class="logo">TN INFO</div>
-        <div class="subtitle">Acesse seu painel financeiro</div>
+        <div class="logo-container">
+            <img src="assets/img/logo.jpg" alt="TN INFO" class="logo-img">
+            <div class="logo-text">TN INFO</div>
+        </div>
+        <div class="subtitle">Acesse seu painel financeiro de elite</div>
 
         <form id="formLogin">
             <div class="form-group">

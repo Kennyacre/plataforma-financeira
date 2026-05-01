@@ -11,49 +11,64 @@
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
 
     <link rel="stylesheet" href="css/login.css?v=1">
+    <style>
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-    <div class="login-box" style="margin-top: 50px; margin-bottom: 50px;">
-        <div class="logo">TN INFO</div>
-        <div class="subtitle">Crie sua conta para começar</div>
+    <div class="login-box" style="margin-top: 50px; margin-bottom: 50px; max-width: 800px;">
+        <div class="logo-container">
+            <img src="assets/img/logo.jpg" alt="TN INFO" class="logo-img" style="width: 120px; height: 120px; border-radius: 20px; object-fit: cover; border: 2px solid rgba(255,255,255,0.1); margin-bottom: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.4);">
+            <div class="logo-text" style="font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px;">TN INFO</div>
+        </div>
+        <div class="subtitle">Crie sua conta no ecossistema de elite</div>
 
         <form id="formCadastro">
-            <div class="form-group">
-                <label>Nome Completo</label>
-                <input type="text" id="nome_completo" class="form-control" placeholder="Seu nome completo" required>
-            </div>
-            <div class="form-group">
-                <label>Utilizador (Username)</label>
-                <input type="text" id="username" class="form-control" placeholder="Escolha um utilizador" required>
-            </div>
-            <div class="form-group">
-                <label>E-mail</label>
-                <input type="email" id="email" class="form-control" placeholder="seu@email.com" required>
-            </div>
-            <div class="form-group">
-                <label>Senha</label>
-                <input type="password" id="password" class="form-control" placeholder="Mínimo 6 caracteres" required
-                    minlength="6">
-            </div>
-            <div class="form-group">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <label style="margin-bottom: 0;">ID de Indicação</label>
-                    <span style="font-size: 11px; color: #64748b;">(Opcional)</span>
+            <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left;">
+                <div class="form-group" style="grid-column: span 2;">
+                    <label style="display: block; margin-bottom: 10px; color: var(--text-muted); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Nome Completo</label>
+                    <input type="text" id="nome_completo" class="form-control" placeholder="Seu nome completo" required style="width: 100%; padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: #09090b; color: white;">
                 </div>
-                <input type="number" id="id_indicacao" class="form-control" placeholder="Ex: 4">
+                
+                <div class="form-group">
+                    <label style="display: block; margin-bottom: 10px; color: var(--text-muted); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Utilizador (Username)</label>
+                    <input type="text" id="username" class="form-control" placeholder="Escolha um utilizador" required style="width: 100%; padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: #09090b; color: white;">
+                </div>
+
+                <div class="form-group">
+                    <label style="display: block; margin-bottom: 10px; color: var(--text-muted); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">E-mail</label>
+                    <input type="email" id="email" class="form-control" placeholder="seu@email.com" required style="width: 100%; padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: #09090b; color: white;">
+                </div>
+
+                <div class="form-group">
+                    <label style="display: block; margin-bottom: 10px; color: var(--text-muted); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Senha</label>
+                    <input type="password" id="password" class="form-control" placeholder="Mínimo 6 caracteres" required minlength="6" style="width: 100%; padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: #09090b; color: white;">
+                </div>
+
+                <div class="form-group">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                        <label style="margin-bottom: 0; color: var(--text-muted); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">ID de Indicação</label>
+                        <span style="font-size: 11px; color: #64748b;">(Opcional)</span>
+                    </div>
+                    <input type="number" id="id_indicacao" class="form-control" placeholder="Ex: 4" style="width: 100%; padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: #09090b; color: white;">
+                </div>
+
+                <div id="mensagemStatus" class="error-msg" style="grid-column: span 2; display: none;"></div>
+
+                <button type="submit" id="btn-submit-cadastro" class="btn-login" style="grid-column: span 2; margin-top: 10px;">
+                    Concluir Registo <span class="material-symbols-rounded">app_registration</span>
+                </button>
             </div>
 
-            <div id="mensagemStatus" class="error-msg" style="display: none;"></div>
-
-            <button type="submit" id="btn-submit-cadastro" class="btn-login" style="margin-top: 20px;">
-                Concluir Registo <span class="material-symbols-rounded">app_registration</span>
-            </button>
-
-            <div style="text-align: center; margin-top: 25px;">
-                <p style="color: #94a3b8; font-size: 14px;">Já possui uma conta?
-                    <a href="index.html" style="color: #3b82f6; font-weight: 600; text-decoration: none;">Faça login</a>
+            <div style="text-align: center; margin-top: 25px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
+                <p style="color: var(--text-muted); font-size: 14px;">Já possui uma conta?
+                    <a href="index.html" style="color: #ffffff; font-weight: 700; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.2);">Faça login</a>
                 </p>
             </div>
         </form>
