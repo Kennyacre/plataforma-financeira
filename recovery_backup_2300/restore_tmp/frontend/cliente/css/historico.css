@@ -1,0 +1,186 @@
+/* Histórico de Transações - Versão Limpa e Responsiva */
+
+.historico-container {
+    background: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 25px;
+    margin-top: 25px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* SEÇÃO DE FILTROS */
+.filter-section {
+    background: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 20px;
+    margin-top: 25px;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    min-width: 200px;
+}
+
+.filter-group label {
+    color: #94a3b8;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.filter-group input,
+.filter-group select {
+    background: #0f172a;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #f8fafc;
+    padding: 12px 15px;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* TABELA PREMIUM */
+.table-container {
+    background: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    margin-top: 20px;
+    overflow-x: auto;
+    /* IMPORTANTE: Permite scroll horizontal em tabelas largas */
+    width: 100%;
+}
+
+.premium-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    min-width: 600px;
+    /* Garante que a tabela não fique minúscula no mobile */
+}
+
+.premium-table th {
+    background: rgba(255, 255, 255, 0.02);
+    color: #94a3b8;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 18px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    white-space: nowrap;
+}
+
+.premium-table td {
+    padding: 18px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    color: #f8fafc;
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+.premium-table tr:hover td {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* BADGES E VALORES */
+.badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.badge.success {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.badge.danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.badge.neutral {
+    background: rgba(148, 163, 184, 0.1);
+    color: #94a3b8;
+}
+
+.valor-positivo {
+    color: #10b981;
+    font-weight: 600;
+}
+
+.valor-negativo {
+    color: #ef4444;
+    font-weight: 600;
+}
+
+/* AÇÕES */
+.acoes-td {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.btn-editar,
+.btn-action {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+    border: none;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+}
+
+.btn-action {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.btn-editar:hover {
+    background: #3b82f6;
+    color: white;
+}
+
+.btn-action:hover {
+    background: #ef4444;
+    color: white;
+}
+
+/* RESPONSIVIDADE */
+@media (max-width: 768px) {
+    .filter-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-group {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .historico-container {
+        padding: 15px;
+    }
+
+    .premium-table th,
+    .premium-table td {
+        padding: 12px 15px;
+        font-size: 13px;
+    }
+}

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registo - TN INFO</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+
+    <link rel="stylesheet" href="css/login.css?v=1">
+</head>
+
+<body>
+
+    <div class="login-box" style="margin-top: 50px; margin-bottom: 50px;">
+        <div class="logo">TN INFO</div>
+        <div class="subtitle">Crie sua conta para começar</div>
+
+        <form id="formCadastro">
+            <div class="form-group">
+                <label>Nome Completo</label>
+                <input type="text" id="nome_completo" class="form-control" placeholder="Seu nome completo" required>
+            </div>
+            <div class="form-group">
+                <label>Utilizador (Username)</label>
+                <input type="text" id="username" class="form-control" placeholder="Escolha um utilizador" required>
+            </div>
+            <div class="form-group">
+                <label>E-mail</label>
+                <input type="email" id="email" class="form-control" placeholder="seu@email.com" required>
+            </div>
+            <div class="form-group">
+                <label>Senha</label>
+                <input type="password" id="password" class="form-control" placeholder="Mínimo 6 caracteres" required
+                    minlength="6">
+            </div>
+            <div class="form-group">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <label style="margin-bottom: 0;">ID de Indicação</label>
+                    <span style="font-size: 11px; color: #64748b;">(Opcional)</span>
+                </div>
+                <input type="number" id="id_indicacao" class="form-control" placeholder="Ex: 4">
+            </div>
+
+            <div id="mensagemStatus" class="error-msg" style="display: none;"></div>
+
+            <button type="submit" id="btn-submit-cadastro" class="btn-login" style="margin-top: 20px;">
+                Concluir Registo <span class="material-symbols-rounded">app_registration</span>
+            </button>
+
+            <div style="text-align: center; margin-top: 25px;">
+                <p style="color: #94a3b8; font-size: 14px;">Já possui uma conta?
+                    <a href="index.html" style="color: #3b82f6; font-weight: 600; text-decoration: none;">Faça login</a>
+                </p>
+            </div>
+        </form>
+    </div>
+
+    <script src="js/cadastro.js?v=1"></script>
+</body>
+
+</html>

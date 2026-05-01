@@ -1,0 +1,35 @@
+.finance-grid { display: grid; grid-template-columns: 1fr; gap: 2rem; max-width: 600px; }
+.card { background: var(--sidebar-bg); padding: 2rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); }
+.card h2 { margin-bottom: 1.5rem; font-size: 1.2rem; }
+
+.input-group { margin-bottom: 1.2rem; display: flex; flex-direction: column; gap: 8px; }
+.input-group label { font-size: 0.85rem; color: var(--text-muted); }
+.input-group input, .input-group select {
+    background: #0f172a; border: 1px solid rgba(255,255,255,0.1);
+    padding: 12px; border-radius: 10px; color: white; outline: none;
+}
+.btn-save {
+    width: 100%; padding: 14px; border-radius: 12px; border: none;
+    background: var(--accent-color); color: white; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    cursor: pointer; transition: 0.3s;
+}
+.btn-save:hover { filter: brightness(1.2); transform: translateY(-2px); }
+.table-card { margin-top: 1rem; overflow-x: auto; }
+.finance-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+.finance-table th { text-align: left; padding: 12px; color: var(--text-muted); font-size: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.finance-table td { padding: 15px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; }
+.badge { padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; }
+.badge.receita { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+.badge.despesa { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+.finance-container {
+    display: flex;
+    flex-direction: column; /* Força um em cima do outro */
+    gap: 2rem;
+    max-width: 800px; /* Opcional: deixa o formulário centralizado e elegante */
+    margin: 0 auto;   /* Centraliza o bloco na tela */
+}
+
+.form-card, .table-card {
+    width: 100%; /* Garante que ocupem toda a largura do container */
+}

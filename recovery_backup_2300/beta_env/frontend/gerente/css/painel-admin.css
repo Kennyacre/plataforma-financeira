@@ -1,0 +1,90 @@
+/* ==========================================
+   PINTURA BLINDADA DO PAINEL ADMIN
+   ========================================== */
+.admin-badge { 
+    background: rgba(255, 255, 255, 0.1); 
+    color: #ffffff; 
+    border: 1px solid rgba(255, 255, 255, 0.2); 
+    padding: 4px 8px; 
+    border-radius: 6px; 
+    font-size: 12px; 
+    font-weight: bold;
+}
+
+.icon-box.gold { 
+    background: rgba(255, 255, 255, 0.05); 
+    color: #ffffff; 
+}
+
+/* Consertando o fundo fantasma do menu */
+.user-info { 
+    background: transparent !important; 
+    border: none !important; 
+}
+
+/* O Botão de Sair Vermelho Blindado */
+.btn-logout {
+    background: rgba(255, 255, 255, 0.05); 
+    color: #ffffff; 
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 12px 20px; 
+    border-radius: 10px; 
+    font-family: 'Inter', sans-serif;
+    font-weight: 600; 
+    font-size: 14px; 
+    cursor: pointer; 
+    display: flex;
+    align-items: center; 
+    gap: 10px; 
+    width: 100%; 
+    transition: all 0.3s ease;
+}
+
+.btn-logout:hover { 
+    background: #ffffff; 
+    color: #000000; 
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2); 
+}
+
+/* Tabela Resumo de Clientes */
+.admin-table-container {
+    background: #0f0f0f; 
+    border-radius: 15px; 
+    padding: 20px; 
+    margin-top: 20px;
+    border: 1px solid rgba(255,255,255,0.05); 
+    overflow-x: auto;
+}
+
+table { width: 100%; border-collapse: collapse; text-align: left; }
+
+th { 
+    color: #ffffff; 
+    font-size: 13px; 
+    text-transform: uppercase; 
+    padding: 15px; 
+    border-bottom: 1px solid rgba(255,255,255,0.1); 
+}
+
+td { 
+    padding: 15px; 
+    color: white; 
+    font-size: 14px; 
+    border-bottom: 1px solid rgba(255,255,255,0.05); 
+}
+
+.btn-acao { 
+    background: transparent; 
+    border: 1px solid #ffffff; 
+    color: #ffffff; 
+    padding: 5px 10px; 
+    border-radius: 5px; 
+    cursor: pointer; 
+    transition: 0.3s; 
+    font-weight: bold;
+}
+
+.btn-acao:hover { 
+    background: #ffffff; 
+    color: #000000; 
+}

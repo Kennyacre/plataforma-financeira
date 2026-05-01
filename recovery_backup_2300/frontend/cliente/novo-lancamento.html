@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Novo Lançamento | TN INFO</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+<link href="css/dashboard.css" rel="stylesheet"/>
+<link href="css/cliente.css" rel="stylesheet"/>
+<!-- PWA -->
+<link href="../manifest.json" rel="manifest"/>
+<meta content="#3b82f6" name="theme-color"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<style>
+        /* SCROLL DA SIDEBAR E BOTÃO MENU */
+        .sidebar {
+            overflow-y: auto;
+            max-height: 100vh;
+            transition: 0.3s ease;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .sidebar.escondida {
+            display: none;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .btn-menu {
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #f8fafc;
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            transition: 0.3s;
+        }
+
+        .btn-menu:hover {
+            background: #3b82f6;
+            border-color: #3b82f6;
+        }
+
+        /* ESTILOS DO FORMULÁRIO PREMIUM */
+        .form-section {
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 25px;
+            max-width: 800px;
+        }
+
+        .form-header {
+            margin-bottom: 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 15px;
+        }
+
+        .form-header h2 {
+            color: #f8fafc;
+            font-size: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        .form-group label {
+            color: #94a3b8;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select {
+            background: #0f172a;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #f8fafc;
+            padding: 12px 15px;
+            border-radius: 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        /* Tipo de Lançamento (Toggle) */
+        .type-toggle {
+            display: flex;
+            background: #0f172a;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .type-toggle label {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            cursor: pointer;
+            color: #94a3b8;
+            transition: 0.3s;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .type-toggle input {
+            display: none;
+        }
+
+        .type-toggle input[value="recebimento"]:checked+label {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .type-toggle input[value="gasto"]:checked+label {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .btn-submit {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .btn-submit:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 992px) {
+            .form-section {
+                padding: 20px;
+                width: 100%;
+                border-radius: 0;
+                margin-top: 0;
+                border: none;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .form-group.full-width {
+                grid-column: span 1;
+            }
+
+            .main-content {
+                padding: 0;
+            }
+
+            .top-bar {
+                padding: 20px;
+                margin-bottom: 0;
+            }
+        }
+    </style>
+<script src="../js/security.js?v=2"></script>
+</link></head>
+<body>
+<div class="dashboard-wrapper">
+<div class="navigation" id="minha-sidebar">
+<div class="user-info" style="display: flex; flex-direction: column; align-items: center; padding: 20px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 10px;">
+<img alt="TN INFO" src="../assets/img/logo.jpg" style="width: 140px; height: 140px; border-radius: 12px; object-fit: cover; border: 2px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.3);"/>
+</div>
+<ul class="">
+<li class="list"><a href="painel-cliente.html"><span class="icon"><span class="material-symbols-rounded">dashboard</span></span><span class="title">Minha Área</span></a></li>
+<li class="list"><a href="minhas-financas.html"><span class="icon"><span class="material-symbols-rounded">account_balance</span></span><span class="title">Minhas Finanças</span></a></li>
+<li class="list"><a href="previsao.html"><span class="icon"><span class="material-symbols-rounded">trending_up</span></span><span class="title">Previsão</span></a></li>
+<li class="list"><a href="calendario.html"><span class="icon"><span class="material-symbols-rounded">calendar_month</span></span><span class="title">Calendário</span></a></li>
+<li class="separator"><span class="title">OPERACIONAL</span></li>
+<li class="list active"><a href="novo-lancamento.html"><span class="icon"><span class="material-symbols-rounded">add_circle</span></span><span class="title">Novo Lançamento</span></a></li>
+<li class="list"><a href="historico.html"><span class="icon"><span class="material-symbols-rounded">history</span></span><span class="title">Histórico</span></a></li>
+<li class="list"><a href="metas-gastos.html"><span class="icon"><span class="material-symbols-rounded">ads_click</span></span><span class="title">Metas de Gastos</span></a></li>
+<li class="separator"><span class="title">CONTA</span></li>
+<li class="list"><a href="meus-cartoes.html"><span class="icon"><span class="material-symbols-rounded">credit_card</span></span><span class="title">Meus Cartões</span></a></li>
+<li class="list"><a href="preferencias.html"><span class="icon"><span class="material-symbols-rounded">settings</span></span><span class="title">Preferências</span></a></li>
+<li class="list"><a href="minha-assinatura.html"><span class="icon"><span class="material-symbols-rounded">verified_user</span></span><span class="title">Minha Assinatura</span></a></li>
+<li class="list"><a href="perfil.html"><span class="icon"><span class="material-symbols-rounded">person</span></span><span class="title">Meu
+                    Perfil</span></a></li>
+</ul>
+</div>
+<main class="main-content">
+<header class="top-bar">
+<div class="header-left">
+<button class="btn-menu" id="btn-toggle-sidebar">
+<span class="material-symbols-rounded">menu</span>
+</button>
+<div>
+<h1>Registrar Movimentação</h1>
+<p>Adicione uma nova receita ou despesa ao seu painel.</p>
+</div>
+</div>
+<div class="top-actions" style="display: flex; gap: 10px; align-items: center; margin-left: auto;">
+    <button class="btn-top-action" onclick="forcarAtualizacao()" title="Atualizar App" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s; font-weight: 600;">
+        <span class="material-symbols-rounded" style="font-size: 20px;">sync</span>
+        <span class="action-text">Atualizar</span>
+    </button>
+    <button class="btn-top-action" onclick="location.href='../index.html'" title="Sair" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s; font-weight: 600;">
+        <span class="material-symbols-rounded" style="font-size: 20px;">logout</span>
+        <span class="action-text">Sair</span>
+    </button>
+</div>
+</header>
+<div class="form-section">
+<div class="form-header">
+<h2><span class="material-symbols-rounded" style="color: #3b82f6;">edit_document</span> Detalhes da
+                        Transação</h2>
+</div>
+<form id="form-lancamento">
+<div class="form-grid">
+<div class="form-group full-width">
+<label>Tipo de Movimentação</label>
+<div class="type-toggle">
+<input checked="" id="tipo-despesa" name="tipo" type="radio" value="gasto"/>
+<label for="tipo-despesa"><span class="material-symbols-rounded" style="vertical-align: middle; font-size: 18px;">arrow_downward</span>
+                                    Despesa</label>
+<input id="tipo-receita" name="tipo" type="radio" value="recebimento"/>
+<label for="tipo-receita"><span class="material-symbols-rounded" style="vertical-align: middle; font-size: 18px;">arrow_upward</span>
+                                    Receita</label>
+</div>
+</div>
+<div class="form-group full-width">
+<label for="descricao">Descrição</label>
+<input id="descricao" placeholder="Ex: Conta de Luz, Salário, Compra no Mercado..." required="" type="text"/>
+</div>
+<div class="form-group">
+<label for="valor">Valor (R$)</label>
+<input id="valor" min="0.01" placeholder="0.00" required="" step="0.01" type="number"/>
+</div>
+<div class="form-group">
+<label for="data">Data</label>
+<input id="data" required="" type="date"/>
+</div>
+<div class="form-group">
+<label>Status do Lançamento</label>
+<select id="status_pagamento">
+<option value="pago">✅ Já Pago / Recebido</option>
+<option value="pendente">⏳ Pendente (A Pagar / A Receber)</option>
+</select>
+</div>
+<div class="form-group">
+<label for="categoria">Categoria</label>
+<select id="categoria" required="">
+<option disabled="" selected="" value="">Carregando categorias...</option>
+</select>
+</div>
+<div class="form-group">
+<label for="pagamento">Forma de Pagamento / Recebimento</label>
+<select id="pagamento" required="">
+<option disabled="" selected="" value="">Carregando formas...</option>
+</select>
+</div>
+<div class="form-group">
+<label for="repetir">Repetir transação?</label>
+<select id="repetir" onchange="toggleQuantidade()">
+<option value="nao">Não, pagamento único</option>
+<option value="sim">Sim, parcelar / repetir meses</option>
+</select>
+</div>
+<div class="form-group" id="div-quantidade" style="display: none;">
+<label for="quantidade">Quantos meses?</label>
+<input id="quantidade" max="120" min="2" type="number" value="1"/>
+</div>
+</div>
+<button class="btn-submit" type="submit">
+<span class="material-symbols-rounded">save</span> Salvar Lançamento
+                    </button>
+</form>
+</div>
+</main>
+</div>
+<script>
+        const user = localStorage.getItem('usuarioLogado');
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!user) { window.location.href = '../index.html'; return; }
+
+            const elNome = document.getElementById('nome-cliente-sidebar');
+            const elAvatar = document.getElementById('user-avatar');
+            if (elNome) elNome.innerText = user.toUpperCase();
+            if (elAvatar) elAvatar.innerText = user.substring(0, 2).toUpperCase();
+
+
+            document.getElementById('data').valueAsDate = new Date();
+
+            // Carregar dados dinâmicos
+            await Promise.all([
+                carregarCategoriasNaLista(),
+                carregarFormasPagamentoNaLista()
+            ]);
+
+            toggleQuantidade();
+        });
+
+        function toggleQuantidade() {
+            const repetir = document.getElementById('repetir').value;
+            const divQtd = document.getElementById('div-quantidade');
+            const inputQtd = document.getElementById('quantidade');
+
+            if (repetir === 'sim') {
+                divQtd.style.display = 'flex';
+                inputQtd.disabled = false;
+                inputQtd.required = true;
+                inputQtd.min = "2";
+            } else {
+                divQtd.style.display = 'none';
+                inputQtd.disabled = true;
+                inputQtd.required = false;
+                inputQtd.value = "1";
+            }
+        }
+
+        async function carregarCategoriasNaLista() {
+            const select = document.getElementById('categoria');
+            try {
+                const res = await fetch(`/api/categorias/${user}`);
+                const data = await res.json();
+
+                select.innerHTML = '<option value="" disabled selected>Selecione a categoria...</option>';
+
+                const padroes = ["Alimentação", "Moradia", "Transporte", "Saúde", "Lazer e Viagens", "Educação", "Salário", "Vestuário", "Investimentos", "Impostos / Taxas", "Cuidados Pessoais", "Outros"];
+
+                padroes.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p; opt.innerText = p;
+                    select.appendChild(opt);
+                });
+
+                if (data.status === 'sucesso' && data.dados.length > 0) {
+                    const sep = document.createElement('option');
+                    sep.disabled = true; sep.innerText = "── MINHAS CATEGORIAS ──";
+                    select.appendChild(sep);
+
+                    data.dados.forEach(cat => {
+                        const opt = document.createElement('option');
+                        opt.value = cat.nome; opt.innerText = cat.nome;
+                        select.appendChild(opt);
+                    });
+                }
+            } catch (err) {
+                console.error("Erro categorias:", err);
+            }
+        }
+
+        async function carregarFormasPagamentoNaLista() {
+            const select = document.getElementById('pagamento');
+            try {
+                // 1. Carregar Formas de Pagamento (Padrões + Customizadas)
+                const res = await fetch(`/api/formas-pagamento/${user}`);
+                const data = await res.json();
+
+                select.innerHTML = '<option value="" disabled selected>Selecione o pagamento...</option>';
+
+                const padroes = ["PIX", "Dinheiro", "Boleto", "Saldo em Conta", "Cartão de Crédito", "Cartão de Débito", "Transferência", "Outros"];
+                padroes.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p; opt.innerText = p;
+                    select.appendChild(opt);
+                });
+
+                if (data.status === 'sucesso' && data.dados.length > 0) {
+                    const sep = document.createElement('option');
+                    sep.disabled = true; sep.innerText = "── MINHAS FORMAS ──";
+                    select.appendChild(sep);
+
+                    data.dados.forEach(forma => {
+                        const opt = document.createElement('option');
+                        opt.value = forma.nome; opt.innerText = forma.nome;
+                        select.appendChild(opt);
+                    });
+                }
+
+                // 2. Carregar Cartões (Para aparecerem na lista de pagamento)
+                const resC = await fetch(`/api/cartoes/${user}`);
+                const dataC = await resC.json();
+                if (dataC.status === 'sucesso' && dataC.cartoes.length > 0) {
+                    const sepC = document.createElement('option');
+                    sepC.disabled = true; sepC.innerText = "── SEUS CARTÕES ──";
+                    select.appendChild(sepC);
+
+                    dataC.cartoes.forEach(cartao => {
+                        const opt = document.createElement('option');
+                        opt.value = cartao.nome;
+                        opt.innerText = `💳 Cartão: ${cartao.nome}`;
+                        select.appendChild(opt);
+                    });
+                }
+            } catch (err) {
+                console.error("Erro ao carregar pagamentos/cartões:", err);
+            }
+        }
+
+        document.getElementById('form-lancamento').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // 👇 CORREÇÃO AQUI: Pegando o valor do rádio botão (Gasto ou Recebimento)
+            const tipoSelecionado = document.querySelector('input[name="tipo"]:checked').value;
+
+            // 👇 CORREÇÃO AQUI: IDs alinhados com o seu HTML
+            const payload = {
+                username: user,
+                tipo: tipoSelecionado,
+                descricao: document.getElementById('descricao').value,
+                valor: parseFloat(document.getElementById('valor').value),
+                data: document.getElementById('data').value, // corrigido
+                categoria: document.getElementById('categoria').value,
+                pagamento: document.getElementById('pagamento').value, // corrigido
+                repetir: document.getElementById('repetir').value, // corrigido
+                quantidade: parseInt(document.getElementById('quantidade').value) || 1, // corrigido
+                status: document.getElementById('status_pagamento').value
+            };
+
+            const btn = document.querySelector('.btn-submit');
+            btn.innerHTML = '<span class="material-symbols-rounded">hourglass_empty</span> Salvando...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/lancamentos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const resultado = await response.json();
+
+                if (response.ok && resultado.status === 'sucesso') {
+                    alert('✅ ' + resultado.mensagem);
+                    window.location.href = 'historico.html'; // Mudei para ir para o Histórico para você ver o botão de confirmar!
+                } else {
+                    alert('Erro ao salvar: ' + (resultado.detail || 'Falha no servidor.'));
+                    btn.innerHTML = '<span class="material-symbols-rounded">save</span> Salvar Lançamento';
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                alert('Erro de conexão com o servidor!');
+                console.error(error);
+                btn.innerHTML = '<span class="material-symbols-rounded">save</span> Salvar Lançamento';
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

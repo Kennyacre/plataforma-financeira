@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Perfil - TN INFO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/perfil.css">
+</head>
+<body>
+    <div class="dashboard-wrapper">
+        <nav class="sidebar">
+            <div class="user-info">
+                <div class="avatar">DU</div>
+                <div>
+                    <h3>DUDA</h3> <span>Nível: Cliente ATIVO</span> </div>
+            </div>
+            <ul class="nav-links">
+                <li onclick="location.href='painel-cliente.html'"><span class="material-symbols-rounded">dashboard</span> Minha Área</li>
+                <li onclick="location.href='financeiro-cliente.html'"><span class="material-symbols-rounded">account_balance</span> Minhas Finanças</li>
+                <li onclick="location.href='previsao.html'"><span class="material-symbols-rounded">query_stats</span> Previsão</li>
+                <li onclick="location.href='calendario.html'"><span class="material-symbols-rounded">calendar_month</span> Calendário</li>
+                <li onclick="location.href='novo-lancamento.html'"><span class="material-symbols-rounded">add_circle</span> Novo Lançamento</li>
+                <li onclick="location.href='historico.html'"><span class="material-symbols-rounded">history</span> Histórico</li>
+                <li onclick="location.href='metas.html'"><span class="material-symbols-rounded">target</span> Metas de Gastos</li>
+                <li onclick="location.href='cartoes.html'"><span class="material-symbols-rounded">credit_card</span> Meus Cartões</li>
+                <li onclick="location.href='preferencias.html'"><span class="material-symbols-rounded">settings</span> Preferências</li>
+                <li onclick="location.href='assinatura.html'"><span class="material-symbols-rounded">verified</span> Minha Assinatura</li>
+                <li class="active"><span class="material-symbols-rounded">person</span> Meu Perfil</li> </ul>
+        </nav>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <div>
+                    <h1>Meu Perfil</h1> <p>Gerencie os seus dados de acesso, contatos e a segurança da sua conta.</p> </div>
+            </header>
+
+            <div class="perfil-grid">
+                <section class="card id-card">
+                    <div class="card-header">
+                        <span class="material-symbols-rounded">badge</span>
+                        <h3>Identificação</h3> </div>
+                    <div class="id-info">
+                        <div class="info-item">
+                            <span>Utilizador:</span> <strong>duda</strong> </div>
+                        <div class="info-item">
+                            <span>Nível de Acesso:</span> <strong class="badge-role">Cliente</strong> </div>
+                        <div class="info-item">
+                            <span>Status da Conta:</span> <strong class="text-green">ATIVO</strong> </div>
+                    </div>
+                    <div class="alert-box">
+                        <span class="material-symbols-rounded">info</span>
+                        <p>Para alterar o seu nome de utilizador ou nível, entre em contato com o Suporte.</p> </div>
+                </section>
+
+                <section class="card">
+                    <div class="card-header">
+                        <span class="material-symbols-rounded">contact_mail</span>
+                        <h3>Informações de Contato</h3> </div>
+                    <form class="form-perfil">
+                        <div class="form-group">
+                            <label>Endereço de E-mail</label> <input type="email" class="input-dark" value="dudinhacf14@gmail.com"> </div>
+                        <div class="form-group">
+                            <label>Número do WhatsApp</label> <input type="text" class="input-dark" value="(24) 99999-9999"> </div>
+                        <button type="submit" class="btn-save-contacts">SALVAR CONTATOS</button> </form>
+                </section>
+
+                <section class="card security-card">
+                    <div class="card-header">
+                        <span class="material-symbols-rounded">lock</span>
+                        <h3>Segurança (Alterar Senha)</h3> </div>
+                    <form class="form-perfil">
+                        <div class="form-group">
+                            <label>Senha Atual</label> <input type="password" class="input-dark" placeholder="Digite a sua senha atual"> </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Nova Senha</label> <input type="password" class="input-dark" placeholder="Digite a nova senha"> </div>
+                            <div class="form-group">
+                                <label>Confirmar Nova Senha</label> <input type="password" class="input-dark" placeholder="Repita a nova senha"> </div>
+                        </div>
+                        <button type="submit" class="btn-update-password">ATUALIZAR SENHA</button> </form>
+                </section>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

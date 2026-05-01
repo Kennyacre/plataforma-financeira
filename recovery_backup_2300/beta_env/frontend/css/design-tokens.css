@@ -1,0 +1,55 @@
+:root {
+    /* TEMA LUXURY BLACK & WHITE */
+    --bg-body: #050505;
+    --bg-sidebar: #000000;
+    --bg-card: #0c0c0c;
+    --bg-input: #111111;
+    --text-main: #ffffff;
+    --text-dim: #ffffff;
+    --text-muted: #ffffff;
+    --border: rgba(255, 255, 255, 0.1);
+    --border-hover: rgba(255, 255, 255, 0.2);
+    --primary: #ffffff; 
+    --success: #ffffff; 
+    --error: #ffffff; 
+    --warning: #ffffff;
+    --shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+    --glass-bg: rgba(255, 255, 255, 0.03);
+    
+    /* Específicos para Gráficos */
+    --chart-line: #ffffff;
+    --chart-grid: rgba(255, 255, 255, 0.05);
+}
+
+body {
+    background-color: var(--bg-body) !important;
+    color: var(--text-main) !important;
+}
+
+/* FORÇANDO TEXTO BRANCO EM ELEMENTOS DE TEXTO EM TODO O SISTEMA */
+h1, h2, h3, h4, h5, h6, p, span, li, label, td, th, .material-symbols-rounded {
+    color: #ffffff !important;
+}
+
+/* Sidebar e Navegação */
+.navigation, .sidebar, #minha-sidebar {
+    background: var(--bg-sidebar) !important;
+}
+
+/* Exceções para botões com fundo branco */
+button[style*="background: #ffffff"], 
+button[style*="background:#ffffff"],
+.btn-primary, .btn-login, .btn-save, .btn-submit, .btn-nova-transacao {
+    color: #000000 !important;
+}
+button[style*="background: #ffffff"] span,
+.btn-primary span, .btn-login span, .btn-save span, .btn-submit span, .btn-nova-transacao span {
+    color: #000000 !important;
+}
+button[style*="background: #ffffff"] .material-symbols-rounded,
+.btn-primary .material-symbols-rounded, .btn-login .material-symbols-rounded, 
+.btn-save .material-symbols-rounded, .btn-submit .material-symbols-rounded, 
+.btn-nova-transacao .material-symbols-rounded {
+    color: #000000 !important;
+}
+

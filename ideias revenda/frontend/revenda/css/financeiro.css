@@ -1,0 +1,19 @@
+
+        .sidebar { overflow-y: auto; max-height: 100vh; transition: 0.3s ease; }
+        .sidebar.escondida { display: none; }
+        .header-left { display: flex; align-items: center; gap: 20px; }
+        .btn-menu { background: #1e293b; border: 1px solid rgba(255,255,255,0.1); color: #f8fafc; padding: 10px; border-radius: 10px; cursor: pointer; display: flex; transition: 0.3s; }
+        
+        /* Cards Financeiros da Revenda */
+        .revenda-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 25px; }
+        .card-finance { background: #1e293b; padding: 30px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden; }
+        .card-creditos { background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color: white; border: none; }
+        
+        .card-finance span { font-size: 14px; opacity: 0.8; font-weight: 600; text-transform: uppercase; }
+        .card-finance h2 { font-size: 42px; margin: 10px 0; font-weight: 800; }
+        .icon-floating { position: absolute; right: -10px; bottom: -10px; font-size: 100px; opacity: 0.1; }
+
+        .info-panel { background: #1e293b; border-radius: 15px; padding: 25px; margin-top: 25px; border: 1px solid rgba(255,255,255,0.05); }
+        .btn-buy { background: #10b981; color: white; border: none; padding: 15px 30px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 10px; margin-top: 20px; }
+        .btn-buy:hover { background: #059669; transform: translateY(-2px); }
+   

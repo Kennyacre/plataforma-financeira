@@ -1,0 +1,51 @@
+/* css/financas.css */
+.financas-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    margin-top: 25px;
+}
+
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.stat-box {
+    background: var(--bg-card);
+    border-radius: 15px;
+    padding: 25px;
+    border: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: 0.3s;
+}
+
+.stat-box:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+}
+
+.stat-box h3 { color: var(--text-dim) !important; font-size: 13px; font-weight: 600; text-transform: uppercase; margin: 0; }
+.stat-box h2 { color: var(--text-main) !important; font-size: 28px; margin: 0; }
+.val-pos { color: #ffffff !important; font-weight: bold; }
+.val-neg { color: #ffffff !important; font-weight: bold; }
+.val-neu { color: #ffffff !important; }
+
+.chart-container-donut {
+    background: var(--bg-card);
+    border-radius: 15px;
+    padding: 30px;
+    border: 1px solid rgba(255,255,255,0.05);
+    height: 400px; 
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+@media (max-width: 768px) {
+    .stats-row { grid-template-columns: 1fr; }
+}

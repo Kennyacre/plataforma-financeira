@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Minha Assinatura | TN INFO</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+<link href="../css/design-tokens.css" rel="stylesheet"/>
+<link href="css/dashboard.css" rel="stylesheet"/>
+<link href="css/cliente.css" rel="stylesheet"/>
+<script src="../js/security.js?v=2"></script>
+<!-- PWA -->
+<link href="../manifest.json" rel="manifest"/>
+<meta content="#000000" name="theme-color"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<style>
+        .sub-card {
+            background: var(--bg-card-light);
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        /* QUADRO DE PAGAMENTO PIX DO REVENDEDOR */
+        .pix-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 25px;
+            display: none;
+        }
+
+        .pix-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #ffffff;
+            margin-bottom: 15px;
+        }
+
+        .pix-header h4 {
+            margin: 0;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        .pix-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .pix-item span {
+            color: #94a3b8;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .pix-item p {
+            color: white;
+            margin: 5px 0 0 0;
+            font-weight: bold;
+        }
+
+        .btn-renew-info {
+            background: #ffffff;
+            color: #000;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: default;
+        }
+
+        @media (max-width: 600px) {
+            .pix-content {
+                grid-template-columns: 1fr;
+            }
+
+            .sub-card {
+                padding: 20px;
+                text-align: center;
+                justify-content: center;
+            }
+        }
+    </style>
+<script src="../js/security.js?v=2"></script>
+</link></head>
+<body>
+<div class="dashboard-wrapper">
+<div class="navigation" id="minha-sidebar">
+<div class="user-info" style="display: flex; flex-direction: column; align-items: center; padding: 20px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 10px;">
+<img alt="TN INFO" src="../assets/img/logo.jpg" style="width: 140px; height: 140px; border-radius: 12px; object-fit: cover; border: 2px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.3);"/>
+</div>
+<ul class="">
+<li class="list"><a href="painel-cliente.html"><span class="icon"><span class="material-symbols-rounded">dashboard</span></span><span class="title">Minha Área</span></a></li>
+<li class="list"><a href="minhas-financas.html"><span class="icon"><span class="material-symbols-rounded">account_balance</span></span><span class="title">Minhas Finanças</span></a></li>
+<li class="list"><a href="previsao.html"><span class="icon"><span class="material-symbols-rounded">trending_up</span></span><span class="title">Previsão</span></a></li>
+<li class="list"><a href="calendario.html"><span class="icon"><span class="material-symbols-rounded">calendar_month</span></span><span class="title">Calendário</span></a></li>
+<li class="separator"><span class="title">OPERACIONAL</span></li>
+<li class="list"><a href="novo-lancamento.html"><span class="icon"><span class="material-symbols-rounded">add_circle</span></span><span class="title">Novo Lançamento</span></a></li>
+<li class="list"><a href="historico.html"><span class="icon"><span class="material-symbols-rounded">history</span></span><span class="title">Histórico</span></a></li>
+<li class="list"><a href="metas-gastos.html"><span class="icon"><span class="material-symbols-rounded">ads_click</span></span><span class="title">Metas de Gastos</span></a></li>
+<li class="separator"><span class="title">CONTA</span></li>
+<li class="list"><a href="meus-cartoes.html"><span class="icon"><span class="material-symbols-rounded">credit_card</span></span><span class="title">Meus Cartões</span></a></li>
+<li class="list"><a href="preferencias.html"><span class="icon"><span class="material-symbols-rounded">settings</span></span><span class="title">Preferências</span></a></li>
+<li class="list active"><a href="minha-assinatura.html"><span class="icon"><span class="material-symbols-rounded">verified_user</span></span><span class="title">Minha Assinatura</span></a></li>
+<li class="list"><a href="perfil.html"><span class="icon"><span class="material-symbols-rounded">person</span></span><span class="title">Meu
+                    Perfil</span></a></li>
+</ul>
+</div>
+<main class="main-content">
+<header class="top-bar">
+<div class="header-left">
+<button class="btn-menu" id="btn-toggle-sidebar"><span class="material-symbols-rounded">menu</span></button>
+<div>
+<h1>Minha Assinatura</h1>
+<p>Verifique o status do seu acesso e realize renovações.</p>
+</div>
+</div>
+<div class="top-actions" style="display: flex; gap: 10px; align-items: center; margin-left: auto;">
+    <button class="btn-top-action" onclick="forcarAtualizacao()" title="Atualizar App" style="background: rgba(255, 255, 255, 0.05); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s; font-weight: 600;">
+        <span class="material-symbols-rounded" style="font-size: 20px;">sync</span>
+        <span class="action-text">Atualizar</span>
+    </button>
+    <button class="btn-top-action" onclick="location.href='../index.html'" title="Sair" style="background: rgba(255, 255, 255, 0.05); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s; font-weight: 600;">
+        <span class="material-symbols-rounded" style="font-size: 20px;">logout</span>
+        <span class="action-text">Sair</span>
+    </button>
+</div>
+</header>
+<div class="sub-card">
+<div>
+<h2 style="color: white; margin: 0;">Plano Gestão Premium</h2>
+<p style="color: #94a3b8; margin-top: 10px;">Sua assinatura é válida até: <strong id="data-vencimento" style="color: #ffffff;">Carregando...</strong></p>
+</div>
+<div id="status-vencimento"></div>
+</div>
+<div class="pix-box" id="box-pix-cliente">
+<div class="pix-header">
+<span class="material-symbols-rounded">payments</span>
+<h4>Dados para Renovação (PIX)</h4>
+</div>
+<div class="pix-content">
+<div class="pix-item">
+<span>CHAVE PIX:</span>
+<p id="pix-superior-chave">---</p>
+</div>
+<div class="pix-item">
+<span>TITULAR:</span>
+<p id="pix-superior-titular">---</p>
+</div>
+</div>
+<p style="font-size: 12px; color: #94a3b8; margin-top: 15px;">* Realize o pagamento e envie o
+                    comprovante para o seu consultor para validar a renovação.</p>
+</div>
+</main>
+</div>
+<script>
+        const user = localStorage.getItem('usuarioLogado');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!user) { window.location.href = '../index.html'; return; }
+            document.getElementById('nome-cliente-sidebar').innerText = user.toUpperCase();
+            document.getElementById('user-avatar').innerText = user.substring(0, 2).toUpperCase();
+
+            carregarDadosAssinatura();
+        });
+
+        async function carregarDadosAssinatura() {
+            try {
+                // 1. Busca vencimento do cliente (Usando a rota de perfil que já existe)
+                const resUser = await fetch(`/api/revenda/perfil/${user}`);
+                const dataUser = await resUser.json();
+
+                // Supondo que a rota de perfil retorne o vencimento. Se não, podemos usar a data que salvamos no login.
+                // Aqui vamos simular a busca do vencimento real.
+                const resPix = await fetch(`/api/pix-pagamento/${user}`);
+                const dataPix = await resPix.json();
+
+                // 2. Exibe o PIX do Revendedor (ou Admin)
+                if (dataPix.status === 'sucesso' && dataPix.pix_chave !== "Não cadastrada") {
+                    document.getElementById('box-pix-cliente').style.display = 'block';
+                    document.getElementById('pix-superior-chave').innerText = dataPix.pix_chave;
+                    document.getElementById('pix-superior-titular').innerText = dataPix.pix_titular;
+                }
+
+                // Para mostrar a data de vencimento, você pode precisar que a API de perfil retorne o campo 'vencimento'
+                // No seu main.py, a tabela usuarios tem a coluna vencimento.
+                // Vamos usar um placeholder por agora ou ajustar a rota /api/revenda/perfil para enviar o vencimento.
+                document.getElementById('data-vencimento').innerText = "Verifique com seu consultor";
+
+            } catch (e) { console.error("Erro ao carregar dados."); }
+        }
+    </script>
+</body>
+</html>

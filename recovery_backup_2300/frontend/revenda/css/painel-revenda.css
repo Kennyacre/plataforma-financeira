@@ -1,0 +1,38 @@
+
+        /* SCROLL DA SIDEBAR E BOTÃO MENU */
+        .sidebar { overflow-y: auto; max-height: 100vh; transition: 0.3s ease; }
+        .sidebar::-webkit-scrollbar { width: 5px; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+        .sidebar.escondida { display: none; }
+        
+        .header-left { display: flex; align-items: center; gap: 20px; }
+        .btn-menu { background: #1e293b; border: 1px solid rgba(255,255,255,0.1); color: #f8fafc; padding: 10px; border-radius: 10px; cursor: pointer; display: flex; transition: 0.3s; }
+        .btn-menu:hover { background: #3b82f6; border-color: #3b82f6; }
+
+        /* WIDGETS DO REVENDEDOR */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 25px; }
+        .stat-card { background: #1e293b; padding: 25px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 10px; }
+        .stat-card .icon-bg { position: absolute; right: -10px; bottom: -20px; font-size: 100px; opacity: 0.05; }
+        
+        .stat-card span.title { font-size: 14px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-card h2 { font-size: 36px; font-weight: 700; color: #f8fafc; margin: 0; }
+        
+        .card-destaque { background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); border: none; box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.3); }
+        .card-destaque span.title, .card-destaque h2 { color: white; }
+
+        /* TABELA DE CLIENTES RECENTES */
+        .table-section { background: #1e293b; border: 1px solid rgba(255,255,255,0.05); border-radius: 15px; padding: 25px; margin-top: 25px; overflow-x: auto; }
+        .table-section h3 { color: #f8fafc; margin: 0 0 20px 0; font-size: 18px; display: flex; align-items: center; gap: 10px; }
+        
+        .premium-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .premium-table th { background: rgba(255,255,255,0.02); color: #94a3b8; font-weight: 600; font-size: 13px; padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .premium-table td { padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #f8fafc; font-size: 14px; vertical-align: middle; }
+        .premium-table tr:hover { background: rgba(255,255,255,0.02); }
+        .premium-table tr:last-child td { border-bottom: none; }
+        
+        .badge-status { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .badge-ativo { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .badge-inativo { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+
+        .btn-action { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: none; padding: 8px; border-radius: 8px; cursor: pointer; transition: 0.3s; display: inline-flex; }
+        .btn-action:hover { background: #3b82f6; color: white; }

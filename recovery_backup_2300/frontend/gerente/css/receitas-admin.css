@@ -1,0 +1,73 @@
+/* gerente/css/receitas-admin.css */
+
+/* CARDS DO COFRE FORTE */
+.admin-stats { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+    gap: 20px; 
+    margin-bottom: 30px; 
+}
+
+.stat-card { 
+    background: #1e293b; 
+    border-radius: 15px; 
+    padding: 25px; 
+    border: 1px solid rgba(255,255,255,0.05); 
+}
+
+.stat-card span.title { 
+    color: #94a3b8; 
+    font-size: 13px; 
+    font-weight: 600; 
+    text-transform: uppercase; 
+}
+
+.stat-card h2 { 
+    color: #f8fafc; 
+    font-size: 32px; 
+    margin: 10px 0 0 0; 
+}
+
+.card-green { border-bottom: 4px solid #10b981; }
+.card-gold { border-bottom: 4px solid #d97706; }
+
+/* TABELA DE TRANSAÇÕES */
+.table-container { 
+    background: #1e293b; 
+    border: 1px solid rgba(255,255,255,0.05); 
+    border-radius: 15px; 
+    padding: 25px; 
+    overflow-x: auto; 
+}
+
+.premium-table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    text-align: left; 
+}
+
+.premium-table th { 
+    color: #94a3b8; 
+    font-size: 13px; 
+    padding: 15px 20px; 
+    border-bottom: 1px solid rgba(255,255,255,0.05); 
+}
+
+.premium-table td { 
+    padding: 15px 20px; 
+    border-bottom: 1px solid rgba(255,255,255,0.05); 
+    font-size: 14px; 
+    color: #f8fafc; 
+}
+
+/* ETIQUETAS DE ENTRADA/SAÍDA */
+.type-badge { 
+    padding: 6px 12px; 
+    border-radius: 20px; 
+    font-size: 11px; 
+    font-weight: 700; 
+    text-transform: uppercase; 
+}
+
+.badge-in { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+.badge-out { background: rgba(239, 68, 68, 0.1); color: #ef4444; }

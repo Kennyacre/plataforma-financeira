@@ -1,0 +1,76 @@
+.rev-sub-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 25px;
+    margin-top: 20px;
+}
+
+.estoque-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    border-left: 4px solid var(--accent);
+}
+
+.estoque-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-dim);
+}
+
+.estoque-header span { font-size: 48px; color: var(--accent); }
+
+.estoque-value h2 {
+    font-size: 32px;
+    margin-top: 15px;
+    color: var(--text-main);
+}
+
+.pix-payment-box {
+    background: #0f172a;
+    padding: 20px;
+    border-radius: 12px;
+    margin: 20px 0;
+    border: 1px dashed var(--border);
+}
+
+.pix-instruction {
+    font-size: 14px;
+    margin-bottom: 15px;
+    color: var(--text-main);
+}
+
+.pix-key-display, .pix-receiver {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin-top: 8px;
+}
+
+.pix-key-display span, .pix-receiver span { color: var(--text-dim); }
+.pix-key-display strong { color: var(--accent); font-family: monospace; font-size: 16px; }
+
+.btn-request {
+    width: 100%;
+    background: var(--green);
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 10px;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: 0.3s;
+}
+
+.btn-request:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+}

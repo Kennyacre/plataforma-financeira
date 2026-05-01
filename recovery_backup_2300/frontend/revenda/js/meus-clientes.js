@@ -1,0 +1,86 @@
+// revenda/js/meus-clientes.js
+const user = localStorage.getItem('usuarioLogado');
+
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Inicializa Segurança e Sidebar
+    if (typeof inicializarSidebar === 'function') inicializarSidebar();
+    
+    document.getElementById('nome-revendedor-sidebar').innerText = user.toUpperCase();
+
+    // 2. Aciona o radar de busca
+    carregarClientes();
+
+    // 3. Liga o sistema de filtro em tempo real
+    const inputFiltro = document.getElementById('filtro-cliente');
+    if (inputFiltro) {
+        inputFiltro.addEventListener('keyup', filtrarTabela);
+    }
+});
+
+async function carregarClientes() {
+    try {
+        const response = await fetch(`/api/revenda/clientes/${user}`);
+        const data = await response.json();
+        const tbody = document.getElementById('lista-clientes');
+        tbody.innerHTML = '';
+
+        if (data.status === 'sucesso') {
+            const clientes = data.clientes || [];
+
+            if (clientes.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:30px;">A sua carteira de clientes está vazia.</td></tr>`;
+                return;
+            }
+
+            clientes.forEach(c => {
+                tbody.innerHTML += `
+                    <tr class="cliente-row">
+                        <td style="color: #64748b;">#${c.id}</td>
+                        <td class="nome-cliente" style="font-weight: bold; color: #f8fafc;">${c.username}</td>
+                        <td><span class="status-pill active-pill">ATIVO</span></td>
+                        <td style="color: #94a3b8;">Premium Anual</td>
+                        <td class="actions-cell">
+                            <button class="btn-reject" onclick="excluirCliente('${c.username}')" title="Mover para Lixeira" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: none; padding: 8px; border-radius: 8px; cursor: pointer; transition: 0.3s;">
+                                <span class="material-symbols-rounded" style="font-size: 18px;">delete</span>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+    } catch (error) {
+        console.error("Erro ao carregar clientes:", error);
+    }
+}
+
+// --- EXCLUSÃO LÓGICA (MANDA PRA LIXEIRA) ---
+async function excluirCliente(clienteAlvo) {
+    if(!confirm(`⚠️ Comandante, deseja mover o cliente '${clienteAlvo}' para a Lixeira?`)) return;
+    
+    try {
+        const response = await fetch(`/api/revenda/excluir-cliente/${user}/${clienteAlvo}`, { method: 'DELETE' });
+        const result = await response.json();
+        
+        if (response.ok) {
+            carregarClientes(); // Some da lista na hora
+        } else {
+            alert("❌ Erro: " + (result.detail || "Falha ao excluir."));
+        }
+    } catch (error) { 
+        alert("🚨 Erro de conexão com o motor central."); 
+    }
+}
+
+function filtrarTabela() {
+    const filter = document.getElementById('filtro-cliente').value.toLowerCase();
+    const rows = document.querySelectorAll('.cliente-row');
+    
+    rows.forEach(row => {
+        const nome = row.querySelector('.nome-cliente').innerText.toLowerCase();
+        if (nome.includes(filter)) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+    });
+}

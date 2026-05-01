@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Preferências | TN INFO</title>
+<script src="../js/security.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+<link href="css/dashboard.css" rel="stylesheet"/>
+<script src="../js/security.js?v=2"></script>
+<!-- PWA -->
+<link href="../manifest.json" rel="manifest"/>
+<meta content="#3b82f6" name="theme-color"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<link href="css/cliente.css" rel="stylesheet"/>
+<link href="css/preferencias.css?v=2" rel="stylesheet"/>
+</link></head>
+<body>
+<div class="dashboard-wrapper">
+<div class="navigation" id="minha-sidebar">
+<div class="user-info" style="display: flex; flex-direction: column; align-items: center; padding: 20px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 10px;">
+<img alt="TN INFO" src="../assets/img/logo.jpg" style="width: 140px; height: 140px; border-radius: 12px; object-fit: cover; border: 2px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.3);"/>
+</div>
+<ul class="">
+<li class="list"><a href="painel-cliente.html"><span class="icon"><span class="material-symbols-rounded">dashboard</span></span><span class="title">Minha Área</span></a></li>
+<li class="list"><a href="minhas-financas.html"><span class="icon"><span class="material-symbols-rounded">account_balance</span></span><span class="title">Minhas Finanças</span></a></li>
+<li class="list"><a href="previsao.html"><span class="icon"><span class="material-symbols-rounded">trending_up</span></span><span class="title">Previsão</span></a></li>
+<li class="list"><a href="calendario.html"><span class="icon"><span class="material-symbols-rounded">calendar_month</span></span><span class="title">Calendário</span></a></li>
+<li class="separator"><span class="title">OPERACIONAL</span></li>
+<li class="list"><a href="novo-lancamento.html"><span class="icon"><span class="material-symbols-rounded">add_circle</span></span><span class="title">Novo Lançamento</span></a></li>
+<li class="list"><a href="historico.html"><span class="icon"><span class="material-symbols-rounded">history</span></span><span class="title">Histórico</span></a></li>
+<li class="list"><a href="metas-gastos.html"><span class="icon"><span class="material-symbols-rounded">ads_click</span></span><span class="title">Metas de Gastos</span></a></li>
+<li class="separator"><span class="title">CONTA</span></li>
+<li class="list"><a href="meus-cartoes.html"><span class="icon"><span class="material-symbols-rounded">credit_card</span></span><span class="title">Meus Cartões</span></a></li>
+<li class="list active"><a href="preferencias.html"><span class="icon"><span class="material-symbols-rounded">settings</span></span><span class="title">Preferências</span></a></li>
+<li class="list"><a href="minha-assinatura.html"><span class="icon"><span class="material-symbols-rounded">verified_user</span></span><span class="title">Minha Assinatura</span></a></li>
+<li class="list"><a href="perfil.html"><span class="icon"><span class="material-symbols-rounded">person</span></span><span class="title">Meu
+                    Perfil</span></a></li>
+</ul>
+</div>
+<main class="main-content">
+<header class="top-bar">
+<div class="header-left">
+<button class="btn-menu" id="btn-toggle-sidebar"><span class="material-symbols-rounded">menu</span></button>
+<div>
+<h1>Preferências</h1>
+<p>Ajuste o sistema à sua maneira.</p>
+</div>
+</div>
+<div class="top-actions" style="display: flex; gap: 10px; align-items: center; margin-left: auto;">
+    <button class="btn-top-action" onclick="forcarAtualizacao()" title="Atualizar App" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s; font-weight: 600;">
+        <span class="material-symbols-rounded" style="font-size: 20px;">sync</span>
+        <span class="action-text">Atualizar</span>
+    </button>
+    <button class="btn-top-action" onclick="location.href='../index.html'" title="Sair" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s; font-weight: 600;">
+        <span class="material-symbols-rounded" style="font-size: 20px;">logout</span>
+        <span class="action-text">Sair</span>
+    </button>
+</div>
+</header>
+<form class="pref-container" onsubmit="salvarPreferencias(event)">
+<div class="pref-section">
+<h3><span class="material-symbols-rounded">notifications</span> Notificações e Alertas</h3>
+<div class="setting-group">
+<div class="setting-label">
+<strong>Alertas de Orçamento</strong>
+<p>Avisar quando atingir 80% da meta de gastos.</p>
+</div>
+<select class="pref-control">
+<option value="sim">Sim, avisar-me</option>
+<option value="nao">Não avisar</option>
+</select>
+</div>
+<div class="setting-group">
+<div class="setting-label">
+<strong>Lembrete de Faturas</strong>
+<p>Receber alertas de vencimento de cartões e contas.</p>
+</div>
+<select class="pref-control">
+<option value="email">Apenas por E-mail</option>
+<option value="painel">Apenas no Painel</option>
+<option selected="" value="ambos">Ambos</option>
+</select>
+</div>
+</div>
+<div class="pref-section">
+<h3><span class="material-symbols-rounded">category</span> Minhas Categorias</h3>
+<p style="color: #94a3b8; font-size: 13px; margin-bottom: 20px;">Personalize as categorias para os
+                        seus lançamentos.</p>
+<div class="add-mini-form">
+<input class="pref-control" id="nova-cat-nome" placeholder="Nome da Categoria" type="text"/>
+<select class="pref-control" id="nova-cat-tipo">
+<option value="gasto">Despesa</option>
+<option value="recebimento">Receita</option>
+</select>
+<button class="btn-add-item" onclick="adicionarCategoria()" type="button">
+<span class="material-symbols-rounded">add</span> Adicionar
+                        </button>
+</div>
+<div class="items-list" id="lista-categorias">
+<!-- Categorias aparecerão aqui -->
+</div>
+</div>
+<div class="pref-section">
+<h3><span class="material-symbols-rounded">payments</span> Formas de Pagamento</h3>
+<p style="color: #94a3b8; font-size: 13px; margin-bottom: 20px;">Gestão de métodos como Dinheiro,
+                        PIX, etc.</p>
+<div class="add-mini-form">
+<input class="pref-control" id="nova-forma-nome" placeholder="Ex: Cartão Nubank, Vale Refeição" type="text"/>
+<button class="btn-add-item" onclick="adicionarFormaPagamento()" type="button">
+<span class="material-symbols-rounded">add</span> Adicionar
+                        </button>
+</div>
+<div class="items-list" id="lista-formas-pagamento">
+<!-- Formas de pagamento aparecerão aqui -->
+</div>
+</div>
+<div class="pref-section" id="pwa-install-section">
+<h3><span class="material-symbols-rounded">install_mobile</span> Versão Aplicativo</h3>
+<p style="color: #94a3b8; font-size: 13px; margin-bottom: 20px;">
+                        Instale o MTConnect no seu telemóvel para um acesso mais rápido e em ecrã inteiro.
+                    </p>
+<!-- Botão para Android / Chrome (Desktop) -->
+<button class="btn-add-item" id="btn-instalar" style="display: none; width: 100%; justify-content: center; background: #3b82f6; height: 45px;" type="button">
+<span class="material-symbols-rounded">download_for_offline</span> INSTALAR AGORA
+                    </button>
+<!-- Instruções para iOS (Safari) -->
+<div id="ios-install-info" style="display: none; background: rgba(59, 130, 246, 0.1); padding: 15px; border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.2);">
+<p style="color: #fff; font-size: 14px; line-height: 1.5;">
+<span class="material-symbols-rounded" style="vertical-align: middle; color: #3b82f6; margin-right: 5px;">ios_share</span>
+                            Para instalar no iPhone, clique no botão <strong>Partilhar</strong> do Safari e escolha
+                            <strong>Adicionar ao Ecrã Principal</strong>.
+                        </p>
+</div>
+</div>
+<div class="pref-section" style="display: none;">
+<h3><span class="material-symbols-rounded">display_settings</span> Aparência e Sistema</h3>
+<div class="setting-group">
+<div class="setting-label">
+<strong>Moeda Padrão</strong>
+<p>Formato de exibição dos valores financeiros.</p>
+</div>
+<select class="pref-control">
+<option selected="" value="BRL">Real (R$)</option>
+<option value="EUR">Euro (€)</option>
+<option value="USD">Dólar ($)</option>
+</select>
+</div>
+</div>
+</form>
+</main>
+</div>
+<script src="js/preferencias.js"></script>
+<script>
+        // Lógica de Instalação Manual PWA
+        let deferredPrompt;
+        const btnInstalar = document.getElementById('btn-instalar');
+        const infoIos = document.getElementById('ios-install-info');
+
+        // 1. Detectar iOS
+        const isIos = () => {
+            const userAgent = window.navigator.userAgent.toLowerCase();
+            return /iphone|ipad|ipod/.test(userAgent);
+        }
+
+        const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
+
+        // Se for iOS e não estiver instalado, mostra info
+        if (isIos() && !isInStandaloneMode()) {
+            infoIos.style.display = 'block';
+        }
+
+        // 2. Capturar o evento beforeinstallprompt (Android / Chrome)
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Impede o Chrome de mostrar o banner automático
+            e.preventDefault();
+            // Guarda o evento para ser usado depois
+            deferredPrompt = e;
+            // Mostra o botão de instalação
+            btnInstalar.style.display = 'flex';
+        });
+
+        // 3. Ação do clique no botão
+        btnInstalar.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                // Mostra o prompt de instalação
+                deferredPrompt.prompt();
+                // Aguarda a resposta do utilizador
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`Resposta do utilizador: ${outcome}`);
+                // Limpa o prompt (só pode ser usado uma vez)
+                deferredPrompt = null;
+                // Esconde o botão
+                btnInstalar.style.display = 'none';
+            }
+        });
+
+        // Esconder botão se o app já estiver instalado
+        window.addEventListener('appinstalled', (evt) => {
+            console.log('MTConnect foi instalado com sucesso!');
+            btnInstalar.style.display = 'none';
+        });
+    </script>
+</body>
+</html>

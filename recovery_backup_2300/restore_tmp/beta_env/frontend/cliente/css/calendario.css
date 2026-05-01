@@ -1,0 +1,366 @@
+.calendar-wrapper {
+    background: var(--bg-card-light);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 25px;
+    margin-top: 25px;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+}
+
+.day-label {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding-bottom: 10px;
+}
+
+.day-cell {
+    background: var(--bg-input);
+    min-height: 120px;
+    border-radius: 12px;
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.day-cell:hover {
+    border-color: #ffffff;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.day-cell.today {
+    border-color: #ffffff;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.day-number {
+    font-weight: 700;
+    font-size: 16px;
+    color: #f8fafc;
+}
+
+.today-tag {
+    background: #ffffff;
+    color: #000000;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 800;
+}
+
+.event-container {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.calendar-event {
+    font-size: 10px;
+    padding: 3px 6px;
+    border-radius: 4px;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ev-receita {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border-left: 2px solid #10b981;
+}
+
+.ev-despesa {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border-left: 2px solid #ef4444;
+}
+
+.day-footer {
+    margin-top: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.val-pos {
+    color: #10b981;
+}
+
+.val-neg {
+    color: #ef4444;
+}
+
+.btn-nav {
+    background: var(--bg-input);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    border-radius: 8px;
+    padding: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: 0.3s;
+}
+
+.btn-nav:hover {
+    background: var(--bg-card-light);
+    color: #ffffff;
+}
+
+/* Painel Lateral */
+.overlay-painel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.3s;
+}
+
+.overlay-painel.aberto {
+    opacity: 1;
+    visibility: visible;
+}
+
+.painel-lateral {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.95);
+    width: 90%;
+    max-width: 450px;
+    height: auto;
+    max-height: 90vh;
+    background: var(--bg-input);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    z-index: 1001;
+    padding: 30px;
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.painel-lateral.aberto {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.cabecalho-painel {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.cabecalho-painel h2 {
+    color: white;
+    margin: 0;
+    font-size: 20px;
+}
+
+.btn-fechar-painel {
+    background: var(--bg-card-light);
+    border: none;
+    color: #94a3b8;
+    border-radius: 8px;
+    padding: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-fechar-painel:hover {
+    background: #334155;
+    color: white;
+}
+
+.resumo-dia-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.resumo-mini-card {
+    background: var(--bg-card-light);
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.resumo-mini-card span {
+    display: block;
+    font-size: 11px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.resumo-mini-card h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.resumo-mini-card.pos h3 {
+    color: #10b981;
+}
+
+.resumo-mini-card.neg h3 {
+    color: #ef4444;
+}
+
+.lista-transacoes-dia {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.transacao-dia-item {
+    background: var(--bg-card-light);
+    padding: 15px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 4px solid #ffffff;
+}
+
+.transacao-dia-item.receita {
+    border-left-color: #10b981;
+}
+
+.transacao-dia-item.despesa {
+    border-left-color: #ef4444;
+}
+
+.t-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.t-desc {
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.t-cat {
+    color: #94a3b8;
+    font-size: 11px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2px 8px;
+    border-radius: 20px;
+    width: fit-content;
+}
+
+.t-valor {
+    font-weight: 700;
+    font-size: 14px;
+}
+
+/* MEDIA QUERIES PARA RESPONSIVIDADE CALENDÁRIO */
+@media (max-width: 992px) {
+    .calendar-wrapper {
+        padding: 15px;
+        margin-top: 15px;
+    }
+
+    .calendar-header {
+        margin-bottom: 20px;
+    }
+
+    .calendar-header h2 {
+        font-size: 18px;
+    }
+
+    .calendar-grid {
+        gap: 5px;
+    }
+
+    .day-label {
+        font-size: 10px;
+        padding-bottom: 5px;
+    }
+
+    .day-cell {
+        min-height: 80px;
+        padding: 6px;
+        border-radius: 8px;
+    }
+
+    .day-number {
+        font-size: 13px;
+    }
+
+    .today-tag {
+        font-size: 8px;
+        padding: 1px 4px;
+    }
+
+    .calendar-event {
+        font-size: 8px;
+        padding: 2px 4px;
+    }
+
+    .day-footer {
+        font-size: 8px;
+    }
+
+    .painel-lateral {
+        width: 95%;
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .calendar-grid {
+        gap: 3px;
+    }
+
+    .day-cell {
+        min-height: 70px;
+        padding: 4px;
+    }
+
+    .day-number {
+        font-size: 12px;
+    }
+}

@@ -1,0 +1,272 @@
+/* Estilos específicos da tabela de clientes herdando o layout global */
+
+.table-container {
+        background: #0f0f0f;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 25px;
+        margin-top: 25px;
+        overflow-x: auto;
+}
+
+.search-box {
+        position: relative;
+        max-width: 400px;
+        margin-bottom: 20px;
+}
+
+.search-box input {
+        width: 100%;
+        background: #0a0a0a;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 12px 15px 12px 45px;
+        border-radius: 10px;
+        color: white;
+        outline: none;
+}
+
+.search-box span {
+        position: absolute;
+        left: 15px;
+        top: 12px;
+        color: #ffffff;
+}
+
+.premium-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+}
+
+.premium-table th {
+        color: #ffffff;
+        font-size: 13px;
+        padding: 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.premium-table td {
+        padding: 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        color: #ffffff;
+        font-size: 14px;
+}
+
+.role-badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+}
+
+.role-admin {
+        background: rgba(255, 255, 255, 0.15);
+        color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.role-revenda {
+        background: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+}
+
+.role-cliente {
+        background: rgba(255, 255, 255, 0.05);
+        color: #ffffff;
+}
+
+.btn-reject {
+        background: rgba(255, 255, 255, 0.05);
+        color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 6px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+}
+
+.btn-reject:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        transform: scale(1.1);
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+/* ==========================================
+   MODAL DE EDIÇÃO (PAINEL LATERAL)
+   ========================================== */
+.overlay-painel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 9998;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.painel-lateral {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.95);
+    width: 90%;
+    max-width: 450px;
+    height: auto;
+    max-height: 90vh;
+    background-color: #0f0f0f;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 9999;
+    padding: 30px;
+    overflow-y: auto;
+    color: white;
+    box-sizing: border-box;
+    opacity: 0;
+    visibility: hidden;
+}
+
+.painel-lateral.aberto {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.cabecalho-painel {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.cabecalho-painel h2 {
+    font-size: 1.5rem;
+    color: #ffffff;
+    margin: 0;
+}
+
+.btn-fechar-painel {
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    color: #ffffff;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s;
+}
+
+.btn-fechar-painel:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #ffffff;
+    font-size: 0.9rem;
+}
+
+.form-control {
+    width: 100%;
+    background: #0a0a0a;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 12px 15px;
+    border-radius: 10px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.form-control:focus {
+    border-color: #ffffff;
+}
+
+.btn-primary {
+    background: #ffffff;
+    color: #000000;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-primary:hover {
+    background: #e2e8f0;
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+}
+
+/* Toggle Switch (Premium) */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(255,255,255,0.1);
+  transition: .4s;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #000000;
+  transition: .4s;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 2px;
+  background-color: white;
+  transition: .4s;
+}
+input:checked + .slider {
+  background-color: #ffffff;
+}
+input:focus + .slider {
+  box-shadow: 0 0 1px #ffffff;
+}
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+.slider.round {
+  border-radius: 34px;
+}
+.slider.round:before {
+  border-radius: 50%;
+}

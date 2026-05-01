@@ -1,0 +1,10 @@
+postgres_data/
+postgres_data_beta/
+instances/
+instances_beta/
+mtconnect_v2_migracao.tar.gz
+sistema_financeiro.tar.gz
+backup_financeiro_pg.sql
+.git/
+__pycache__/
+

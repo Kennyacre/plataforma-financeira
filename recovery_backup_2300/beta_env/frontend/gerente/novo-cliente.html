@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Cadastrar Cliente | TN INFO</title>
+<script src="../js/security.js?v=2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+<link rel="shortcut icon" href="../assets/img/logo.jpg" type="image/x-icon">
+<link href="../css/design-tokens.css?v=1" rel="stylesheet"/>
+<link href="../cliente/css/dashboard.css?v=1" rel="stylesheet"/>
+<link href="css/admin.css?v=1" rel="stylesheet"/>
+<link href="css/novo-cliente-admin.css?v=1" rel="stylesheet"/>
+<!-- PWA -->
+<link href="../manifest.json" rel="manifest"/>
+<meta content="#000000" name="theme-color"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+</link></head>
+<body>
+<div class="dashboard-wrapper">
+<div class="navigation" id="minha-sidebar">
+<div class="user-info" style="display: flex; flex-direction: column; align-items: center; padding: 20px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 10px;">
+<img alt="TN INFO" src="../assets/img/logo.jpg" style="width: 140px; height: 140px; border-radius: 12px; object-fit: cover; border: 2px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.3);"/>
+<div id="nome-admin-sidebar" style="color: white; font-weight: bold; margin-top: 15px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">
+</div>
+</div>
+<ul class="">
+<li class="list"><a href="painel-admin.html"><span class="icon"><span class="material-symbols-rounded">bar_chart</span></span><span class="title">Visão Geral</span></a></li>
+<li class="list active"><a href="novo-cliente.html"><span class="icon"><span class="material-symbols-rounded">person_add</span></span><span class="title">Criar Cliente</span></a></li>
+<li class="list"><a href="todos-clientes.html"><span class="icon"><span class="material-symbols-rounded">group</span></span><span class="title">Todos os Clientes</span></a></li>
+<li class="list"><a href="lixeira-admin.html"><span class="icon"><span class="material-symbols-rounded">delete_sweep</span></span><span class="title">Lixeira do Sistema</span></a></li>
+<li class="separator"><span class="title">FINANCEIRO GLOBAL</span></li>
+<li class="list"><a href="receitas-admin.html"><span class="icon"><span class="material-symbols-rounded">account_balance</span></span><span class="title">Receitas Totais</span></a></li>
+<li class="list"><a href="perfil-admin.html"><span class="icon"><span class="material-symbols-rounded">manage_accounts</span></span><span class="title">Meu Perfil</span></a></li>
+</ul>
+
+</div>
+<main class="main-content">
+<header class="top-bar" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+<div class="header-left">
+<button class="btn-menu" id="btn-toggle-sidebar"><span class="material-symbols-rounded">menu</span></button>
+<div>
+<h1>Fábrica de Clientes</h1>
+<p>Registe um novo cliente com acesso direto à plataforma.</p>
+</div>
+</div>
+<div class="top-actions" style="display: flex; gap: 10px; align-items: center; margin-left: auto;">
+<button class="btn-top-action" onclick="forcarAtualizacao()" title="Atualizar App" style="background: rgba(255, 255, 255, 0.05); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s; font-weight: 600;">
+<span class="material-symbols-rounded" style="font-size: 20px;">sync</span>
+<span class="action-text">Atualizar</span>
+</button>
+<button class="btn-top-action" onclick="fazerLogout()" title="Sair" style="background: rgba(255, 255, 255, 0.05); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s; font-weight: 600;">
+<span class="material-symbols-rounded" style="font-size: 20px;">logout</span>
+<span class="action-text">Sair</span>
+</button>
+</div>
+</header>
+<div class="admin-form-container" style="max-width: 650px; margin: 40px auto;">
+    <div class="widget-card">
+        <div class="widget-header" style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 20px; margin-bottom: 30px;">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div style="background: rgba(255, 255, 255, 0.1); color: #ffffff; width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <span class="material-symbols-rounded" style="font-size: 32px;">person_add</span>
+                </div>
+                <div>
+                    <h3 style="margin: 0; font-size: 20px;">Dados de Acesso Oficial</h3>
+                    <p style="margin: 5px 0 0; font-size: 13px; color: #ffffff;">Preencha as credenciais para o novo utilizador final.</p>
+                </div>
+            </div>
+        </div>
+
+        <form class="form-block" id="form-novo-cliente" style="border: none;">
+            <div class="form-grid">
+                <div class="form-group full-width" style="margin-bottom: 25px;">
+                    <label style="color: #ffffff; font-size: 13px; font-weight: 600; display: block; margin-bottom: 10px;">Nome de Utilizador / Login</label>
+                    <div style="position: relative;">
+                        <span class="material-symbols-rounded" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #ffffff; font-size: 20px;">alternate_email</span>
+                        <input class="form-control" id="username" placeholder="Ex: cliente.oficial" required="" style="width: 100%; padding: 14px 14px 14px 45px; border-radius: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: white; transition: 0.3s;" type="text"/>
+                    </div>
+                </div>
+                
+                <div class="form-group" style="margin-bottom: 25px;">
+                    <label style="color: #ffffff; font-size: 13px; font-weight: 600; display: block; margin-bottom: 10px;">Senha de Acesso</label>
+                    <div style="position: relative;">
+                        <span class="material-symbols-rounded" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #ffffff; font-size: 20px;">lock</span>
+                        <input class="form-control" id="password" minlength="6" placeholder="Mínimo 6 caracteres" required="" style="width: 100%; padding: 14px 14px 14px 45px; border-radius: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: white; transition: 0.3s;" type="password"/>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 25px;">
+                    <label style="color: #ffffff; font-size: 13px; font-weight: 600; display: block; margin-bottom: 10px;">Dias de Acesso</label>
+                    <div style="position: relative;">
+                        <span class="material-symbols-rounded" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #ffffff; font-size: 20px;">calendar_today</span>
+                        <input class="form-control" id="dias_acesso" min="1" placeholder="Ex: 30" required="" style="width: 100%; padding: 14px 14px 14px 45px; border-radius: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: white; transition: 0.3s;" type="number" value="30"/>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-footer" style="padding-top: 20px;">
+                <button class="btn-activate" type="submit" style="width: 100%; background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%); color: #000000; border: none; padding: 18px; border-radius: 14px; font-weight: 800; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; transition: 0.3s; box-shadow: 0 10px 20px -5px rgba(255, 255, 255, 0.2);">
+                    <span class="material-symbols-rounded">rocket_launch</span> ATIVAR CLIENTE OFICIAL
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+</main>
+</div>
+<script src="js/novo-cliente.js?v=1"></script>
+<script src="js/admin-ia.js?v=1"></script>
+</body>
+</html>

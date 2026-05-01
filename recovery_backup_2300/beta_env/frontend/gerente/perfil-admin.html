@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Meu Perfil | TN INFO</title>
+<script src="../js/security.js?v=2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+<link rel="shortcut icon" href="../assets/img/logo.jpg" type="image/x-icon">
+<link href="../css/design-tokens.css?v=1" rel="stylesheet"/>
+<link href="../cliente/css/dashboard.css?v=1" rel="stylesheet"/>
+<link href="css/admin.css?v=1" rel="stylesheet"/>
+<link href="css/perfil-admin.css?v=1" rel="stylesheet"/>
+</link></head>
+<body>
+<div class="dashboard-wrapper">
+<div class="navigation" id="minha-sidebar">
+<div class="user-info" style="display: flex; flex-direction: column; align-items: center; padding: 20px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 10px;">
+<img alt="TN INFO" src="../assets/img/logo.jpg" style="width: 140px; height: 140px; border-radius: 12px; object-fit: cover; border: 2px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.3);"/>
+<div id="nome-admin-sidebar" style="color: white; font-weight: bold; margin-top: 15px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">
+</div>
+</div>
+<ul class="">
+<li class="list"><a href="painel-admin.html"><span class="icon"><span class="material-symbols-rounded">bar_chart</span></span><span class="title">Visão Geral</span></a></li>
+<li class="list"><a href="novo-cliente.html"><span class="icon"><span class="material-symbols-rounded">person_add</span></span><span class="title">Criar Cliente</span></a></li>
+<li class="list"><a href="todos-clientes.html"><span class="icon"><span class="material-symbols-rounded">group</span></span><span class="title">Todos os Clientes</span></a></li>
+<li class="list"><a href="lixeira-admin.html"><span class="icon"><span class="material-symbols-rounded">delete_sweep</span></span><span class="title">Lixeira do Sistema</span></a></li>
+<li class="separator"><span class="title">FINANCEIRO GLOBAL</span></li>
+<li class="list"><a href="receitas-admin.html"><span class="icon"><span class="material-symbols-rounded">account_balance</span></span><span class="title">Receitas Totais</span></a></li>
+<li class="list active"><a href="perfil-admin.html"><span class="icon"><span class="material-symbols-rounded">manage_accounts</span></span><span class="title">Meu Perfil</span></a></li>
+</ul>
+
+</div>
+<main class="main-content">
+<header class="top-bar" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+<div class="header-left">
+<button class="btn-menu" id="btn-toggle-sidebar"><span class="material-symbols-rounded">menu</span></button>
+<div>
+<h1>Quartel-General Pessoal</h1>
+<p>Configure os seus dados de administrador e recebedor principal.</p>
+</div>
+</div>
+<div class="top-actions" style="display: flex; gap: 10px; align-items: center; margin-left: auto;">
+<button class="btn-top-action" onclick="forcarAtualizacao()" title="Atualizar App" style="background: rgba(255, 255, 255, 0.05); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s; font-weight: 600;">
+<span class="material-symbols-rounded" style="font-size: 20px;">sync</span>
+<span class="action-text">Atualizar</span>
+</button>
+<button class="btn-top-action" onclick="fazerLogout()" title="Sair" style="background: rgba(255, 255, 255, 0.05); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s; font-weight: 600;">
+<span class="material-symbols-rounded" style="font-size: 20px;">logout</span>
+<span class="action-text">Sair</span>
+</button>
+</div>
+</header>
+<div class="admin-dashboard-grid" style="grid-template-columns: repeat(2, 1fr);">
+    <!-- Card 1: Dados da Conta -->
+    <div class="widget-card col-span-1">
+        <div class="widget-header" style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; margin-bottom: 20px;">
+            <h3><span class="material-symbols-rounded" style="color: #ffffff;">admin_panel_settings</span> Dados da Conta</h3>
+        </div>
+        <div class="health-status" style="gap: 20px;">
+            <div class="status-item" style="padding: 10px 0; border-bottom: 1px dashed rgba(255,255,255,0.05);">
+                <span style="font-weight: 600;">Nível de Acesso</span>
+                <span style="background: rgba(255, 255, 255, 0.1); color: #ffffff; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid rgba(255, 255, 255, 0.2);">Administrador Global</span>
+            </div>
+            <div class="status-item" style="padding: 10px 0;">
+                <span style="font-weight: 600;">Status da Sessão</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div class="status-dot"></div>
+                    <span style="color: #ffffff; font-weight: bold;">OPERACIONAL</span>
+                </div>
+            </div>
+        </div>
+        <div style="margin-top: 25px; background: rgba(255, 255, 255, 0.05); border-left: 4px solid #ffffff; padding: 15px; border-radius: 8px; display: flex; gap: 12px; align-items: center;">
+            <span class="material-symbols-rounded" style="color: #ffffff; font-size: 20px;">info</span>
+            <p style="font-size: 12px; color: #ffffff; margin: 0; line-height: 1.4;">Para alterações estruturais de segurança, utilize o terminal seguro do servidor.</p>
+        </div>
+    </div>
+
+    <!-- Card 2: Dados de Recebimento (PIX) -->
+    <div class="widget-card col-span-1">
+        <div class="widget-header" style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; margin-bottom: 20px;">
+            <h3><span class="material-symbols-rounded" style="color: #ffffff;">payments</span> Recebimento Oficial (PIX)</h3>
+        </div>
+        <p style="font-size: 13px; color: #ffffff; margin-bottom: 20px; line-height: 1.5;">
+            Defina as chaves para as quais os revendedores enviarão os pagamentos dos pacotes.
+        </p>
+        
+        <form id="form-perfil-admin">
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <div class="form-group">
+                    <label style="color: #ffffff; font-size: 13px; font-weight: 600; display: block; margin-bottom: 8px;">Chave PIX Oficial</label>
+                    <div style="position: relative;">
+                        <span class="material-symbols-rounded" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #ffffff; font-size: 20px;">vpn_key</span>
+                        <input class="form-control" id="pix_chave" placeholder="CPF, Celular, E-mail ou Chave Aleatória" required="" style="width: 100%; padding: 12px 12px 12px 42px; border-radius: 10px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: white;" type="text"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label style="color: #ffffff; font-size: 13px; font-weight: 600; display: block; margin-bottom: 8px;">Titular da Conta</label>
+                    <div style="position: relative;">
+                        <span class="material-symbols-rounded" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #ffffff; font-size: 20px;">person</span>
+                        <input class="form-control" id="pix_titular" placeholder="Nome completo do beneficiário" required="" style="width: 100%; padding: 12px 12px 12px 42px; border-radius: 10px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: white;" type="text"/>
+                    </div>
+                </div>
+
+                <button class="btn-premium-action" type="submit" style="width: 100%; margin: 10px 0 0; justify-content: center; background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%); color: #000000; box-shadow: 0 8px 15px -3px rgba(255, 255, 255, 0.2);">
+                    <span class="material-symbols-rounded">save</span> SALVAR CONFIGURAÇÕES
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+</main>
+</div>
+<script src="js/perfil-admin.js?v=1"></script>
+<script src="js/admin-ia.js?v=1"></script>
+</body>
+</html>

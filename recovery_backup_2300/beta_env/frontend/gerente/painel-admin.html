@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Painel do Gerente | TN INFO</title>
+<script src="../js/security.js?v=2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+<link rel="shortcut icon" href="../assets/img/logo.jpg" type="image/x-icon">
+<link href="../css/design-tokens.css?v=1" rel="stylesheet"/>
+<link href="../cliente/css/dashboard.css?v=1" rel="stylesheet"/>
+<link href="css/admin.css?v=1" rel="stylesheet"/>
+<!-- PWA -->
+<link href="../manifest.json" rel="manifest"/>
+<meta content="#000000" name="theme-color"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+</link></head>
+<body>
+<div class="dashboard-wrapper">
+<div class="navigation" id="minha-sidebar">
+<div class="user-info" style="display: flex; flex-direction: column; align-items: center; padding: 20px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 10px;">
+<img alt="TN INFO" src="../assets/img/logo.jpg" style="width: 140px; height: 140px; border-radius: 12px; object-fit: cover; border: 2px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.3);"/>
+<div id="nome-admin-sidebar" style="color: white; font-weight: bold; margin-top: 15px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">
+</div>
+</div>
+<ul class="">
+<li class="list active"><a href="painel-admin.html"><span class="icon"><span class="material-symbols-rounded">bar_chart</span></span><span class="title">Visão Geral</span></a></li>
+<li class="list"><a href="novo-cliente.html"><span class="icon"><span class="material-symbols-rounded">person_add</span></span><span class="title">Criar Cliente</span></a></li>
+<li class="list"><a href="todos-clientes.html"><span class="icon"><span class="material-symbols-rounded">group</span></span><span class="title">Todos os Clientes</span></a></li>
+<li class="list"><a href="lixeira-admin.html"><span class="icon"><span class="material-symbols-rounded">delete_sweep</span></span><span class="title">Lixeira do Sistema</span></a></li>
+<li class="separator"><span class="title">FINANCEIRO GLOBAL</span></li>
+<li class="list"><a href="receitas-admin.html"><span class="icon"><span class="material-symbols-rounded">account_balance</span></span><span class="title">Receitas Totais</span></a></li>
+<li class="list"><a href="perfil-admin.html"><span class="icon"><span class="material-symbols-rounded">manage_accounts</span></span><span class="title">Meu Perfil</span></a></li>
+</ul>
+
+</div>
+<main class="main-content">
+<header class="top-bar" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+<div class="header-left">
+<button class="btn-menu" id="btn-toggle-sidebar"><span class="material-symbols-rounded">menu</span></button>
+<div>
+<h1>Torre de Controlo (Admin)</h1>
+<p>Visão global de todos os revendedores, clientes e finanças do sistema.</p>
+</div>
+</div>
+<div class="top-actions" style="display: flex; gap: 10px; align-items: center; margin-left: auto;">
+<button class="btn-top-action" onclick="forcarAtualizacao()" title="Atualizar App" style="background: rgba(255, 255, 255, 0.05); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s; font-weight: 600;">
+<span class="material-symbols-rounded" style="font-size: 20px;">sync</span>
+<span class="action-text">Atualizar</span>
+</button>
+<button class="btn-top-action" onclick="fazerLogout()" title="Sair" style="background: rgba(255, 255, 255, 0.05); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s; font-weight: 600;">
+<span class="material-symbols-rounded" style="font-size: 20px;">logout</span>
+<span class="action-text">Sair</span>
+</button>
+</div>
+</header>
+
+<div class="admin-dashboard-grid">
+    <!-- Card 1: Total Users -->
+    <div class="widget-card col-span-1">
+        <div class="widget-header">
+            <span class="material-symbols-rounded" style="color: #ffffff;">group</span>
+            <span class="trend-badge trend-up">+5% ⬆️</span>
+        </div>
+        <span style="color: #ffffff; font-size: 13px; font-weight: 600;">Utilizadores</span>
+        <h2 id="total-clientes" style="font-size: 32px; margin: 10px 0; color: #ffffff;">0</h2>
+        <p style="font-size: 11px; color: #ffffff; opacity: 0.7;">Base de dados ativa</p>
+    </div>
+
+    <!-- Card 2: Revenue -->
+    <div class="widget-card col-span-1">
+        <div class="widget-header">
+            <span class="material-symbols-rounded" style="color: #ffffff;">payments</span>
+            <span class="trend-badge trend-up">+12% ⬆️</span>
+        </div>
+        <span style="color: #ffffff; font-size: 13px; font-weight: 600;">Receita Bruta</span>
+        <h2 id="total-receitas" style="font-size: 32px; margin: 10px 0; color: #ffffff;">R$ 0,00</h2>
+        <p style="font-size: 11px; color: #ffffff; opacity: 0.7;">Fluxo de caixa global</p>
+    </div>
+
+    <!-- Card 3: Quick Actions -->
+    <div class="widget-card col-span-2">
+        <div class="widget-header">
+            <h3><span class="material-symbols-rounded">bolt</span> Ações Rápidas</h3>
+        </div>
+        <div class="quick-actions-grid">
+            <div class="btn-quick" onclick="abrirModalNovoUser()">
+                <span class="material-symbols-rounded">person_add</span>
+                Criar Cliente
+            </div>
+            <div class="btn-quick" onclick="fazerBackup()">
+                <span class="material-symbols-rounded">cloud_download</span>
+                Backup
+            </div>
+            <div class="btn-quick" onclick="location.href='todos-clientes.html'">
+                <span class="material-symbols-rounded">group</span>
+                Gerir Todos
+            </div>
+            <div class="btn-quick" onclick="location.href='receitas-admin.html'">
+                <span class="material-symbols-rounded">account_balance</span>
+                Finanças
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart 1: Evolution -->
+    <div class="widget-card col-span-3 row-span-2">
+        <div class="widget-header">
+            <h3><span class="material-symbols-rounded">trending_up</span> Evolução Financeira</h3>
+            <span style="color: #ffffff; font-size: 12px; opacity: 0.8;">Últimos 6 meses</span>
+        </div>
+        <canvas id="evolucaoChart" style="max-height: 300px;"></canvas>
+    </div>
+
+    <!-- Card 4: System Health -->
+    <div class="widget-card col-span-1">
+        <div class="widget-header">
+            <h3><span class="material-symbols-rounded">analytics</span> Status</h3>
+        </div>
+        <div class="health-status">
+            <div class="status-item">
+                <span>Servidor</span>
+                <div class="status-dot"></div>
+            </div>
+            <div class="status-item">
+                <span>Base Dados</span>
+                <div class="status-dot"></div>
+            </div>
+            <div class="status-item">
+                <span>Segurança</span>
+                <span style="color: #ffffff; font-weight: bold;">OK</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart 2: User Distribution -->
+    <div class="widget-card col-span-1">
+        <div class="widget-header">
+            <h3><span class="material-symbols-rounded">pie_chart</span> Utilizadores</h3>
+        </div>
+        <canvas id="distribuicaoChart" style="max-height: 180px;"></canvas>
+    </div>
+
+    <!-- Table: Recent Activity -->
+    <div class="widget-card col-span-4">
+        <div class="widget-header">
+            <h3><span class="material-symbols-rounded">history</span> Últimos Registos</h3>
+            <button onclick="location.href='todos-clientes.html'" style="background: none; border: none; color: #ffffff; cursor: pointer; font-size: 12px; font-weight: bold; text-decoration: underline;">Ver Todos</button>
+        </div>
+        <div class="table-container" style="background: none; padding: 0; border: none; margin-top: 0;">
+            <table class="premium-table">
+                <thead>
+                    <tr>
+                        <th class="hide-mobile">ID</th>
+                        <th>Utilizador</th>
+                        <th class="hide-tablet">Acesso</th>
+                        <th style="text-align: right;">Controle</th>
+                    </tr>
+                </thead>
+                <tbody id="lista-ultimos">
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 40px; color: #ffffff; opacity: 0.7;">Sintonizando satélites...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Criar Utilizador (Efeito Scale) -->
+<div class="modal-overlay" id="modalNovoUser" onclick="fecharModalNovoUser()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Criar Novo Utilizador</h2>
+            <button class="btn-fechar-modal" onclick="fecharModalNovoUser()">
+                <span class="material-symbols-rounded">close</span>
+            </button>
+        </div>
+        <form class="form-block" id="form-novo-cliente-modal" onsubmit="event.preventDefault(); alert('Em desenvolvimento'); fecharModalNovoUser();">
+            <div class="form-grid">
+                <div class="form-group full-width" style="margin-bottom: 15px;">
+                    <label style="color: #ffffff; font-size: 13px; font-weight: 600; display: block; margin-bottom: 8px;">Nome de Utilizador / Login</label>
+                    <input class="form-control" id="modal_username" placeholder="Ex: cliente.oficial" required="" style="width: 100%; padding: 12px; border-radius: 8px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: white;" type="text"/>
+                </div>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="color: #ffffff; font-size: 13px; font-weight: 600; display: block; margin-bottom: 8px;">Senha Forte</label>
+                    <input class="form-control" id="modal_password" minlength="6" placeholder="Mínimo 6 caracteres" required="" style="width: 100%; padding: 12px; border-radius: 8px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: white;" type="password"/>
+                </div>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="color: #ffffff; font-size: 13px; font-weight: 600; display: block; margin-bottom: 8px;">Dias de Acesso Iniciais</label>
+                    <input class="form-control" id="modal_dias_acesso" min="1" placeholder="Ex: 30" required="" style="width: 100%; padding: 12px; border-radius: 8px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: white;" type="number" value="30"/>
+                </div>
+            </div>
+            <button class="btn-activate" type="submit" style="width: 100%; background: #ffffff; color: #000000; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 15px; box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);">
+                <span class="material-symbols-rounded">rocket_launch</span> Ativar Cliente Oficial
+            </button>
+        </form>
+    </div>
+</div>
+</main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="js/painel-admin.js?v=2"></script>
+<script src="js/admin-ia.js?v=1"></script>
+</body>
+</html>

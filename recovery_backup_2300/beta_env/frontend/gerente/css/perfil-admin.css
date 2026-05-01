@@ -1,0 +1,242 @@
+.perfil-admin-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin-top: 25px;
+}
+
+.security-card { grid-column: span 2; }
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.card-header span { color: var(--green); font-size: 28px; }
+
+.info-list { margin-bottom: 25px; }
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+}
+
+.badge-admin {
+    background: var(--green);
+    color: white;
+    padding: 2px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+.support-alert {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 15px;
+    border-radius: 10px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    font-size: 13px;
+    color: #ffffff;
+}
+
+.pix-description {
+    font-size: 13px;
+    color: #ffffff;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.admin-profile-form { display: flex; flex-direction: column; gap: 15px; }
+
+.security-flex {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr) auto;
+    align-items: flex-end;
+    gap: 20px;
+}
+
+.btn-save-pix, .btn-save-contacts, .btn-update-pass {
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-save-pix { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
+.btn-save-contacts { background: var(--green); border: none; color: white; }
+.btn-update-pass { background: var(--accent); border: none; color: white; }
+
+@media (max-width: 1200px) {
+    .perfil-admin-grid, .security-flex { grid-template-columns: 1fr; }
+    .security-card { grid-column: span 1; }
+}
+/* ==========================================
+   DESIGN DA TELA MEU PERFIL ADMIN (perfil-admin.css)
+   ========================================== */
+
+.perfil-admin-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 30px;
+}
+
+/* O Cartão Escuro Padrão */
+.card {
+    background: #0f0f0f;
+    border-radius: 15px;
+    padding: 30px;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    margin-bottom: 25px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 15px;
+}
+
+.card-header span {
+    color: #ffffff;
+    font-size: 26px;
+}
+
+.card-header h3 {
+    margin: 0;
+    font-size: 18px;
+}
+
+/* Lista de Identificação */
+.info-list {
+    margin-bottom: 20px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 0;
+    border-bottom: 1px dashed rgba(255,255,255,0.1);
+    color: #ffffff;
+    font-size: 15px;
+}
+
+.info-row strong {
+    color: white;
+}
+
+.badge-admin {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff !important;
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 12px;
+}
+
+.text-green { color: #ffffff !important; }
+
+/* Aviso de Suporte */
+.support-alert {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 10px;
+    display: flex;
+    gap: 10px;
+    color: #ffffff;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.support-alert span {
+    color: #ffffff;
+}
+
+.support-alert p { margin: 0; }
+
+/* Formulários */
+.pix-description {
+    color: #ffffff;
+    font-size: 14px;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #ffffff;
+    font-size: 14px;
+}
+
+.input-dark {
+    width: 100%;
+    padding: 14px 15px;
+    border-radius: 10px;
+    background: #050505;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: white;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: all 0.3s;
+}
+
+.input-dark:focus {
+    outline: none;
+    border-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+/* Botões de Ação */
+button[type="submit"] {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.btn-save-pix {
+    background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
+    color: #000000;
+}
+.btn-save-pix:hover { box-shadow: 0 6px 20px rgba(255, 255, 255, 0.2); transform: translateY(-2px); }
+
+.btn-save-contacts {
+    background: linear-gradient(135deg, #444444 0%, #111111 100%);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.btn-save-contacts:hover { box-shadow: 0 6px 20px rgba(255, 255, 255, 0.1); transform: translateY(-2px); }
+
+.btn-update-pass {
+    background: #ffffff;
+    color: #000000;
+}
+.btn-update-pass:hover { box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3); transform: translateY(-2px); }
+
+/* Ajuste Responsivo para telas menores */
+@media (max-width: 1024px) {
+    .perfil-admin-grid {
+        grid-template-columns: 1fr;
+    }
+}

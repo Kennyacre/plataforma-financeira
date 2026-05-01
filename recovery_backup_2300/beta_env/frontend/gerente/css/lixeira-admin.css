@@ -1,0 +1,61 @@
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.btn-back {
+    background: #0f0f0f;
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-back:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.admin-date {
+    font-size: 14px;
+    color: var(--text-dim);
+    font-weight: 600;
+}
+
+.empty-state-card {
+    padding: 120px 20px !important;
+    text-align: center;
+    background: rgba(15, 23, 42, 0.3) !important;
+    border: 2px dashed rgba(148, 163, 184, 0.1) !important;
+}
+
+.empty-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.empty-content span {
+    font-size: 80px;
+    color: var(--text-dim);
+    opacity: 0.15;
+}
+
+.empty-content h3 {
+    font-size: 22px;
+    color: var(--text-main);
+}
+
+.empty-content p {
+    color: var(--text-dim);
+    font-size: 15px;
+    max-width: 450px;
+}

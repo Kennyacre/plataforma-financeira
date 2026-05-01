@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Meu Perfil | TN INFO</title>
+<script src="../js/security.js?v=2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+<link href="../cliente/css/dashboard.css?v=1" rel="stylesheet"/>
+<link href="css/admin.css?v=1" rel="stylesheet"/>
+<link href="css/perfil-admin.css?v=1" rel="stylesheet"/>
+</link></head>
+<body>
+<div class="dashboard-wrapper">
+<div class="navigation" id="minha-sidebar">
+<div class="user-info" style="display: flex; flex-direction: column; align-items: center; padding: 20px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 10px;">
+<img alt="TN INFO" src="../assets/img/logo.jpg" style="width: 140px; height: 140px; border-radius: 12px; object-fit: cover; border: 2px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.3);"/>
+<div id="nome-admin-sidebar" style="color: white; font-weight: bold; margin-top: 15px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">
+</div>
+</div>
+<ul class="">
+<li class="list"><a href="painel-admin.html"><span class="icon"><span class="material-symbols-rounded">bar_chart</span></span><span class="title">Visão Geral</span></a></li>
+<li class="list"><a href="novo-cliente.html"><span class="icon"><span class="material-symbols-rounded">person_add</span></span><span class="title">Criar Cliente</span></a></li>
+<li class="list"><a href="todos-clientes.html"><span class="icon"><span class="material-symbols-rounded">group</span></span><span class="title">Todos os Clientes</span></a></li>
+<li class="list"><a href="lixeira-admin.html"><span class="icon"><span class="material-symbols-rounded">delete_sweep</span></span><span class="title">Lixeira do Sistema</span></a></li>
+<li class="separator"><span class="title">FINANCEIRO GLOBAL</span></li>
+<li class="list"><a href="receitas-admin.html"><span class="icon"><span class="material-symbols-rounded">account_balance</span></span><span class="title">Receitas Totais</span></a></li>
+<li class="list active"><a href="perfil-admin.html"><span class="icon"><span class="material-symbols-rounded">manage_accounts</span></span><span class="title">Meu Perfil</span></a></li>
+</ul>
+<div class="sidebar-footer" style="display: flex; flex-direction: column; gap: 10px; padding: 15px;">
+<button class="btn-update" onclick="forcarAtualizacao()" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); padding: 10px; border-radius: 10px; cursor: pointer; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;">
+<span class="material-symbols-rounded">sync</span> Atualizar App
+                </button>
+<button class="btn-logout" onclick="fazerLogout()">
+<span class="material-symbols-rounded">logout</span> Sair
+                </button>
+</div>
+</div>
+<main class="main-content">
+<header class="top-bar">
+<div class="header-left">
+<button class="btn-menu" id="btn-toggle-sidebar"><span class="material-symbols-rounded">menu</span></button>
+<div>
+<h1>Quartel-General Pessoal</h1>
+<p>Configure os seus dados de administrador e recebedor principal.</p>
+</div>
+</div>
+</header>
+<div class="perfil-admin-grid">
+<div class="form-section">
+<div class="card-header">
+<span class="material-symbols-rounded">admin_panel_settings</span>
+<h3>Dados da Conta</h3>
+</div>
+<div class="info-list">
+<div class="info-row">
+<span style="color: #94a3b8;">Nível de Acesso</span>
+<span class="badge-admin">Administrador Global</span>
+</div>
+<div class="info-row">
+<span style="color: #94a3b8;">Status do Sistema</span>
+<span style="color: #10b981; font-weight: 600;">Operacional</span>
+</div>
+</div>
+<div class="support-alert">
+<span class="material-symbols-rounded">info</span>
+<div>Para alterar a senha base, utilize os comandos do servidor remoto ou base de dados.</div>
+</div>
+</div>
+<div class="form-section security-card">
+<div class="card-header">
+<span class="material-symbols-rounded" style="color: #10b981;">payments</span>
+<h3>Dados de Recebimento (PIX)</h3>
+</div>
+<p style="font-size: 13px; color: #94a3b8; margin-bottom: 20px;">
+                        Configure a conta para onde os revendedores enviarão o pagamento dos pacotes de crédito.
+                    </p>
+<form id="form-perfil-admin">
+<div style="display: flex; flex-direction: column; gap: 15px;">
+<div>
+<label style="color: #94a3b8; font-size: 13px; font-weight: 600; display: block; margin-bottom: 8px;">Chave
+                                    PIX Oficial</label>
+<input class="input-dark" id="pix_chave" placeholder="CPF, Celular, E-mail ou Chave Aleatória" required="" type="text"/>
+</div>
+<div>
+<label style="color: #94a3b8; font-size: 13px; font-weight: 600; display: block; margin-bottom: 8px;">Nome
+                                    do Titular da Conta</label>
+<input class="input-dark" id="pix_titular" placeholder="Nome Exato de quem vai receber" required="" type="text"/>
+</div>
+<button class="btn-save-pix" type="submit">
+<span class="material-symbols-rounded">save</span> Salvar Dados Bancários
+                            </button>
+</div>
+</form>
+</div>
+</div>
+</main>
+</div>
+<script src="js/perfil-admin.js?v=1"></script>
+<script src="js/admin-ia.js?v=1"></script>
+</body>
+</html>

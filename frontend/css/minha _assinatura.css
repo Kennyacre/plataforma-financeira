@@ -1,0 +1,84 @@
+.subscription-container {
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.sub-card {
+    border-left: 4px solid var(--green);
+}
+
+.sub-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 30px;
+}
+
+.sub-title {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.sub-title span {
+    font-size: 40px;
+    color: var(--accent);
+}
+
+.sub-title h3 { font-size: 20px; }
+.sub-title p { color: var(--text-dim); font-size: 14px; }
+
+.badge-status {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--green);
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-weight: 800;
+    font-size: 12px;
+    border: 1px solid var(--green);
+}
+
+.sub-details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    background: rgba(15, 23, 42, 0.5);
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.detail-item span {
+    font-size: 13px;
+    color: var(--text-dim);
+    display: block;
+    margin-bottom: 5px;
+}
+
+.sub-footer-note {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-dim);
+    font-size: 13px;
+}
+
+.upgrade-card {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    text-align: center;
+    padding: 40px !important;
+}
+
+.btn-upgrade {
+    margin-top: 20px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+}

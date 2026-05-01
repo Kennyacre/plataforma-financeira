@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprovar Créditos | TN INFO</title>
+
+    <script src="../js/security.js?v=2"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+    
+    <link rel="stylesheet" href="../cliente/css/dashboard.css?v=1">
+    <link rel="stylesheet" href="css/admin.css?v=1">
+    <link rel="stylesheet" href="css/arpovar_credito.css?v=1"> </head>
+<body>
+    <div class="dashboard-wrapper">
+        <nav class="sidebar" id="minha-sidebar">
+            <div class="user-info">
+                <div class="avatar" id="user-avatar" style="background: linear-gradient(135deg, #d97706, #b45309);">AD</div>
+                <div>
+                    <h3 id="nome-admin-sidebar">ADMIN</h3>
+                    <span class="level-tag" style="background: rgba(245, 158, 11, 0.2); color: #fcd34d;">Dono do Sistema</span>
+                </div>
+            </div>
+            
+            <ul class="nav-links">
+                <li onclick="location.href='painel-admin.html'"><span class="material-symbols-rounded">bar_chart</span> Visão Geral</li>
+                <li onclick="location.href='todos-clientes.html'"><span class="material-symbols-rounded">group</span> Todos os Clientes</li>
+                <li class="separator">FINANCEIRO GLOBAL</li>
+                <li onclick="location.href='pacotes.html'"><span class="material-symbols-rounded">package_2</span> Pacotes de Crédito</li>
+                <li class="active" onclick="location.href='aprovar-creditos.html'"><span class="material-symbols-rounded">add_card</span> Aprovar Créditos</li>
+                <li onclick="location.href='receitas-admin.html'"><span class="material-symbols-rounded">account_balance</span> Receitas Totais</li>
+                <li onclick="location.href='perfil-admin.html'"><span class="material-symbols-rounded">manage_accounts</span> Meu Perfil</li>
+            </ul>
+            <div class="sidebar-footer">
+                <button class="btn-logout" onclick="fazerLogout()">
+                    <span class="material-symbols-rounded">logout</span> Sair
+                </button>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="header-left">
+                    <button id="btn-toggle-sidebar" class="btn-menu"><span class="material-symbols-rounded">menu</span></button>
+                    <div>
+                        <h1>Aprovação de Créditos</h1>
+                        <p>Valide os pagamentos e liberte os créditos para os revendedores.</p>
+                    </div>
+                </div>
+            </header>
+
+            <div class="table-container">
+                <table class="premium-table">
+                    <thead>
+                        <tr>
+                            <th>ID Pedido</th>
+                            <th>Revendedor</th>
+                            <th>Qtd. Créditos</th>
+                            <th>Valor Total</th>
+                            <th style="text-align: right;">Ações de Comandante</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-pedidos">
+                        <tr><td colspan="5" style="text-align: center;">Varrendo o radar por solicitações...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/aprovar-creditos.js?v=1"></script>
+</body>
+</html>

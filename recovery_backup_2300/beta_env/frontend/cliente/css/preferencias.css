@@ -1,0 +1,213 @@
+/* css/preferencias.css */
+.pref-container {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    max-width: 800px;
+    margin-top: 25px;
+}
+
+.pref-section {
+    background: var(--bg-card-light);
+    border-radius: 15px;
+    padding: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.pref-section h3 {
+    color: #f8fafc;
+    margin-top: 0;
+    margin-bottom: 25px;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pref-section h3 span {
+    color: #3b82f6;
+}
+
+.setting-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.setting-group:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.setting-label {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.setting-label strong {
+    color: #f8fafc;
+    font-size: 15px;
+}
+
+.setting-label p {
+    color: #94a3b8;
+    font-size: 13px;
+    margin: 0;
+}
+
+.pref-control {
+    background: var(--bg-input);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    min-width: 150px;
+}
+
+.pref-control:focus {
+    border-color: #3b82f6;
+}
+
+.btn-save-pref {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    width: fit-content;
+}
+
+.btn-save-pref:hover {
+    background: #059669;
+    transform: translateY(-2px);
+}
+
+/* Gestão de Itens (Categorias/Pagamentos) */
+.add-mini-form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.btn-add-item {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-add-item:hover {
+    background: #2563eb;
+}
+
+.items-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.item-card {
+    background: var(--bg-input);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: 0.3s;
+}
+
+.item-card:hover {
+    border-color: #3b82f6;
+}
+
+.item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.item-name {
+    color: #f8fafc;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.item-badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    font-weight: 700;
+    width: fit-content;
+}
+
+.badge-gasto {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+.badge-recebimento {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+}
+
+.btn-delete-item {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: 0.3s;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.btn-delete-item:hover {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+@media (max-width: 768px) {
+    .setting-group {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .pref-control {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .add-mini-form {
+        flex-direction: column;
+    }
+
+    .btn-add-item {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .pref-section {
+        padding: 20px;
+    }
+}

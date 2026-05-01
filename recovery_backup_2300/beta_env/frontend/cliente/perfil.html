@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Meu Perfil | TN INFO</title>
+<script src="../js/security.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+<link href="../css/design-tokens.css" rel="stylesheet"/>
+<link href="css/dashboard.css" rel="stylesheet"/>
+<link href="css/cliente.css" rel="stylesheet"/>
+<link href="css/formularios.css" rel="stylesheet"/>
+<!-- PWA -->
+<link href="../manifest.json" rel="manifest"/>
+<meta content="#3b82f6" name="theme-color"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<style>
+        @media (max-width: 768px) {
+            .profile-grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+    </style>
+</link></head>
+<body>
+<div class="dashboard-wrapper">
+<div class="navigation" id="minha-sidebar">
+<div class="user-info" style="display: flex; flex-direction: column; align-items: center; padding: 20px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 10px;">
+<img alt="TN INFO" src="../assets/img/logo.jpg" style="width: 140px; height: 140px; border-radius: 12px; object-fit: cover; border: 2px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.3);"/>
+</div>
+<ul class="">
+<li class="list"><a href="painel-cliente.html"><span class="icon"><span class="material-symbols-rounded">dashboard</span></span><span class="title">Minha Área</span></a></li>
+<li class="list"><a href="minhas-financas.html"><span class="icon"><span class="material-symbols-rounded">account_balance</span></span><span class="title">Minhas Finanças</span></a></li>
+<li class="list"><a href="previsao.html"><span class="icon"><span class="material-symbols-rounded">trending_up</span></span><span class="title">Previsão</span></a></li>
+<li class="list"><a href="calendario.html"><span class="icon"><span class="material-symbols-rounded">calendar_month</span></span><span class="title">Calendário</span></a></li>
+<li class="separator"><span class="title">OPERACIONAL</span></li>
+<li class="list"><a href="novo-lancamento.html"><span class="icon"><span class="material-symbols-rounded">add_circle</span></span><span class="title">Novo Lançamento</span></a></li>
+<li class="list"><a href="historico.html"><span class="icon"><span class="material-symbols-rounded">history</span></span><span class="title">Histórico</span></a></li>
+<li class="list"><a href="metas-gastos.html"><span class="icon"><span class="material-symbols-rounded">ads_click</span></span><span class="title">Metas de Gastos</span></a></li>
+<li class="separator"><span class="title">CONTA</span></li>
+<li class="list"><a href="meus-cartoes.html"><span class="icon"><span class="material-symbols-rounded">credit_card</span></span><span class="title">Meus Cartões</span></a></li>
+<li class="list"><a href="preferencias.html"><span class="icon"><span class="material-symbols-rounded">settings</span></span><span class="title">Preferências</span></a></li>
+<li class="list"><a href="minha-assinatura.html"><span class="icon"><span class="material-symbols-rounded">verified_user</span></span><span class="title">Minha Assinatura</span></a></li>
+<li class="list active"><a href="perfil.html"><span class="icon"><span class="material-symbols-rounded">person</span></span><span class="title">Meu Perfil</span></a></li>
+</ul>
+</div>
+<main class="main-content">
+<header class="top-bar">
+<div class="header-left">
+<button class="btn-menu" id="btn-toggle-sidebar"><span class="material-symbols-rounded">menu</span></button>
+<h1>Meu Perfil</h1>
+</div>
+<div class="top-actions" style="display: flex; gap: 10px; align-items: center; margin-left: auto;">
+    <button class="btn-top-action" onclick="forcarAtualizacao()" title="Atualizar App" style="background: rgba(255, 255, 255, 0.05); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s; font-weight: 600;">
+        <span class="material-symbols-rounded" style="font-size: 20px;">sync</span>
+        <span class="action-text">Atualizar</span>
+    </button>
+    <button class="btn-top-action" onclick="location.href='../index.html'" title="Sair" style="background: rgba(255, 255, 255, 0.05); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s; font-weight: 600;">
+        <span class="material-symbols-rounded" style="font-size: 20px;">logout</span>
+        <span class="action-text">Sair</span>
+    </button>
+</div>
+</header>
+<div class="profile-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:25px; margin-top:25px;">
+<div class="card-premium" style="background: var(--bg-card-light); padding:25px; border-radius:15px;">
+<div style="background: var(--bg-input); padding: 10px; border-radius: 8px; margin-bottom: 20px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.1);">
+<p style="margin: 0; font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">
+                            ID de Indicação</p>
+<h2 id="display-id" style="margin: 5px 0 0 0; color: #ffffff; font-size: 24px;">--</h2>
+</div>
+<div class="form-group">
+<label>Nome Completo</label>
+<input class="form-control" id="perfil-nome" placeholder="Seu nome" type="text"/>
+</div>
+<div class="form-group" style="margin-top: 15px;">
+<label>E-mail Associado</label>
+<input class="form-control" id="perfil-email" placeholder="seu@email.com" type="email"/>
+</div>
+<button class="btn-login" style="width:100%; margin-top:15px;">Salvar Alterações</button>
+</div>
+<div class="card-premium" style="background: var(--bg-card-light); padding:25px; border-radius:15px;">
+<div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
+<span class="material-symbols-rounded" style="color:#ffffff;">group</span>
+<h3 style="margin:0;">Conta Compartilhada</h3>
+</div>
+<p style="font-size:13px; color:#94a3b8; margin-bottom:20px;">Permita que outra pessoa gerencie as
+                        finanças com você.</p>
+<div style="display:flex; gap:10px; margin-bottom:20px;">
+<input class="form-control" id="email-convite" placeholder="E-mail do convidado" type="email"/>
+<button class="btn-login" onclick="enviarConvite()" style="margin:0; width:auto; padding:0 20px;">Convidar</button>
+</div>
+<h4 style="font-size:12px; color:#64748b; text-transform:uppercase; margin-bottom:10px;">Convites
+                        Enviados</h4>
+<div id="lista-enviados"></div>
+<h4 style="font-size:12px; color:#64748b; text-transform:uppercase; margin-top:20px; margin-bottom:10px;">
+                        Convites Recebidos</h4>
+<div id="lista-recebidos"></div>
+</div>
+</div>
+</main>
+</div>
+<script src="js/perfil.js"></script>
+</body>
+</html>

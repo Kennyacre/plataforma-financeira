@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.env
+venv/
+.vscode/
+node_modules/
+instances/
+*.json
+venv-win/
+bs4env/
+*.tar.gz
+mtconnect_v2_beta_deploy.tar.gz
