@@ -13,7 +13,7 @@
 }
 
 .stat-box {
-    background: #1e293b;
+    background: #18181b;
     border-radius: 15px;
     padding: 25px;
     border: 1px solid rgba(255,255,255,0.05);
@@ -30,12 +30,12 @@
 
 .stat-box h3 { color: #94a3b8; font-size: 13px; font-weight: 600; text-transform: uppercase; margin: 0; }
 .stat-box h2 { color: #f8fafc; font-size: 28px; margin: 0; }
-.val-pos { color: #10b981; }
-.val-neg { color: #ef4444; }
-.val-neu { color: #3b82f6; }
+.val-pos { color: #ffffff; }
+.val-neg { color: #a1a1aa; }
+.val-neu { color: #ffffff; }
 
 .chart-container-donut {
-    background: #1e293b;
+    background: #18181b;
     border-radius: 15px;
     padding: 30px;
     border: 1px solid rgba(255,255,255,0.05);

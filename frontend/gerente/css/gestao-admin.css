@@ -46,7 +46,7 @@
 .user-actions { display: flex; gap: 10px; }
 
 .btn-icon {
-    background: #1e293b;
+    background: #18181b;
     border: 1px solid var(--border);
     color: var(--text-main);
     width: 40px;

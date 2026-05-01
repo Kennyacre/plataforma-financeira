@@ -1,6 +1,6 @@
 /* Filtro Dropdown */
 .select-dark {
-    background: #1e293b;
+    background: #18181b;
     color: var(--text-main);
     border: 1px solid var(--border);
     padding: 8px 15px;
@@ -27,7 +27,7 @@
 }
 
 .chart-container { 
-    background: #1e293b; 
+    background: #18181b; 
     border-radius: 15px; 
     padding: 25px; 
     border: 1px solid rgba(255,255,255,0.05); 
@@ -37,7 +37,7 @@
 }
 
 .summary-card { 
-    background: #1e293b; 
+    background: #18181b; 
     border-radius: 15px; 
     padding: 25px; 
     border: 1px solid rgba(255,255,255,0.05); 

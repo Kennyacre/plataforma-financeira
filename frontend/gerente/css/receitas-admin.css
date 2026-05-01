@@ -9,7 +9,7 @@
 }
 
 .stat-card { 
-    background: #1e293b; 
+    background: #18181b; 
     border-radius: 15px; 
     padding: 25px; 
     border: 1px solid rgba(255,255,255,0.05); 
@@ -28,12 +28,12 @@
     margin: 10px 0 0 0; 
 }
 
-.card-green { border-bottom: 4px solid #10b981; }
-.card-gold { border-bottom: 4px solid #d97706; }
+.card-green { border-bottom: 4px solid #ffffff; }
+.card-gold { border-bottom: 4px solid #a1a1aa; }
 
 /* TABELA DE TRANSAÇÕES */
 .table-container { 
-    background: #1e293b; 
+    background: #18181b; 
     border: 1px solid rgba(255,255,255,0.05); 
     border-radius: 15px; 
     padding: 25px; 

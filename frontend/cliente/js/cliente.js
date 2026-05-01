@@ -279,7 +279,7 @@ async function carregarDadosGrafico(ano) {
             if (instanceFinanceChart) instanceFinanceChart.destroy();
             instanceFinanceChart = new Chart(ctx, {
                 type: 'bar',
-                data: { labels: dados.labels, datasets: [{ label: 'Receitas', data: dados.receitas, backgroundColor: '#10b981', borderRadius: 4 }, { label: 'Despesas', data: dados.despesas, backgroundColor: '#ef4444', borderRadius: 4 }] },
+                data: { labels: dados.labels, datasets: [{ label: 'Receitas', data: dados.receitas, backgroundColor: '#ffffff', borderRadius: 4 }, { label: 'Despesas', data: dados.despesas, backgroundColor: '#52525b', borderRadius: 4 }] },
                 options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }, x: { grid: { display: false }, ticks: { color: '#94a3b8' } } }, plugins: { legend: { labels: { color: '#f8fafc' } } } }
             });
         }

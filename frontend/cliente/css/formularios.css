@@ -6,11 +6,11 @@
 
 /* O fundo do formulário */
 .form-card {
-    background: #1e293b !important;
+    background: #18181b !important;
     padding: 30px !important;
     border-radius: 16px;
     border: 1px solid rgba(255,255,255,0.05);
-    border-top: 4px solid #3b82f6 !important; /* Linha azul de destaque */
+    border-top: 4px solid #ffffff !important; /* Linha branca de destaque */
 }
 
 .form-grid {
@@ -33,7 +33,7 @@
 
 /* O fundo de onde digita */
 .input-dark {
-    background: #0f172a !important;
+    background: #09090b !important;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
     color: white !important;
     padding: 12px !important;
@@ -45,7 +45,7 @@
 }
 
 .input-dark:focus {
-    border-color: #3b82f6 !important;
+    border-color: #ffffff !important;
 }
 
 .input-dark:disabled {
@@ -62,8 +62,8 @@
 }
 
 .btn-save {
-    background: #10b981;
-    color: white;
+    background: #ffffff;
+    color: #000000;
     border: none;
     padding: 12px 30px;
     border-radius: 10px;

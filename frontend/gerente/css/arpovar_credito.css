@@ -5,16 +5,16 @@
         .sidebar.escondida { display: none; }
         
         .header-left { display: flex; align-items: center; gap: 20px; }
-        .btn-menu { background: #1e293b; border: 1px solid rgba(255,255,255,0.1); color: #f8fafc; padding: 10px; border-radius: 10px; cursor: pointer; display: flex; transition: 0.3s; }
+        .btn-menu { background: #18181b; border: 1px solid rgba(255,255,255,0.1); color: #f8fafc; padding: 10px; border-radius: 10px; cursor: pointer; display: flex; transition: 0.3s; }
 
-        .table-container { background: #1e293b; border: 1px solid rgba(255,255,255,0.05); border-radius: 15px; padding: 25px; margin-top: 25px; overflow-x: auto; }
+        .table-container { background: #18181b; border: 1px solid rgba(255,255,255,0.05); border-radius: 15px; padding: 25px; margin-top: 25px; overflow-x: auto; }
         .premium-table { width: 100%; border-collapse: collapse; text-align: left; }
         .premium-table th { color: #94a3b8; font-size: 13px; padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .premium-table td { padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #f8fafc; font-size: 14px; }
         
         .actions-cell { display: flex; gap: 10px; justify-content: flex-end; }
-        .btn-approve { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid #10b981; padding: 8px 15px; border-radius: 8px; cursor: pointer; transition: 0.3s; font-weight: bold; font-size: 12px; display: flex; align-items: center; gap: 5px;}
-        .btn-approve:hover { background: #10b981; color: white; transform: translateY(-2px); }
+        .btn-approve { background: #ffffff; color: #000000; border: 1px solid #ffffff; padding: 8px 15px; border-radius: 8px; cursor: pointer; transition: 0.3s; font-weight: bold; font-size: 12px; display: flex; align-items: center; gap: 5px;}
+        .btn-approve:hover { background: #e2e8f0; transform: translateY(-2px); }
         
         .btn-reject { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; padding: 8px 15px; border-radius: 8px; cursor: pointer; transition: 0.3s; font-weight: bold; font-size: 12px; display: flex; align-items: center; gap: 5px;}
         .btn-reject:hover { background: #ef4444; color: white; transform: translateY(-2px); }

@@ -1,7 +1,7 @@
 /* Estilos específicos da tabela de clientes herdando o layout global */
 
 .table-container {
-        background: #1e293b;
+        background: #18181b;
         border: 1px solid rgba(255, 255, 255, 0.05);
         border-radius: 15px;
         padding: 25px;
@@ -17,7 +17,7 @@
 
 .search-box input {
         width: 100%;
-        background: #0f172a;
+        background: #09090b;
         border: 1px solid rgba(255, 255, 255, 0.1);
         padding: 12px 15px 12px 45px;
         border-radius: 10px;
@@ -60,18 +60,18 @@
 }
 
 .role-admin {
-        background: rgba(245, 158, 11, 0.1);
-        color: #f59e0b;
+        background: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
 }
 
 .role-revenda {
-        background: rgba(139, 92, 246, 0.1);
-        color: #8b5cf6;
+        background: rgba(161, 161, 170, 0.1);
+        color: #a1a1aa;
 }
 
 .role-cliente {
-        background: rgba(59, 130, 246, 0.1);
-        color: #3b82f6;
+        background: rgba(255, 255, 255, 0.05);
+        color: #d4d4d8;
 }
 
 .btn-reject {
@@ -119,7 +119,7 @@
     max-width: 450px;
     height: auto;
     max-height: 90vh;
-    background-color: #1e293b;
+    background-color: #18181b;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
@@ -184,7 +184,7 @@
 
 .form-control {
     width: 100%;
-    background: #0f172a;
+    background: #09090b;
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: white;
     padding: 12px 15px;
@@ -195,12 +195,12 @@
 }
 
 .form-control:focus {
-    border-color: #3b82f6;
+    border-color: #ffffff;
 }
 
 .btn-primary {
-    background: #3b82f6;
-    color: white;
+    background: #ffffff;
+    color: #000000;
     border: none;
     padding: 12px 20px;
     border-radius: 10px;
@@ -210,8 +210,8 @@
 }
 
 .btn-primary:hover {
-    background: #2563eb;
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+    background: #e2e8f0;
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
 }
 
 /* Toggle Switch (Premium) */
@@ -244,10 +244,10 @@
   transition: .4s;
 }
 input:checked + .slider {
-  background-color: #f59e0b;
+  background-color: #ffffff;
 }
 input:focus + .slider {
-  box-shadow: 0 0 1px #f59e0b;
+  box-shadow: 0 0 1px #ffffff;
 }
 input:checked + .slider:before {
   transform: translateX(26px);

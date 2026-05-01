@@ -8,7 +8,7 @@
 }
 
 .pref-section {
-    background: #1e293b;
+    background: #18181b;
     border-radius: 15px;
     padding: 30px;
     border: 1px solid rgba(255, 255, 255, 0.05);
@@ -25,7 +25,7 @@
 }
 
 .pref-section h3 span {
-    color: #3b82f6;
+    color: #ffffff;
 }
 
 .setting-group {
@@ -59,7 +59,7 @@
 }
 
 .pref-control {
-    background: #0f172a;
+    background: #09090b;
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: white;
     padding: 10px 15px;
@@ -70,12 +70,12 @@
 }
 
 .pref-control:focus {
-    border-color: #3b82f6;
+    border-color: #ffffff;
 }
 
 .btn-save-pref {
-    background: #10b981;
-    color: white;
+    background: #ffffff;
+    color: #000000;
     border: none;
     padding: 15px 30px;
     border-radius: 10px;
@@ -90,7 +90,7 @@
 }
 
 .btn-save-pref:hover {
-    background: #059669;
+    background: #e2e8f0;
     transform: translateY(-2px);
 }
 
@@ -102,8 +102,8 @@
 }
 
 .btn-add-item {
-    background: #3b82f6;
-    color: white;
+    background: #ffffff;
+    color: #000000;
     border: none;
     padding: 10px 20px;
     border-radius: 8px;
@@ -116,7 +116,7 @@
 }
 
 .btn-add-item:hover {
-    background: #2563eb;
+    background: #e2e8f0;
 }
 
 .items-list {
@@ -126,7 +126,7 @@
 }
 
 .item-card {
-    background: #0f172a;
+    background: #09090b;
     border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 10px;
     padding: 15px;
@@ -137,7 +137,7 @@
 }
 
 .item-card:hover {
-    border-color: #3b82f6;
+    border-color: #ffffff;
 }
 
 .item-info {

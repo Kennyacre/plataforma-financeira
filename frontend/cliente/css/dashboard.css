@@ -1,9 +1,9 @@
 :root {
-    --bg-color: #0f172a;
-    --sidebar-bg: #1e293b;
-    --accent-color: #2563eb;
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
+    --bg-color: #000000;
+    --sidebar-bg: #09090b;
+    --accent-color: #ffffff;
+    --text-main: #ffffff;
+    --text-muted: #71717a;
 }
 
 * {
@@ -366,18 +366,18 @@ body {
 }
 
 .blue {
-    background: rgba(37, 99, 235, 0.2);
-    color: #3b82f6;
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
 }
 
 .green {
-    background: rgba(16, 185, 129, 0.2);
-    color: #10b981;
+    background: rgba(255, 255, 255, 0.8);
+    color: #000000;
 }
 
 .red {
-    background: rgba(239, 68, 68, 0.2);
-    color: #ef4444;
+    background: rgba(161, 161, 170, 0.1);
+    color: #a1a1aa;
 }
 
 .stat-info span {
@@ -415,11 +415,11 @@ canvas {
 
 /* Estilos Gerais do Painel e Tabelas */
 .client-welcome {
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    background: linear-gradient(135deg, #09090b 0%, #000000 100%);
     padding: 30px;
     border-radius: 16px;
     margin-bottom: 30px;
-    border: 1px solid #334155;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .client-welcome h2 {
@@ -434,10 +434,10 @@ canvas {
 }
 
 .table-container {
-    background: #1e293b;
+    background: #09090b;
     padding: 20px;
     border-radius: 16px;
-    border: 1px solid #334155;
+    border: 1px solid rgba(255, 255, 255, 0.05);
     overflow-x: auto;
 }
 
@@ -462,8 +462,9 @@ td {
 
 /* Badges de Status Dinâmicos */
 .badge-pago {
-    background: rgba(16, 185, 129, 0.2);
-    color: #10b981;
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
     padding: 6px 12px;
     border-radius: 8px;
     font-size: 12px;
@@ -471,8 +472,9 @@ td {
 }
 
 .badge-pendente {
-    background: rgba(239, 68, 68, 0.2);
-    color: #ef4444;
+    background: rgba(161, 161, 170, 0.1);
+    color: #a1a1aa;
+    border: 1px solid rgba(161, 161, 170, 0.2);
     padding: 6px 12px;
     border-radius: 8px;
     font-size: 12px;

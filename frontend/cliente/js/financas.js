@@ -142,7 +142,7 @@ function renderizarGraficoDonut(dadosCategorias) {
                 // Paleta de cores Premium para as categorias
                 backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6'],
                 borderWidth: 4,
-                borderColor: '#1e293b', // Mesma cor do fundo do card
+                borderColor: '#18181b', // Cor do fundo (Cinza Chumbo)
                 hoverOffset: 10
             }]
         },
