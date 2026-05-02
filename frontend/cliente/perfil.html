@@ -5,6 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Meu Perfil | TN INFO</title>
+<link rel="shortcut icon" href="../assets/img/logo.jpg" type="image/x-icon">
 <script src="../js/security.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
@@ -15,11 +16,35 @@
 <link href="../manifest.json" rel="manifest"/>
 <meta content="#3b82f6" name="theme-color"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
-<style>
+    <style>
         @media (max-width: 768px) {
             .profile-grid {
                 grid-template-columns: 1fr !important;
             }
+        }
+        /* FORÇANDO TEMA LUXURY MONOCHROME */
+        .id-box-premium {
+            background: #18181b !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5) !important;
+        }
+        .id-text-premium {
+            color: #ffffff !important;
+            text-shadow: 0 0 10px rgba(255,255,255,0.1) !important;
+        }
+        .btn-premium-monochrome {
+            background: #ffffff !important;
+            color: #000000 !important;
+            border: none !important;
+            box-shadow: 0 4px 15px rgba(255,255,255,0.2) !important;
+        }
+        .btn-top-premium {
+            background: rgba(255, 255, 255, 0.05) !important;
+            color: #ffffff !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+        .icon-premium {
+            color: #ffffff !important;
         }
     </style>
 </link></head>
@@ -33,6 +58,7 @@
 <li class="list"><a href="painel-cliente.html"><span class="icon"><span class="material-symbols-rounded">dashboard</span></span><span class="title">Minha Área</span></a></li>
 <li class="list"><a href="minhas-financas.html"><span class="icon"><span class="material-symbols-rounded">account_balance</span></span><span class="title">Minhas Finanças</span></a></li>
 <li class="list"><a href="previsao.html"><span class="icon"><span class="material-symbols-rounded">trending_up</span></span><span class="title">Previsão</span></a></li>
+<li class="list"><a href="parcelamentos.html"><span class="icon"><span class="material-symbols-rounded">payments</span></span><span class="title">Meus Parcelamentos</span></a></li>
 <li class="list"><a href="calendario.html"><span class="icon"><span class="material-symbols-rounded">calendar_month</span></span><span class="title">Calendário</span></a></li>
 <li class="separator"><span class="title">OPERACIONAL</span></li>
 <li class="list"><a href="novo-lancamento.html"><span class="icon"><span class="material-symbols-rounded">add_circle</span></span><span class="title">Novo Lançamento</span></a></li>
@@ -52,7 +78,7 @@
 <h1>Meu Perfil</h1>
 </div>
 <div class="top-actions" style="display: flex; gap: 10px; align-items: center; margin-left: auto;">
-    <button class="btn-top-action" onclick="forcarAtualizacao()" title="Atualizar App" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s; font-weight: 600;">
+    <button class="btn-top-action" onclick="forcarAtualizacao()" title="Atualizar App" style="background: rgba(255, 255, 255, 0.05); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s; font-weight: 600;">
         <span class="material-symbols-rounded" style="font-size: 20px;">sync</span>
         <span class="action-text">Atualizar</span>
     </button>
@@ -63,40 +89,58 @@
 </div>
 </header>
 <div class="profile-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:25px; margin-top:25px;">
-<div class="card-premium" style="background:#1e293b; padding:25px; border-radius:15px;">
-<div style="background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 8px; margin-bottom: 20px; text-align: center; border: 1px solid rgba(59, 130, 246, 0.2);">
-<p style="margin: 0; font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">
-                            ID de Indicação</p>
-<h2 id="display-id" style="margin: 5px 0 0 0; color: #3b82f6; font-size: 24px;">--</h2>
-</div>
-<div class="form-group">
-<label>Nome Completo</label>
-<input class="form-control" id="perfil-nome" placeholder="Seu nome" type="text"/>
-</div>
-<div class="form-group" style="margin-top: 15px;">
-<label>E-mail Associado</label>
-<input class="form-control" id="perfil-email" placeholder="seu@email.com" type="email"/>
-</div>
-<button class="btn-login" style="width:100%; margin-top:15px;">Salvar Alterações</button>
-</div>
-<div class="card-premium" style="background:#1e293b; padding:25px; border-radius:15px;">
-<div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
-<span class="material-symbols-rounded" style="color:#3b82f6;">group</span>
-<h3 style="margin:0;">Conta Compartilhada</h3>
-</div>
-<p style="font-size:13px; color:#94a3b8; margin-bottom:20px;">Permita que outra pessoa gerencie as
-                        finanças com você.</p>
-<div style="display:flex; gap:10px; margin-bottom:20px;">
-<input class="form-control" id="email-convite" placeholder="E-mail do convidado" type="email"/>
-<button class="btn-login" onclick="enviarConvite()" style="margin:0; width:auto; padding:0 20px;">Convidar</button>
-</div>
-<h4 style="font-size:12px; color:#64748b; text-transform:uppercase; margin-bottom:10px;">Convites
-                        Enviados</h4>
-<div id="lista-enviados"></div>
-<h4 style="font-size:12px; color:#64748b; text-transform:uppercase; margin-top:20px; margin-bottom:10px;">
-                        Convites Recebidos</h4>
-<div id="lista-recebidos"></div>
-</div>
+<div class="card-premium" style="background:#09090b; border: 1px solid rgba(255,255,255,0.05); padding:25px; border-radius:15px;">
+            <div style="background: #000000 !important; padding: 25px; border-radius: 12px; margin-bottom: 25px; text-align: center; border: 4px solid #ffffff !important; box-shadow: 0 0 30px rgba(255,255,255,0.1) !important;">
+                <p style="margin: 0; font-size: 11px; color: #ffffff !important; text-transform: uppercase; letter-spacing: 3px; font-weight: 900;">
+                    ID DE INDICAÇÃO</p>
+                <h2 id="display-id-premium" style="margin: 10px 0 0 0; color: #ffffff !important; font-size: 36px; font-family: 'Inter', sans-serif; font-weight: 900;">#--</h2>
+            </div>
+            <div class="form-group">
+                <label style="color: #a1a1aa;">Nome Completo</label>
+                <input class="form-control" id="perfil-nome" placeholder="Seu nome" type="text" style="background: #111111; border-color: rgba(255,255,255,0.1); color: white;">
+            </div>
+            <div class="form-group" style="margin-top: 15px;">
+                <label style="color: #a1a1aa;">E-mail Associado</label>
+                <input class="form-control" id="perfil-email" placeholder="seu@email.com" type="email" style="background: #111111; border-color: rgba(255,255,255,0.1); color: white;">
+            </div>
+            <button class="btn-login" style="width:100%; margin-top:15px; background: white; color: black; border: none; border-radius: 8px; font-weight: bold; padding: 12px;">Salvar Alterações</button>
+        </div>
+        <div class="card-premium" style="background:#09090b; border: 1px solid rgba(255,255,255,0.05); padding:25px; border-radius:15px;">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
+                <span class="material-symbols-rounded" style="color:#ffffff;">group</span>
+                <h3 style="margin:0; color: white;">Conta Compartilhada</h3>
+            </div>
+            <p style="font-size:13px; color:#a1a1aa; margin-bottom:20px;">Permita que outra pessoa gerencie as finanças com você.</p>
+            <div style="display:flex; gap:10px; margin-bottom:20px;">
+                <input class="form-control" id="email-convite" placeholder="E-mail do convidado" type="email" style="background: #111111; border-color: rgba(255,255,255,0.1); color: white;">
+                <button class="btn-login" onclick="enviarConvite()" style="margin:0; width:auto; padding:0 20px; background: white; color: black; border-radius: 8px; font-weight: 700;">Convidar</button>
+            </div>
+            <h4 style="font-size:11px; color:#71717a; text-transform:uppercase; margin-bottom:10px;">Convites Enviados</h4>
+            <div id="lista-enviados"></div>
+            <h4 style="font-size:11px; color:#71717a; text-transform:uppercase; margin-top:20px; margin-bottom:10px;">Convites Recebidos</h4>
+            <div id="lista-recebidos"></div>
+        </div>
+        <!-- CARD DE ALTERAÇÃO DE SENHA -->
+        <div class="card-premium" style="background:#09090b; border: 1px solid rgba(255,255,255,0.05); padding:25px; border-radius:15px; grid-column: span 2; margin-top: 10px;">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
+                <span class="material-symbols-rounded" style="color:#ffffff;">lock</span>
+                <h3 style="margin:0; color: white;">Alterar Minha Senha</h3>
+            </div>
+            <p style="font-size:13px; color:#a1a1aa; margin-bottom:20px;">Defina uma nova senha de acesso para sua conta.</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group">
+                    <label style="color: #a1a1aa;">Nova Senha</label>
+                    <input type="password" id="nova-senha" class="form-control" placeholder="Mínimo 6 caracteres" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: #111111; color: white;">
+                </div>
+                <div class="form-group">
+                    <label style="color: #a1a1aa;">Confirmar Senha</label>
+                    <input type="password" id="confirmar-senha" class="form-control" placeholder="Repita a nova senha" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: #111111; color: white;">
+                </div>
+            </div>
+            <button onclick="alterarSenha()" class="btn-login" style="width:auto; padding: 14px 30px; margin-top:20px; background: white; color: black; border: none; border-radius: 10px; cursor: pointer; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                <span class="material-symbols-rounded">key</span> Atualizar Senha
+            </button>
+        </div>
 </div>
 </main>
 </div>

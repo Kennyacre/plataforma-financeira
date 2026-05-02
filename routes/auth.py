@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from core.database import get_db_connection
-from models.schemas import LoginRequest, PerfilUpdate, ManualRegistrationRequest
+from models.schemas import LoginRequest, PerfilUpdate, ManualRegistrationRequest, SolicitacaoRecuperacao, RedefinirSenha
 import logging
 from pydantic import BaseModel
 # import psycopg2 # REMOVIDO PARA COMPATIBILIDADE COM PYTHON 3.14
@@ -15,7 +15,7 @@ def login(request: LoginRequest):
     cur = conn.cursor()
     try:
         cur.execute("""
-            SELECT username, password, role, status, deletado
+            SELECT username, password, role, status, deletado, must_change_password
             FROM usuarios 
             WHERE (username = %s OR email = %s) AND deletado IS NOT TRUE
         """, (request.username.lower().strip(), request.username.lower().strip()))
@@ -30,7 +30,12 @@ def login(request: LoginRequest):
         if user[3] == 'bloqueado':
             raise HTTPException(status_code=403, detail="A sua conta está bloqueada.")
             
-        return {"status": "sucesso", "role": user[2], "username": user[0]}
+        return {
+            "status": "sucesso", 
+            "role": user[2], 
+            "username": user[0],
+            "must_change_password": bool(user[5])
+        }
     finally:
         cur.close(); conn.close()
 
@@ -137,5 +142,54 @@ def get_info_indicacao(usuario_id: int):
         res = cur.fetchone()
         if not res: raise HTTPException(status_code=404, detail="Indicação não encontrada.")
         return {"username": res[0], "role": res[1], "nome": res[2] or res[0]}
+    finally:
+        cur.close(); conn.close()
+
+@router.post("/recuperar-senha/solicitar")
+def solicitar_recuperacao(dados: SolicitacaoRecuperacao):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        username = dados.username.lower().strip()
+        # Verifica se o usuário existe
+        cur.execute("SELECT id FROM usuarios WHERE username = %s AND deletado = FALSE", (username,))
+        if not cur.fetchone():
+            raise HTTPException(status_code=404, detail="Utilizador não encontrado.")
+        
+        # Verifica se já tem uma solicitação pendente
+        cur.execute("SELECT id FROM recuperacao_senha WHERE username = %s AND status = 'pendente'", (username,))
+        if cur.fetchone():
+            return {"status": "sucesso", "mensagem": "Já existe uma solicitação pendente para este utilizador."}
+
+        cur.execute("INSERT INTO recuperacao_senha (username) VALUES (%s)", (username,))
+        conn.commit()
+        return {"status": "sucesso", "mensagem": "Solicitação de recuperação enviada com sucesso!"}
+    except HTTPException: raise
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cur.close(); conn.close()
+
+@router.post("/recuperar-senha/redefinir")
+def redefinir_senha(dados: RedefinirSenha):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        username = dados.username.lower().strip()
+        cur.execute("""
+            UPDATE usuarios 
+            SET password = %s, must_change_password = FALSE 
+            WHERE username = %s AND deletado = FALSE
+        """, (dados.nova_senha, username))
+        
+        if cur.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Utilizador não encontrado.")
+            
+        conn.commit()
+        return {"status": "sucesso", "mensagem": "Senha redefinida com sucesso!"}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         cur.close(); conn.close()

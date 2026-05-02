@@ -1,253 +1,237 @@
-/* =========================================
-   1. SEU CSS ORIGINAL (Tema Roxo, Listas, etc)
-   ========================================= */
-.card-detail {
-    background: linear-gradient(135deg, #820ad1 0%, #4b067a 100%); /* Cor Roxa Nubank */
-    margin-bottom: 25px;
+/* meus-cartoes.css - MINIMALIST LUXURY EDITION */
+.cards-page-layout { 
+    display: flex; 
+    flex-wrap: wrap; /* Permite quebrar linha no celular */
+    gap: 30px; 
+    margin-top: 30px; 
+    align-items: flex-start; 
 }
 
-.card-info-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 30px;
-}
-
-.brand { display: flex; align-items: center; gap: 15px; }
-.brand span { font-size: 32px; }
-.brand h3 { font-size: 18px; margin-bottom: 2px; }
-.brand span { color: white; opacity: 0.8; font-size: 13px; }
-
-.card-stats {
-    display: flex;
-    justify-content: space-between;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding-top: 20px;
-}
-
-.stat-item span { font-size: 12px; opacity: 0.7; }
-.stat-item h2 { font-size: 22px; margin-top: 5px; }
-
-.content-grid-cartoes { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; }
-.purchase-list { list-style: none; margin-top: 15px; }
-.purchase-list li { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid var(--border); }
-.item-value { text-align: right; }
-.item-value span { font-size: 12px; color: var(--text-dim); display: block; }
-
-.btn-pay-bill {
-    background: var(--green);
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.btn-save-card {
-    width: 100%;
-    background: var(--accent);
-    color: white;
-    border: none;
-    padding: 12px;
-    border-radius: 10px;
-    margin-top: 15px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-/* =========================================
-   2. ESTILO PREMIUM DO CARTÃO DE CRÉDITO BLACK
-   ========================================= */
-.credit-card-box {
-    background: #18181b;
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 20px;
+.form-section {
+    background: #09090b;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 28px;
     padding: 30px;
     width: 100%;
-    max-width: 400px;
-    color: white;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    max-width: 400px; /* Trava a largura para não ficar muito larga */
+    box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+}
+@media (min-width: 1024px) {
+    .form-section { position: sticky; top: 20px; }
+}
+
+.form-header h2 {
+    color: #ffffff;
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.form-group label {
+    color: #a1a1aa;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+}
+
+.form-group input, .form-group select {
+    width: 100%;
+    background: #18181b;
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #ffffff;
+    padding: 16px 20px;
+    border-radius: 14px;
+    font-size: 15px;
+    outline: none;
+    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.form-group input:focus {
+    background: #27272a;
+    border-color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(255,255,255,0.05);
+}
+
+.btn-submit-premium {
+    width: 100%;
+    background: #ffffff;
+    color: #000000;
+    padding: 18px;
+    border-radius: 16px;
+    font-weight: 900;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: 0.4s;
+    border: none;
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.cards-list-section {
+    flex: 1;
+    min-width: 320px;
+}
+
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 350px); /* Trava em 350px fixos */
+    gap: 25px;
+}
+
+/* --- DESIGN SLEEK CARD --- */
+.credit-card-item {
+    width: 350px; /* Largura fixa */
+    height: 210px;
+    border-radius: 28px;
+    padding: 30px;
     position: relative;
     overflow: hidden;
-    margin-top: 20px;
-}
-.credit-card-box::before {
-    content: ''; position: absolute; top: -50px; left: -50px; width: 150px; height: 150px;
-    background: rgba(255,255,255,0.05); border-radius: 50%;
-}
-.card-chip { width: 45px; margin-bottom: 20px; }
-.card-number { font-size: 22px; letter-spacing: 3px; margin-bottom: 20px; font-family: monospace; }
-.card-details { display: flex; justify-content: space-between; font-size: 14px; color: #94a3b8; }
-.card-name { text-transform: uppercase; color: white; font-weight: 600; margin-top: 5px; }
-
-/* =========================================
-   3. ESTILOS DOS BOTÕES
-   ========================================= */
-.btn-primary {
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-    color: white; border: none; padding: 12px 24px; border-radius: 10px;
-    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px; cursor: pointer;
-    display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
-}
-.btn-primary:hover {
-    transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.btn-logout {
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2);
-    padding: 12px 20px; border-radius: 10px; font-family: 'Inter', sans-serif;
-    font-weight: 600; font-size: 14px; cursor: pointer; display: flex;
-    align-items: center; gap: 10px; width: 100%; transition: all 0.3s ease;
-}
-.btn-logout:hover {
-    background: #ef4444; color: white; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
-}
-/* =========================================
-   4. ESTILOS DO MODAL (POP-UP) DE NOVO CARTÃO
-   ========================================= */
-.modal-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(4px);
-    display: none; /* Começa escondido */
-    justify-content: center; align-items: center; z-index: 1000;
+.credit-card-item:hover {
+    transform: scale(1.03) translateY(-5px);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+    border-color: rgba(255,255,255,0.3);
 }
 
-.modal-content {
-    background: #18181b; border-radius: 20px; padding: 30px; width: 90%; max-width: 450px;
-    border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-    animation: deslizarCima 0.3s ease-out;
+/* Brilho Sutil de Metal */
+.credit-card-item::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+    pointer-events: none;
 }
 
-@keyframes deslizarCima {
-    from { transform: translateY(30px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+.cc-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-.modal-header h2 { font-size: 20px; margin: 0; }
-.close-btn { cursor: pointer; color: #94a3b8; transition: color 0.3s; }
-.close-btn:hover { color: #ef4444; }
-
-/* Estilo das caixinhas de digitar */
-.form-group { margin-bottom: 20px; }
-.form-group label { display: block; margin-bottom: 8px; color: #94a3b8; font-size: 14px; }
-.form-control {
-    width: 100%; padding: 12px 15px; border-radius: 8px;
-    background: #09090b; border: 1px solid rgba(255,255,255,0.1);
-    color: white; font-family: 'Inter', sans-serif; font-size: 15px; box-sizing: border-box;
-}
-.form-control:focus { outline: none; border-color: #ffffff; }
-.row-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.btn-salvar { width: 100%; justify-content: center; margin-top: 10px; }
-
- 
-/* Grelha que organiza os cartões lado a lado */
-.cards-grid { 
-    display: grid; 
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
-    gap: 25px; 
-    margin-top: 25px; 
+.cc-chip {
+    width: 42px;
+    height: 32px;
+    background: linear-gradient(135deg, #e2e8f0 0%, #94a3b8 100%);
+    border-radius: 6px;
+    opacity: 0.9;
 }
 
-/* O "recipiente" de cada cartão para não esticar */
-.card-item { 
-    display: flex; 
-    flex-direction: column; 
-    gap: 15px; 
+.cc-bank-name {
+    font-size: 14px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    opacity: 0.9;
 }
 
-/* O design do Cartão em si */
-.credit-card { 
-    height: 200px; 
-    border-radius: 20px; 
-    padding: 25px; 
-    color: white; 
-    display: flex; 
-    flex-direction: column; 
-    justify-content: space-between; 
-    position: relative; 
-    overflow: hidden; 
-    box-shadow: 0 10px 20px rgba(0,0,0,0.2); 
-    transition: 0.3s; 
+.cc-body {
+    margin-top: 10px;
 }
 
-/* Cores dos Cartões */
-.card-black { background: linear-gradient(135deg, #0f172a 0%, #334155 100%); }
-.card-purple { background: linear-gradient(135deg, #6b21a8 0%, #a855f7 100%); }
-.card-blue { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); }
+.cc-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 2px;
+    margin: 0;
+}
 
-/* Elementos internos do Cartão */
-.card-top { display: flex; justify-content: space-between; align-items: flex-start; }
-.chip { width: 45px; height: 35px; background: #e2e8f0; border-radius: 6px; position: relative; opacity: 0.8; }
-.card-number { font-size: 18px; letter-spacing: 2px; font-family: 'Courier New', monospace; margin: 20px 0; }
-.card-bottom { display: flex; justify-content: space-between; align-items: flex-end; }
-.card-label { font-size: 10px; text-transform: uppercase; opacity: 0.7; display: block; }
-.card-info { font-size: 14px; font-weight: bold; }
+.cc-value {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin: 5px 0;
+}
 
-/* Informações de Limite abaixo do cartão */
-.limit-info { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; }
-.progress-mini { height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; margin: 10px 0; overflow: hidden; }
-.progress-fill { height: 100%; background: #10b981; border-radius: 10px; }
+.cc-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
 
-/* Botão de Adicionar */
-.btn-add-card { background: transparent; border: 2px dashed rgba(255,255,255,0.1); border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; cursor: pointer; min-height: 200px; height: 100%; }
+.cc-sub-info {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.8);
+}
 
-/* Modal (Pop-up) */
-#modalCartao { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center; backdrop-filter: blur(5px); }
-.modal-content { background:#18181b; padding:30px; border-radius:20px; width:400px; border:1px solid rgba(255,255,255,0.1); }
-.form-input { width:100%; padding:12px; margin-bottom:15px; border-radius:8px; background:#09090b; border:1px solid #334155; color:white; box-sizing: border-box; }
+/* Botões Minimalistas */
+.btn-pay-minimal {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: 0.3s;
+}
 
+.btn-pay-minimal:hover {
+    background: #ffffff;
+    color: #000000;
+}
 
+.btn-del-minimal {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    font-size: 18px;
+    opacity: 0.3;
+    cursor: pointer;
+    transition: 0.3s;
+}
 
+.btn-del-minimal:hover {
+    opacity: 1;
+    color: #ef4444;
+}
 
-        .sidebar { overflow-y: auto; max-height: 100vh; transition: 0.3s ease; }
-        .sidebar::-webkit-scrollbar { width: 5px; }
-        .sidebar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
-        .sidebar.escondida { display: none; }
-        
-        .header-left { display: flex; align-items: center; gap: 20px; }
-        .btn-menu { background: #18181b; border: 1px solid rgba(255,255,255,0.1); color: #f8fafc; padding: 10px; border-radius: 10px; cursor: pointer; display: flex; transition: 0.3s; }
-        .btn-menu:hover { background: #3b82f6; border-color: #3b82f6; }
-
-        .cards-page-layout { display: flex; gap: 25px; margin-top: 25px; align-items: flex-start; }
-        .form-section { background: #18181b; border: 1px solid rgba(255,255,255,0.05); border-radius: 15px; padding: 25px; flex: 1; min-width: 300px; position: sticky; top: 20px; }
-        
-        .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
-        .form-group label { color: #94a3b8; font-size: 13px; font-weight: 600; }
-        .form-group input { background: #09090b; border: 1px solid rgba(255,255,255,0.1); color: #f8fafc; padding: 12px 15px; border-radius: 10px; outline: none; transition: 0.3s; }
-        .form-group input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
-
-        .btn-submit { background: #3b82f6; color: white; border: none; padding: 15px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.3s; width: 100%; display: flex; justify-content: center; gap: 8px; }
-        .btn-submit:hover { background: #2563eb; transform: translateY(-2px); }
-
-        .cards-list-section { flex: 2; display: flex; flex-direction: column; gap: 20px; }
-        .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-        
-        /* BOTÕES DE AÇÃO DO CARTÃO */
-        .btn-delete-card { position: absolute; top: 15px; right: 15px; background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 5px; border-radius: 8px; cursor: pointer; transition: 0.3s; z-index: 10; }
-        .btn-delete-card:hover { background: #ef4444; color: white; transform: scale(1.1); }
-
-        .btn-pay-fatura { position: absolute; bottom: 85px; right: 25px; background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer; transition: 0.3s; z-index: 10; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); text-transform: uppercase; }
-        .btn-pay-fatura:hover { background: #059669; transform: translateY(-2px); }
-        
-        /* DESIGN DO CARTÃO */
-        .credit-card-item { border-radius: 16px; padding: 25px; position: relative; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); transition: 0.3s; display: flex; flex-direction: column; justify-content: space-between; min-height: 200px; }
-        .cc-bg-pattern { position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; border-radius: 50%; background: rgba(255,255,255,0.1); }
-        .cc-top { display: flex; justify-content: space-between; align-items: flex-start; z-index: 1; }
-        .cc-chip { width: 40px; height: 30px; background: rgba(255,255,255,0.8); border-radius: 5px; position: relative; }
-        .cc-brand { font-size: 22px; color: white; font-weight: 700; text-transform: uppercase; }
-        .cc-middle { z-index: 1; margin-top: 15px; }
-        .cc-limit-title { color: rgba(255,255,255,0.7); font-size: 11px; text-transform: uppercase; margin: 0; }
-        .cc-limit-value { color: white; font-size: 22px; margin: 5px 0 0 0; font-weight: 600; }
-        .cc-bottom { display: flex; justify-content: space-between; z-index: 1; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 15px; }
-        .cc-date { color: white; font-size: 13px; display: flex; flex-direction: column; }
-        .cc-date span { color: rgba(255,255,255,0.7); font-size: 10px; text-transform: uppercase; }
-        
-        .no-cards { background: #18181b; border: 1px dashed rgba(255,255,255,0.2); border-radius: 15px; padding: 40px; text-align: center; color: #94a3b8; grid-column: 1 / -1; }
-
-        @media (max-width: 900px) { .cards-page-layout { flex-direction: column; } .form-section { width: 100%; position: static; } }
+/* MEDIA QUERIES PARA CELULAR */
+@media (max-width: 768px) {
+    .cards-page-layout {
+        flex-direction: column;
+        gap: 20px;
+    }
     
+    .form-section {
+        max-width: 100%;
+        padding: 20px;
+    }
+    
+    .credit-card-item {
+        width: 100%; /* No celular eles podem ocupar a largura da tela para não cortar */
+        max-width: 350px;
+        height: 190px;
+        padding: 20px;
+    }
+    
+    .cards-grid {
+        grid-template-columns: 1fr; /* Uma coluna no celular */
+        justify-items: center; /* Centraliza no mobile */
+    }
+}

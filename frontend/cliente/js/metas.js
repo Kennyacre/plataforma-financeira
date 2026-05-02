@@ -4,8 +4,10 @@ const user = localStorage.getItem('usuarioLogado');
 document.addEventListener('DOMContentLoaded', async () => {
     if (typeof inicializarSidebar === 'function') inicializarSidebar();
 
-    document.getElementById('nome-cliente-sidebar').innerText = user.toUpperCase();
-    document.getElementById('user-avatar').innerText = user.substring(0,2).toUpperCase();
+    const elNome = document.getElementById('nome-cliente-sidebar');
+    const elAvatar = document.getElementById('user-avatar');
+    if (elNome) elNome.innerText = user.toUpperCase();
+    if (elAvatar) elAvatar.innerText = user.substring(0,2).toUpperCase();
 
     await Promise.all([
         carregarMetas(),

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperar Senha | TN INFO</title>
+    <link rel="shortcut icon" href="assets/img/logo.jpg" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <style>
+        :root {
+            --primary: #ffffff;
+            --bg-dark: #09090b;
+            --card-bg: #18181b;
+            --text-main: #ffffff;
+            --text-muted: #a1a1aa;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-main);
+        }
+        .login-box {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 40px;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+        }
+        .logo-text { font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 800; margin-bottom: 10px; }
+        .subtitle { color: var(--text-muted); font-size: 14px; margin-bottom: 30px; }
+        .form-group { text-align: left; margin-bottom: 24px; }
+        .form-group label { display: block; margin-bottom: 10px; color: var(--text-muted); font-size: 13px; font-weight: 600; }
+        .form-control {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #09090b;
+            color: white;
+            font-size: 15px;
+        }
+        .btn-action {
+            width: 100%;
+            background: #ffffff;
+            color: #000000;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-action:hover { background: #e4e4e7; }
+        .msg { margin-top: 20px; padding: 12px; border-radius: 12px; display: none; font-size: 14px; }
+        .success { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .error { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+        .back-link { margin-top: 25px; }
+        .back-link a { color: var(--text-muted); text-decoration: none; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <div class="logo-text">Recuperar Acesso</div>
+        <div class="subtitle">Informe seu utilizador para solicitar uma nova senha ao administrador.</div>
+        <form id="formRecuperar">
+            <div class="form-group">
+                <label>Utilizador ou E-mail</label>
+                <input type="text" id="username" class="form-control" placeholder="Digite seu login" required>
+            </div>
+            <button type="submit" id="btnSubmit" class="btn-action">Solicitar Recuperação</button>
+        </form>
+        <div id="mensagem" class="msg"></div>
+        <div class="back-link">
+            <a href="index.html">← Voltar para o Login</a>
+        </div>
+    </div>
+    <script>
+        document.getElementById('formRecuperar').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const btn = document.getElementById('btnSubmit');
+            const msgDiv = document.getElementById('mensagem');
+            
+            btn.disabled = true;
+            btn.innerText = 'Enviando...';
+            msgDiv.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/recuperar-senha/solicitar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: username.toLowerCase().trim() })
+                });
+                const result = await response.json();
+                
+                msgDiv.style.display = 'block';
+                if (response.ok) {
+                    msgDiv.className = 'msg success';
+                    msgDiv.innerText = result.mensagem;
+                    document.getElementById('formRecuperar').reset();
+                } else {
+                    msgDiv.className = 'msg error';
+                    msgDiv.innerText = result.detail || 'Erro ao processar solicitação.';
+                }
+            } catch (err) {
+                msgDiv.style.display = 'block';
+                msgDiv.className = 'msg error';
+                msgDiv.innerText = 'Erro de conexão com o servidor.';
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Solicitar Recuperação';
+            }
+        });
+    </script>
+</body>
+</html>

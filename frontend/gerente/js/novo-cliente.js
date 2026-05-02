@@ -15,7 +15,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const payload = {
             username: document.getElementById('username').value.toLowerCase().trim(),
             password: document.getElementById('password').value,
-            dias_acesso: parseInt(document.getElementById('dias_acesso').value)
+            dias_acesso: parseInt(document.getElementById('dias_acesso').value),
+            email: document.getElementById('email').value,
+            whatsapp: document.getElementById('whatsapp').value,
+            valor_venda: parseFloat(document.getElementById('valor_venda').value) || 0
         };
 
         const btn = document.querySelector('.btn-activate');

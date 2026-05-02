@@ -11,6 +11,8 @@ import json
 import logging
 import io
 import re
+import random
+import string
 
 router = APIRouter(prefix="/api/admin", tags=["Admin"])
 
@@ -28,9 +30,9 @@ def listar_todos_usuarios():
     conn = get_db_connection()
     cur = conn.cursor()
     try:
-        # Puxa todos que não estão na lixeira e INCLUI a coluna status
+        # Puxa todos que não estão na lixeira e INCLUI novas colunas de contato
         cur.execute("""
-            SELECT id, username, role, revendedor, vencimento, status, creditos, nome_completo, is_premium
+            SELECT id, username, role, revendedor, vencimento, status, creditos, nome_completo, is_premium, email, whatsapp, valor_venda
             FROM usuarios 
             WHERE deletado IS NOT TRUE AND role != 'revenda'
             ORDER BY id DESC
@@ -47,7 +49,10 @@ def listar_todos_usuarios():
                 "status": r[5] if r[5] else "ativo",
                 "creditos": r[6] if r[6] else 0,
                 "nome": r[7] if r[7] else r[1],
-                "is_premium": bool(r[8]) if len(r) > 8 else False
+                "is_premium": bool(r[8]) if len(r) > 8 else False,
+                "email": r[9] if len(r) > 9 else "",
+                "whatsapp": r[10] if len(r) > 10 else "",
+                "valor_venda": float(r[11]) if len(r) > 11 and r[11] else 0.0
             })
             
         return {"status": "sucesso", "usuarios": usuarios}
@@ -56,6 +61,34 @@ def listar_todos_usuarios():
     finally:
         cur.close()
         conn.close()
+
+# --- ROTA PARA BUSCAR UM ÚNICO USUÁRIO (NOVA) ---
+@router.get("/usuarios/{usuario_id}")
+def obter_usuario(usuario_id: int):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            SELECT id, username, email, whatsapp, vencimento, status, is_premium, valor_venda, nome_completo
+            FROM usuarios WHERE id = %s
+        """, (usuario_id,))
+        r = cur.fetchone()
+        if not r:
+            raise HTTPException(status_code=404, detail="Usuário não encontrado no banco.")
+        
+        return {
+            "id": r[0],
+            "username": r[1],
+            "email": r[2] if r[2] else "",
+            "whatsapp": r[3] if r[3] else "",
+            "vencimento": str(r[4]) if r[4] else "",
+            "status": r[5],
+            "is_premium": bool(r[6]),
+            "valor_venda": float(r[7] or 0.0),
+            "nome": r[8] if r[8] else r[1]
+        }
+    finally:
+        cur.close(); conn.close()
 
 @router.post("/novo-revendedor")
 def criar_revendedor(dados: NovoRevendedor):
@@ -93,9 +126,9 @@ def criar_cliente_admin(dados: NovoClienteAdmin):
         from datetime import date, timedelta
         vencimento = date.today() + timedelta(days=dados.dias_acesso)
         cur.execute("""
-            INSERT INTO usuarios (username, password, role, vencimento, status, deletado) 
-            VALUES (%s, %s, 'cliente', %s, 'ativo', FALSE)
-        """, (dados.username, dados.password, vencimento))
+            INSERT INTO usuarios (username, password, role, vencimento, status, deletado, email, whatsapp, valor_venda) 
+            VALUES (%s, %s, 'cliente', %s, 'ativo', FALSE, %s, %s, %s)
+        """, (dados.username, dados.password, vencimento, dados.email, dados.whatsapp, dados.valor_venda))
         conn.commit()
         return {"status": "sucesso", "mensagem": f"Cliente {dados.username} criado com sucesso até {vencimento}!"}
     except HTTPException: raise
@@ -113,7 +146,7 @@ def dashboard_admin():
         cur.execute("SELECT COUNT(*) FROM usuarios WHERE role = 'cliente' AND deletado IS NOT TRUE")
         total_clientes = cur.fetchone()[0]
         
-        cur.execute("SELECT SUM(valor) FROM financas WHERE tipo = 'recebimento'")
+        cur.execute("SELECT SUM(valor_venda) FROM usuarios WHERE deletado IS NOT TRUE")
         total_receitas = float(cur.fetchone()[0] or 0.0)
         
         cur.execute("SELECT COUNT(*) FROM financas")
@@ -122,11 +155,15 @@ def dashboard_admin():
         cur.execute("SELECT id, username, role FROM usuarios WHERE deletado IS NOT TRUE AND role != 'revenda' ORDER BY id DESC LIMIT 10")
         ultimos = [{"id": r[0], "username": r[1], "role": r[2]} for r in cur.fetchall()]
         
+        cur.execute("SELECT COUNT(*) FROM recuperacao_senha WHERE status = 'pendente'")
+        total_recuperacoes = cur.fetchone()[0]
+        
         return {
             "status": "sucesso", 
             "total_clientes": total_clientes, 
             "total_receitas": total_receitas, 
             "total_transacoes": total_transacoes,
+            "total_recuperacoes": total_recuperacoes,
             "ultimos_usuarios": ultimos
         }
     finally:
@@ -154,35 +191,38 @@ def atualizar_usuario(usuario_id: int, dados: UsuarioUpdateAdmin):
     conn = get_db_connection()
     cur = conn.cursor()
     try:
-        cur.execute("SELECT id FROM usuarios WHERE id = %s", (usuario_id,))
+        # 1. Verifica se o usuário existe
+        cur.execute("SELECT username FROM usuarios WHERE id = %s", (usuario_id,))
         if not cur.fetchone():
             raise HTTPException(status_code=404, detail="Usuário não encontrado.")
 
-        updates = []
-        values = []
+        # 2. Prepara a gravação campo a campo para evitar falhas silenciosas
         if dados.nome_completo is not None:
-            updates.append("nome_completo = %s")
-            values.append(dados.nome_completo)
+            cur.execute("UPDATE usuarios SET nome_completo = %s WHERE id = %s", (dados.nome_completo, usuario_id))
+        if dados.email is not None:
+            cur.execute("UPDATE usuarios SET email = %s WHERE id = %s", (dados.email, usuario_id))
+        if dados.whatsapp is not None:
+            cur.execute("UPDATE usuarios SET whatsapp = %s WHERE id = %s", (dados.whatsapp, usuario_id))
         if dados.vencimento is not None:
-            updates.append("vencimento = %s")
-            values.append(dados.vencimento if dados.vencimento else None)
+            venc = dados.vencimento if dados.vencimento and dados.vencimento != "" else None
+            cur.execute("UPDATE usuarios SET vencimento = %s WHERE id = %s", (venc, usuario_id))
         if dados.status is not None:
-            updates.append("status = %s")
-            values.append(dados.status)
+            cur.execute("UPDATE usuarios SET status = %s WHERE id = %s", (dados.status, usuario_id))
         if dados.is_premium is not None:
-            updates.append("is_premium = %s")
-            values.append(dados.is_premium)
+            cur.execute("UPDATE usuarios SET is_premium = %s WHERE id = %s", (dados.is_premium, usuario_id))
+        if dados.valor_venda is not None:
+            val = float(dados.valor_venda)
+            cur.execute("UPDATE usuarios SET valor_venda = %s WHERE id = %s", (val, usuario_id))
 
-        if updates:
-            values.append(usuario_id)
-            query = f"UPDATE usuarios SET {', '.join(updates)} WHERE id = %s"
-            cur.execute(query, values)
-            conn.commit()
+        # 3. Força a gravação no disco
+        conn.commit()
+        logging.info(f"✅ Usuário {usuario_id} gravado com sucesso no banco de dados.")
             
-        return {"status": "sucesso", "mensagem": "Usuário atualizado com sucesso."}
+        return {"status": "sucesso", "mensagem": "Usuário atualizado com sucesso no banco de dados."}
     except Exception as e:
         conn.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        logging.error(f"❌ Erro ao gravar usuário {usuario_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erro interno de gravação: {str(e)}")
     finally:
         cur.close()
         conn.close()
@@ -262,6 +302,85 @@ def gerar_backup():
         cur.execute("SELECT * FROM financas")
         financas = cur.fetchall()
         return {"usuarios": usuarios, "financas": financas}
+    finally:
+        cur.close(); conn.close()
+
+# --- ROTAS DE RECUPERAÇÃO DE SENHA (ADMIN) ---
+
+@router.get("/recuperacoes-pendentes")
+def listar_recuperacoes_pendentes():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            SELECT id, username, status, data_solicitacao 
+            FROM recuperacao_senha 
+            WHERE status = 'pendente' 
+            ORDER BY data_solicitacao DESC
+        """)
+        rows = cur.fetchall()
+        recuperacoes = []
+        for r in rows:
+            recuperacoes.append({
+                "id": r[0],
+                "username": r[1],
+                "status": r[2],
+                "data": r[3].strftime("%d/%m/%Y %H:%M")
+            })
+        return {"status": "sucesso", "recuperacoes": recuperacoes}
+    finally:
+        cur.close(); conn.close()
+
+@router.post("/recuperacoes/gerar/{recuperacao_id}")
+def gerar_senha_temporaria(recuperacao_id: int):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        # Busca o username da solicitação
+        cur.execute("SELECT username FROM recuperacao_senha WHERE id = %s", (recuperacao_id,))
+        res = cur.fetchone()
+        if not res:
+            raise HTTPException(status_code=404, detail="Solicitação não encontrada.")
+        
+        username = res[0]
+        
+        # Gera senha aleatória de 8 caracteres
+        nova_senha = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+        
+        # Atualiza o usuário
+        cur.execute("""
+            UPDATE usuarios 
+            SET password = %s, must_change_password = TRUE 
+            WHERE username = %s
+        """, (nova_senha, username))
+        
+        # Atualiza a solicitação
+        from datetime import datetime
+        cur.execute("""
+            UPDATE recuperacao_senha 
+            SET status = 'resolvido', data_resolucao = %s 
+            WHERE id = %s
+        """, (datetime.now(), recuperacao_id))
+        
+        conn.commit()
+        return {"status": "sucesso", "senha_temporaria": nova_senha, "username": username}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cur.close(); conn.close()
+
+@router.delete("/recuperacoes/{recuperacao_id}")
+def excluir_recuperacao(recuperacao_id: int):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("DELETE FROM recuperacao_senha WHERE id = %s", (recuperacao_id,))
+        conn.commit()
+        return {"status": "sucesso", "mensagem": "Solicitação removida."}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         cur.close(); conn.close()
 

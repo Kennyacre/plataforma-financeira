@@ -1,9 +1,11 @@
 :root {
-    --bg-color: #000000;
-    --sidebar-bg: #09090b;
+    --bg-color: #050505;
+    --sidebar-bg: #0a0a0a;
     --accent-color: #ffffff;
     --text-main: #ffffff;
-    --text-muted: #71717a;
+    --text-muted: #94a3b8;
+    --luxury-gold: #f59e0b;
+    --luxury-silver: #e2e8f0;
 }
 
 * {
@@ -34,13 +36,14 @@ body {
     display: flex;
     flex-direction: column;
     padding: 2rem 0 2rem 15px;
-    border-right: none;
+    border-right: 1px solid rgba(255, 255, 255, 0.03);
     transition: width 0.5s ease;
     z-index: 999;
 }
 
 .navigation:hover {
-    width: 300px;
+    width: 260px;
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.3);
 }
 
 .user-info img {
@@ -156,28 +159,7 @@ body {
     border-top-left-radius: 30px;
     border-bottom-left-radius: 30px;
     color: var(--accent-color);
-}
-
-.navigation ul li.active a::before,
-.navigation ul li.active a::after {
-    content: '';
-    position: absolute;
-    right: -50px; /* Compensar o padding-right de 50px do ul para esconder o scroll */
-    width: 50px;
-    height: 50px;
-    background: transparent;
-    border-radius: 50%;
-    pointer-events: none;
-}
-
-.navigation ul li.active a::before {
-    top: -50px;
-    box-shadow: 35px 35px 0 10px var(--sidebar-bg);
-}
-
-.navigation ul li.active a::after {
-    bottom: -50px;
-    box-shadow: 35px -35px 0 10px var(--sidebar-bg);
+    box-shadow: -5px 0 0 var(--bg-color); /* Preenche o rastro */
 }
 
 /* ==========================================
@@ -236,7 +218,7 @@ body {
         /* Escondido */
         top: 0;
         height: 100vh;
-        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+        box-shadow: 1px 0 0 rgba(255, 255, 255, 0.05);
     }
 
     .navigation .user-info img {
@@ -356,7 +338,8 @@ body {
     display: flex;
     align-items: center;
     gap: 1.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
 }
 
 .icon-box {
@@ -506,6 +489,34 @@ td {
     background: #ef4444 !important;
     color: white !important;
     box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+}
+
+/* BOTÕES DE AÇÃO DO TOPO (HEADER ACTIONS) */
+.btn-top-action {
+    padding: 10px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    font-size: 14px;
+    border: none;
+    background: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+}
+
+.btn-top-action-monochrome {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.btn-top-action-monochrome:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    transform: translateY(-2px);
 }
 
 @media (max-width: 768px) {

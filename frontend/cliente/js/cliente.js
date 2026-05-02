@@ -292,10 +292,28 @@ async function carregarDadosGrafico(ano) {
 function alterarMes(direcao) {
     const elMes = document.getElementById('filtro-mes');
     const elAno = document.getElementById('filtro-ano');
-    let m = parseInt(elMes.value); let y = parseInt(elAno.value);
+    if (!elMes || !elAno) return;
+
+    let m = parseInt(elMes.value); 
+    let y = parseInt(elAno.value);
+    
     m += direcao;
-    if (m > 12) { m = 1; y++; } else if (m < 1) { m = 12; y--; }
-    elMes.value = m; elAno.value = y;
+    
+    if (m > 12) { m = 1; y++; } 
+    else if (m < 1) { m = 12; y--; }
+
+    // Garante que o ano exista no seletor
+    let existe = false;
+    for(let i=0; i<elAno.options.length; i++) {
+        if(parseInt(elAno.options[i].value) === y) { existe = true; break; }
+    }
+    if(!existe) {
+        const opt = new Option(y, y);
+        elAno.add(opt);
+    }
+
+    elMes.value = m; 
+    elAno.value = y;
     window.atualizarDashboard();
 }
 

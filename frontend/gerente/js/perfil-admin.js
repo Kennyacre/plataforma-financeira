@@ -56,3 +56,43 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 });
+
+async function alterarSenhaAdmin() {
+    const user = localStorage.getItem('usuarioLogado');
+    const novaSenha = document.getElementById('admin-nova-senha').value;
+    const confirmarSenha = document.getElementById('admin-confirmar-senha').value;
+
+    if (!novaSenha || novaSenha.length < 6) {
+        alert("A senha deve ter pelo menos 6 caracteres.");
+        return;
+    }
+
+    if (novaSenha !== confirmarSenha) {
+        alert("As senhas não coincidem.");
+        return;
+    }
+
+    if (!confirm("Deseja realmente alterar sua senha? Você será desconectado.")) return;
+
+    try {
+        const res = await fetch('/api/recuperar-senha/redefinir', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username: user,
+                nova_senha: novaSenha
+            })
+        });
+
+        if (res.ok) {
+            alert("✅ Senha alterada com sucesso! Faça login novamente.");
+            localStorage.clear();
+            window.location.href = '../index.html';
+        } else {
+            const err = await res.json();
+            alert("❌ Erro ao alterar senha: " + err.detail);
+        }
+    } catch (e) {
+        alert("Erro de conexão.");
+    }
+}

@@ -34,6 +34,9 @@ class NovoClienteAdmin(BaseModel):
     username: str
     password: str
     dias_acesso: int
+    email: Optional[str] = None
+    whatsapp: Optional[str] = None
+    valor_venda: Optional[float] = 0.0
 class NovoRevendedor(BaseModel):
     username: str
     password: str
@@ -76,7 +79,16 @@ class ManualRegistrationRequest(BaseModel):
 class UsuarioUpdateAdmin(BaseModel):
     nome_completo: Optional[str] = None
     email: Optional[str] = None
+    whatsapp: Optional[str] = None
     vencimento: Optional[str] = None
     status: Optional[str] = None
     is_premium: Optional[bool] = None
+    valor_venda: Optional[float] = None
+
+class SolicitacaoRecuperacao(BaseModel):
+    username: str
+
+class RedefinirSenha(BaseModel):
+    username: str
+    nova_senha: str
 

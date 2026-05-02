@@ -246,15 +246,54 @@
 input:checked + .slider {
   background-color: #ffffff;
 }
-input:focus + .slider {
-  box-shadow: 0 0 1px #ffffff;
-}
 input:checked + .slider:before {
   transform: translateX(26px);
+  background-color: #000000; /* Dot preto no fundo branco quando ativado */
 }
 .slider.round {
   border-radius: 34px;
 }
 .slider.round:before {
   border-radius: 50%;
+}
+
+/* Botões de Ação da Tabela - Premium */
+.btn-table-action {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    margin: 0 3px;
+    padding: 0;
+}
+
+.btn-table-action:hover {
+    background: #ffffff;
+    color: #000000;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.15);
+}
+
+.btn-table-action.btn-renew-action:hover {
+    background: #ffffff;
+    color: #000000;
+}
+
+.btn-table-action.btn-delete-action:hover {
+    background: #ff4444;
+    color: #ffffff;
+    border-color: #ff4444;
+    box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3);
+}
+
+.btn-table-action span {
+    font-size: 18px;
 }

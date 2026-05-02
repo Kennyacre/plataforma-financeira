@@ -31,6 +31,11 @@ document.getElementById('formLogin').addEventListener('submit', async function (
             localStorage.setItem('usuarioLogado', result.username);
             localStorage.setItem('funcaoUsuario', result.role);
 
+            if (result.must_change_password) {
+                window.location.href = 'redefinir-senha.html';
+                return;
+            }
+
             const role = result.role.toLowerCase();
             redirecionarPorRole(role);
         } else {

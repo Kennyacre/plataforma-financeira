@@ -4,7 +4,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Histórico de Transações | TN INFO</title>
+<title>Histórico | TN INFO</title>
+<link href="../assets/img/logo.jpg" rel="shortcut icon" type="image/x-icon"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
 <link href="css/dashboard.css" rel="stylesheet"/>
@@ -13,8 +14,37 @@
 <script src="../js/security.js?v=2"></script>
 <!-- PWA -->
 <link href="../manifest.json" rel="manifest"/>
-<meta content="#3b82f6" name="theme-color"/>
+<meta content="#000000" name="theme-color"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
+<style>
+    /* FORÇANDO TEMA LUXURY MONOCHROME NO HISTÓRICO */
+    .filter-section {
+        background: #09090b !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    .filter-group input, 
+    .filter-group select {
+        background: #111111 !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        color: #ffffff !important;
+    }
+    .table-container {
+        background: #09090b !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    .premium-table th {
+        background: #111111 !important;
+        color: #a1a1aa !important;
+    }
+    .empty-state {
+        color: #71717a !important;
+    }
+    #btn-filtrar {
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-weight: 800 !important;
+    }
+</style>
 </link></head>
 <body>
 <div class="dashboard-wrapper">
@@ -26,6 +56,7 @@
 <li class="list"><a href="painel-cliente.html"><span class="icon"><span class="material-symbols-rounded">dashboard</span></span><span class="title">Minha Área</span></a></li>
 <li class="list"><a href="minhas-financas.html"><span class="icon"><span class="material-symbols-rounded">account_balance</span></span><span class="title">Minhas Finanças</span></a></li>
 <li class="list"><a href="previsao.html"><span class="icon"><span class="material-symbols-rounded">trending_up</span></span><span class="title">Previsão</span></a></li>
+<li class="list"><a href="parcelamentos.html"><span class="icon"><span class="material-symbols-rounded">payments</span></span><span class="title">Meus Parcelamentos</span></a></li>
 <li class="list"><a href="calendario.html"><span class="icon"><span class="material-symbols-rounded">calendar_month</span></span><span class="title">Calendário</span></a></li>
 <li class="separator"><span class="title">OPERACIONAL</span></li>
 <li class="list"><a href="novo-lancamento.html"><span class="icon"><span class="material-symbols-rounded">add_circle</span></span><span class="title">Novo Lançamento</span></a></li>
@@ -51,11 +82,11 @@
 </div>
 </div>
 <div class="top-actions" style="display: flex; gap: 10px; align-items: center; margin-left: auto;">
-    <button class="btn-top-action" onclick="forcarAtualizacao()" title="Atualizar App" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s; font-weight: 600;">
+    <button class="btn-top-action" onclick="forcarAtualizacao()" title="Atualizar App" style="background: rgba(255, 255, 255, 0.05); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s; font-weight: 600;">
         <span class="material-symbols-rounded" style="font-size: 20px;">sync</span>
         <span class="action-text">Atualizar</span>
     </button>
-    <button class="btn-top-action" onclick="location.href='../index.html'" title="Sair" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s; font-weight: 600;">
+    <button class="btn-reject" onclick="location.href='../index.html'" title="Sair" style="padding: 8px 16px; border-radius: 8px; font-weight: 600;">
         <span class="material-symbols-rounded" style="font-size: 20px;">logout</span>
         <span class="action-text">Sair</span>
     </button>
@@ -101,9 +132,9 @@
 <option value="2026">2026</option>
 </select>
 <div class="filter-group" style="display: flex; align-items: flex-end; justify-content: flex-end; flex: 1;">
-<button id="btn-filtrar" style="background: #3b82f6; color: #fff; border: none; padding: 12px 25px; border-radius: 12px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.2s; box-shadow: 0 4px 15px rgba(59,130,246,0.3); height: 45px;">
+<button id="btn-filtrar" style="background: #ffffff; color: #000000; border: none; padding: 12px 25px; border-radius: 12px; cursor: pointer; font-weight: 700; display: flex; align-items: center; gap: 8px; transition: all 0.2s; box-shadow: 0 4px 15px rgba(255,255,255,0.1); height: 45px;">
 <span class="material-symbols-rounded">search</span> Pesquisar
-                        </button>
+</button>
 </div>
 </div>
 </div>

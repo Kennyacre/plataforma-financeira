@@ -47,7 +47,7 @@
                 <div style="margin-top: 30px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; background: rgba(255,255,255,0.05);">
                     <p style="color: #fcd34d; font-weight: bold;">Entre em contacto com o seu administrador ou revendedor para autorizar o acesso.</p>
                 </div>
-                <button onclick="localStorage.clear(); location.href='/'" style="margin-top: 40px; background: #3b82f6; color: white; border: none; padding: 12px 30px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);">Ir para o Login</button>
+                <button onclick="localStorage.clear(); location.href='/'" style="margin-top: 40px; background: #ffffff; color: #000000; border: none; padding: 12px 30px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);">Ir para o Login</button>
             </div>
         `;
     }
@@ -122,4 +122,12 @@ function forcarAtualizacao() {
     const url = new URL(window.location.href);
     url.searchParams.set('refresh', Date.now());
     window.location.href = url.toString();
+}
+// Registro do Service Worker para PWA
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js', { scope: '/' })
+            .then(reg => console.log('PWA: Ativo'))
+            .catch(err => console.error('PWA: Erro', err));
+    });
 }

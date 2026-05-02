@@ -5,15 +5,188 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Minhas Finanças | TN INFO</title>
+<link rel="shortcut icon" href="../assets/img/logo.jpg" type="image/x-icon">
 <script src="../js/security.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
 <link href="css/dashboard.css" rel="stylesheet"/>
 <link href="../manifest.json" rel="manifest"/>
-<meta content="#3b82f6" name="theme-color"/>
+<meta content="#ffffff" name="theme-color"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <link href="css/cliente.css" rel="stylesheet"/>
 <link href="css/financas.css" rel="stylesheet"/>
+<style>
+    /* TEMA LUXURY MONOCHROME - ANÁLISE DE FINANÇAS */
+    .stat-box {
+        background: #111111 !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
+    }
+    .stat-box h3 {
+        color: #a1a1aa !important;
+    }
+    .chart-container-donut {
+        background: #09090b !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+        border-radius: 20px !important;
+    }
+    .dashboard-filters {
+        background: #111111 !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    .select-personalizado option {
+        background: #111111 !important;
+        color: #ffffff !important;
+    }
+    .val-pos { color: #ffffff !important; }
+    .val-neg { color: #ffffff !important; opacity: 0.8; }
+    .val-neu { color: #ffffff !important; font-weight: 800 !important; }
+
+    .btn-top-action-monochrome {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+
+    /* SELETOR DE PERÍODO PADRONIZADO (Luxury) */
+    .periodo-navegacao-premium {
+        display: flex;
+        align-items: center;
+        background: #111111;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 100px;
+        padding: 4px;
+        gap: 5px;
+        transition: 0.3s;
+    }
+
+    .btn-nav-periodo {
+        background: #1a1a1a;
+        color: white;
+        border: none;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .btn-nav-periodo:hover {
+        background: #252525;
+        transform: scale(1.05);
+    }
+
+    .periodo-identificador {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 15px;
+        cursor: pointer;
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 14px;
+        user-select: none;
+    }
+
+    .periodo-identificador span.material-symbols-rounded {
+        font-size: 20px;
+        color: #a1a1aa;
+    }
+
+    .periodo-identificador:hover {
+        opacity: 0.8;
+    }
+
+    .dashboard-filters {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .old-selects-hidden {
+        display: none !important;
+    }
+    /* LISTA DE PENDÊNCIAS */
+    .pending-list-section {
+        margin-top: 30px;
+        background: #111111;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        padding: 25px;
+    }
+    .pending-list-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .pending-list-header h2 {
+        font-size: 18px;
+        font-weight: 700;
+        color: #ffffff;
+        margin: 0;
+    }
+    .pending-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        background: #09090b;
+        border: 1px solid rgba(255, 255, 255, 0.03);
+        border-radius: 12px;
+        margin-bottom: 10px;
+        transition: 0.3s;
+    }
+    .pending-item:hover {
+        border-color: rgba(255, 255, 255, 0.1);
+        transform: translateX(5px);
+    }
+    .pending-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .pending-desc {
+        font-weight: 600;
+        color: #ffffff;
+    }
+    .pending-meta {
+        font-size: 12px;
+        color: #71717a;
+    }
+    .pending-value {
+        font-weight: 800;
+        font-size: 16px;
+        color: #ffffff;
+        margin-right: 20px;
+    }
+    .btn-confirm-pay {
+        background: #ffffff;
+        color: #000000;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    .btn-confirm-pay:hover {
+        background: #e2e2e2;
+        transform: scale(1.05);
+    }
+    .no-pending-msg {
+        text-align: center;
+        padding: 30px;
+        color: #71717a;
+        font-style: italic;
+    }
+</style>
 </link></head>
 <body>
 <div class="dashboard-wrapper">
@@ -25,6 +198,7 @@
 <li class="list"><a href="painel-cliente.html"><span class="icon"><span class="material-symbols-rounded">dashboard</span></span><span class="title">Minha Área</span></a></li>
 <li class="list active"><a href="minhas-financas.html"><span class="icon"><span class="material-symbols-rounded">account_balance</span></span><span class="title">Minhas Finanças</span></a></li>
 <li class="list"><a href="previsao.html"><span class="icon"><span class="material-symbols-rounded">trending_up</span></span><span class="title">Previsão</span></a></li>
+<li class="list"><a href="parcelamentos.html"><span class="icon"><span class="material-symbols-rounded">payments</span></span><span class="title">Meus Parcelamentos</span></a></li>
 <li class="list"><a href="calendario.html"><span class="icon"><span class="material-symbols-rounded">calendar_month</span></span><span class="title">Calendário</span></a></li>
 <li class="separator"><span class="title">OPERACIONAL</span></li>
 <li class="list"><a href="novo-lancamento.html"><span class="icon"><span class="material-symbols-rounded">add_circle</span></span><span class="title">Novo Lançamento</span></a></li>
@@ -48,31 +222,47 @@
 </div>
 </div>
 <div class="header-right" style="display: flex; align-items: center; gap: 15px;">
-<div class="dashboard-filters" style="display: flex; gap: 10px; background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
-<select class="select-personalizado" id="filtro-mes" style="background: transparent; color: #fff; border: none; font-family: inherit; font-size: 14px; cursor: pointer; outline: none;">
-<option value="1">Janeiro</option>
-<option value="2">Fevereiro</option>
-<option value="3">Março</option>
-<option selected="" value="4">Abril</option>
-<option value="5">Maio</option>
-<option value="6">Junho</option>
-<option value="7">Julho</option>
-<option value="8">Agosto</option>
-<option value="9">Setembro</option>
-<option value="10">Outubro</option>
-<option value="11">Novembro</option>
-<option value="12">Dezembro</option>
-</select>
-<div style="width: 1px; height: 20px; background: rgba(255,255,255,0.1);"></div>
-<select class="select-personalizado" id="filtro-ano" style="background: transparent; color: #fff; border: none; font-family: inherit; font-size: 14px; cursor: pointer; outline: none;">
-<option value="2024">2024</option>
-<option value="2025">2025</option>
-<option selected="" value="2026">2026</option>
-</select>
-</div>
+<div class="dashboard-filters">
+    <div class="periodo-navegacao-premium">
+        <button class="btn-nav-periodo" onclick="alterarMes(-1)" title="Mês Anterior">
+            <span class="material-symbols-rounded">chevron_left</span>
+        </button>
+        <div class="periodo-identificador" onclick="toggleMonthPicker()">
+            <span class="material-symbols-rounded">calendar_month</span>
+            <span id="texto-periodo">Abril 2026</span>
+            <span class="material-symbols-rounded" style="font-size: 16px;">expand_more</span>
+        </div>
+        <button class="btn-nav-periodo" onclick="alterarMes(1)" title="Próximo Mês">
+            <span class="material-symbols-rounded">chevron_right</span>
+        </button>
+    </div>
+
+    <!-- Selects originais escondidos -->
+    <div class="old-selects-hidden">
+        <select id="filtro-mes">
+            <option value="1">Janeiro</option>
+            <option value="2">Fevereiro</option>
+            <option value="3">Março</option>
+            <option value="4">Abril</option>
+            <option value="5">Maio</option>
+            <option value="6">Junho</option>
+            <option value="7">Julho</option>
+            <option value="8">Agosto</option>
+            <option value="9">Setembro</option>
+            <option value="10">Outubro</option>
+            <option value="11">Novembro</option>
+            <option value="12">Dezembro</option>
+        </select>
+        <select id="filtro-ano">
+            <option value="2024">2024</option>
+            <option value="2025">2025</option>
+            <option value="2026">2026</option>
+        </select>
+    </div>
+    </div>
 </div>
 <div class="top-actions" style="display: flex; gap: 10px; align-items: center; margin-left: auto;">
-    <button class="btn-top-action" onclick="forcarAtualizacao()" title="Atualizar App" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s; font-weight: 600;">
+    <button class="btn-top-action btn-top-action-monochrome" onclick="forcarAtualizacao()" title="Atualizar App">
         <span class="material-symbols-rounded" style="font-size: 20px;">sync</span>
         <span class="action-text">Atualizar</span>
     </button>
@@ -101,6 +291,15 @@
 <canvas id="financasChart"></canvas>
 </div>
 </div>
+    <div class="pending-list-section">
+        <div class="pending-list-header">
+            <h2>Contas a Pagar (Pendentes do Mês)</h2>
+            <span class="material-symbols-rounded" style="color: #71717a;">event_busy</span>
+        </div>
+        <div id="lista-pendentes" class="pending-list-body">
+            <p class="no-pending-msg">Carregando pendências...</p>
+        </div>
+    </div>
 </main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

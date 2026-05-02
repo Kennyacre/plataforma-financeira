@@ -122,8 +122,8 @@ function desenharTabela(dados) {
             : `<span class="badge warning" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">Pendente</span>`;
 
         const btnConfirmar = !isPago ? `
-            <button class="btn-confirmar" title="Confirmar Pagamento" onclick="confirmarPagamento(${lanc.id})" style="background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); padding: 5px; border-radius: 8px; cursor: pointer; margin-right: 5px;">
-                <span class="material-symbols-rounded" style="font-size: 18px;">check_circle</span>
+            <button class="btn-table-action btn-confirm-action" title="Confirmar Pagamento" onclick="confirmarPagamento(${lanc.id})">
+                <span class="material-symbols-rounded">check_circle</span>
             </button>
         ` : '';
 
@@ -137,13 +137,15 @@ function desenharTabela(dados) {
             <td class="${classeValor}">${sinal}${formatarMoeda(lanc.valor || 0)}</td>
             <td>${statusHtml}</td>
             <td style="text-align: center; white-space: nowrap;">
-                ${btnConfirmar}
-                <button class="btn-editar" title="Editar" onclick="abrirPainelEdicao(${lanc.id}, '${lanc.tipo}', '${lanc.descricao}', ${lanc.valor}, '${lanc.data}', '${lanc.categoria}', '${lanc.pagamento}', '${lanc.status || 'pago'}')">
-                    <span class="material-symbols-rounded" style="font-size: 18px;">edit</span>
-                </button>
-                <button class="btn-action" title="Excluir" onclick="deletarLancamento(${lanc.id})">
-                    <span class="material-symbols-rounded" style="font-size: 18px;">delete</span>
-                </button>
+                <div style="display: flex; gap: 4px; justify-content: center;">
+                    ${btnConfirmar}
+                    <button class="btn-table-action" title="Editar" onclick="abrirPainelEdicao(${lanc.id}, '${lanc.tipo}', '${lanc.descricao}', ${lanc.valor}, '${lanc.data}', '${lanc.categoria}', '${lanc.pagamento}', '${lanc.status || 'pago'}')">
+                        <span class="material-symbols-rounded">edit</span>
+                    </button>
+                    <button class="btn-table-action btn-delete-action" title="Excluir" onclick="deletarLancamento(${lanc.id})">
+                        <span class="material-symbols-rounded">delete</span>
+                    </button>
+                </div>
             </td>
         `;
         tbody.appendChild(tr);

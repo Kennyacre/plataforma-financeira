@@ -200,8 +200,28 @@ def get_cartoes(username: str):
     conn = get_db_connection()
     cur = conn.cursor()
     try:
-        cur.execute("SELECT nome_cartao, dia_fechamento, limite_total, fatura_atual, cor_card, dia_vencimento FROM cartoes WHERE username = %s", (username,))
-        cartoes = [{"nome": r[0], "fechamento": r[1], "limite": float(r[2]), "fatura": float(r[3]), "cor": r[4], "vencimento": r[5]} for r in cur.fetchall()]
+        agora = datetime.now()
+        # Busca os dados básicos do cartão + soma dos gastos do mês atual
+        cur.execute("""
+            SELECT c.nome_cartao, c.dia_fechamento, c.limite_total, c.fatura_atual, c.cor_card, c.dia_vencimento,
+            (SELECT COALESCE(SUM(f.valor), 0) FROM financas f 
+             WHERE f.username = c.username AND f.pagamento = c.nome_cartao 
+             AND EXTRACT(MONTH FROM f.data) = %s AND EXTRACT(YEAR FROM f.data) = %s
+             AND f.tipo = 'gasto') as fatura_mes
+            FROM cartoes c WHERE c.username = %s
+        """, (agora.month, agora.year, username))
+        
+        cartoes = []
+        for r in cur.fetchall():
+            cartoes.append({
+                "nome": r[0],
+                "fechamento": r[1],
+                "limite": float(r[2]),
+                "fatura_total": float(r[3]), # Dívida total (todas as parcelas)
+                "cor": r[4],
+                "vencimento": r[5],
+                "fatura": float(r[6]) # Fatura do mês atual (o que o usuário vê pra pagar)
+            })
         return {"status": "sucesso", "cartoes": cartoes}
     except Exception as e:
         return {"status": "erro", "detalhe": str(e)}
@@ -242,16 +262,35 @@ def pagar_fatura(dados: dict):
     conn = get_db_connection()
     cur = conn.cursor()
     try:
-        cur.execute("SELECT fatura_atual FROM cartoes WHERE username = %s AND nome_cartao = %s", (dados['username'], dados['nome_cartao']))
-        res = cur.fetchone()
-        if not res: return {"status": "erro", "detalhe": "Cartão não encontrado."}
-        valor_fatura = res[0]
-        if valor_fatura <= 0: return {"status": "erro", "detalhe": "A fatura já está zerada!"}
+        agora = datetime.now()
+        # 1. Calcula o valor total de compras deste mês para este cartão
+        cur.execute("""
+            SELECT COALESCE(SUM(valor), 0) FROM financas 
+            WHERE username = %s AND pagamento = %s 
+            AND EXTRACT(MONTH FROM data) = %s AND EXTRACT(YEAR FROM data) = %s
+            AND tipo = 'gasto'
+        """, (dados['username'], dados['nome_cartao'], agora.month, agora.year))
         
-        cur.execute("UPDATE cartoes SET fatura_atual = 0 WHERE username = %s AND nome_cartao = %s", (dados['username'], dados['nome_cartao']))
-        cur.execute("INSERT INTO financas (username, tipo, descricao, valor, data, categoria, pagamento) VALUES (%s, 'gasto', %s, %s, CURRENT_DATE, 'Pagamento', 'Saldo em Conta')", (dados['username'], f"Pagamento Fatura: {dados['nome_cartao']}", valor_fatura))
+        valor_fatura_mes = float(cur.fetchone()[0] or 0.0)
+        
+        if valor_fatura_mes <= 0:
+            return {"status": "erro", "detalhe": "A fatura deste mês já está zerada!"}
+        
+        # 2. Abate apenas o valor do mês da dívida total do cartão
+        cur.execute("""
+            UPDATE cartoes 
+            SET fatura_atual = GREATEST(fatura_atual - %s, 0) 
+            WHERE username = %s AND nome_cartao = %s
+        """, (valor_fatura_mes, dados['username'], dados['nome_cartao']))
+        
+        # 3. Registra o pagamento no histórico (para abater do saldo em conta)
+        cur.execute("""
+            INSERT INTO financas (username, tipo, descricao, valor, data, categoria, pagamento) 
+            VALUES (%s, 'gasto', %s, %s, CURRENT_DATE, 'Pagamento', 'Saldo em Conta')
+        """, (dados['username'], f"Pagamento Fatura ({agora.month}/{agora.year}): {dados['nome_cartao']}", valor_fatura_mes))
+        
         conn.commit()
-        return {"status": "sucesso"}
+        return {"status": "sucesso", "mensagem": f"Fatura de {agora.month}/{agora.year} paga com sucesso!"}
     except Exception as e:
         conn.rollback()
         return {"status": "erro", "detalhe": str(e)}

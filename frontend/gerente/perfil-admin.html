@@ -5,6 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Meu Perfil | TN INFO</title>
+<link href="../assets/img/logo.jpg" rel="shortcut icon" type="image/x-icon"/>
 <script src="../js/security.js?v=2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
@@ -63,17 +64,32 @@
 </div>
 <div class="info-row">
 <span style="color: #94a3b8;">Status do Sistema</span>
-<span style="color: #10b981; font-weight: 600;">Operacional</span>
+<span style="color: #ffffff; font-weight: 800;">OPERACIONAL</span>
 </div>
 </div>
-<div class="support-alert">
-<span class="material-symbols-rounded">info</span>
-<div>Para alterar a senha base, utilize os comandos do servidor remoto ou base de dados.</div>
+<div class="form-section security-card" style="margin-top: 20px;">
+<div class="card-header">
+<span class="material-symbols-rounded">lock</span>
+<h3>Alterar Senha</h3>
+</div>
+<div style="display: flex; flex-direction: column; gap: 15px;">
+    <div>
+        <label style="color: #94a3b8; font-size: 13px; font-weight: 600; display: block; margin-bottom: 8px;">Nova Senha</label>
+        <input class="input-dark" id="admin-nova-senha" placeholder="Mínimo 6 caracteres" type="password"/>
+    </div>
+    <div>
+        <label style="color: #94a3b8; font-size: 13px; font-weight: 600; display: block; margin-bottom: 8px;">Confirmar Senha</label>
+        <input class="input-dark" id="admin-confirmar-senha" placeholder="Repita a nova senha" type="password"/>
+    </div>
+    <button class="btn-save-pix" onclick="alterarSenhaAdmin()">
+        <span class="material-symbols-rounded">key</span> Atualizar Senha
+    </button>
+</div>
 </div>
 </div>
 <div class="form-section security-card">
 <div class="card-header">
-<span class="material-symbols-rounded" style="color: #10b981;">payments</span>
+<span class="material-symbols-rounded">payments</span>
 <h3>Dados de Recebimento (PIX)</h3>
 </div>
 <p style="font-size: 13px; color: #94a3b8; margin-bottom: 20px;">

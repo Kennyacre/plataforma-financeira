@@ -48,18 +48,18 @@ async function carregarUsuariosGlobais() {
                 let acoes = '';
                 if (u.username && u.username.toLowerCase() !== 'admin') {
                     acoes = `
-                        <div style="display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap;">
-                            <button onclick="abrirModalEdicao(${u.id})" title="Editar Usuário"
-                                style="background: rgba(59,130,246,0.15); color: #3b82f6; border: 1px solid rgba(59,130,246,0.3); padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 4px; white-space: nowrap;">
-                                ✏️ Editar
+                        <div style="display: flex; gap: 4px; justify-content: flex-end;">
+                            <button onclick="abrirModalEdicao(${u.id})" class="btn-table-action" title="Editar">
+                                <span class="material-symbols-rounded">edit</span>
                             </button>
-                            <button onclick="toggleBloqueio(${u.id}, '${u.username}')" title="${labelBloqueio}"
-                                style="background: ${isBloqueado ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)'}; color: ${corBloqueio}; border: 1px solid ${isBloqueado ? 'rgba(16,185,129,0.3)' : 'rgba(245,158,11,0.3)'}; padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 4px; white-space: nowrap;">
-                                ${isBloqueado ? '🔓 Desbloquear' : '🔒 Bloquear'}
+                            <button onclick="renovarCliente(${u.id}, '${u.vencimento}')" class="btn-table-action btn-renew-action" title="Renovar +30 Dias">
+                                <span class="material-symbols-rounded">event_repeat</span>
                             </button>
-                            <button onclick="excluirUsuario(${u.id}, '${u.username}')" title="Mover para Lixeira"
-                                style="background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 4px; white-space: nowrap;">
-                                🗑️ Excluir
+                            <button onclick="toggleBloqueio(${u.id}, '${u.username}')" class="btn-table-action" title="${labelBloqueio}" style="color: ${corBloqueio};">
+                                <span class="material-symbols-rounded">${iconBloqueio}</span>
+                            </button>
+                            <button onclick="excluirUsuario(${u.id}, '${u.username}')" class="btn-table-action btn-delete-action" title="Excluir">
+                                <span class="material-symbols-rounded">delete</span>
                             </button>
                         </div>
                     `;
@@ -79,9 +79,10 @@ async function carregarUsuariosGlobais() {
                             ${u.nome || u.username} ${premiumBadge} <br>
                             <small style="color: #64748b; font-weight: normal;">@${u.username}</small> ${isBloqueado ? '<small>(Bloqueado)</small>' : ''}
                         </td>
-                        <td><span style="background: ${badgeBg}; color: ${badgeColor}; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; text-transform: uppercase;">${u.role}</span></td>
-                        <td class="hide-tablet" style="color: #94a3b8;">${u.revendedor || 'Sistema'}</td>
+                        <td class="hide-mobile" style="color: #94a3b8; font-size: 13px;">${u.email || '-'}</td>
+                        <td class="hide-mobile" style="color: #94a3b8; font-size: 13px;">${u.whatsapp || '-'}</td>
                         <td style="color: #94a3b8;">${u.vencimento || 'Sem data'}</td>
+                        <td style="font-weight: bold; color: #ffffff;">R$ ${u.valor_venda ? u.valor_venda.toFixed(2).replace('.', ',') : '0,00'}</td>
                         <td class="actions-cell">${acoes}</td>
                     </tr>
                 `;
@@ -97,31 +98,41 @@ async function carregarUsuariosGlobais() {
 
 // === LÓGICA DO MODAL DE EDIÇÃO ===
 
-function abrirModalEdicao(id) {
-    const user = allUsersData.find(u => u.id === id);
-    if (!user) return;
-    
-    // Preenche os campos
-    document.getElementById('editUserId').value = user.id;
-    document.getElementById('editNome').value = user.nome || '';
-    
-    if (user.vencimento && user.vencimento !== 'Sem data') {
-        document.getElementById('editVencimento').value = user.vencimento;
-    } else {
-        document.getElementById('editVencimento').value = '';
+async function abrirModalEdicao(id) {
+    try {
+        // Busca os dados REAIS e ATUAIS do banco de dados (com cache bust)
+        const response = await fetch(`/api/admin/usuarios/${id}?v=${Date.now()}`);
+        if (!response.ok) throw new Error("Não foi possível carregar os dados do usuário.");
+        
+        const user = await response.json();
+        
+        // Preenche os campos do modal com o que está no banco
+        document.getElementById('editUserId').value = user.id;
+        document.getElementById('editNome').value = user.nome || '';
+        document.getElementById('editEmail').value = user.email || '';
+        document.getElementById('editWhatsapp').value = user.whatsapp || '';
+        document.getElementById('editValorVenda').value = user.valor_venda || 0;
+        
+        if (user.vencimento && user.vencimento !== 'Sem data' && user.vencimento !== 'None') {
+            document.getElementById('editVencimento').value = user.vencimento;
+        } else {
+            document.getElementById('editVencimento').value = '';
+        }
+        
+        document.getElementById('editStatus').value = user.status === 'bloqueado' ? 'bloqueado' : 'ativo';
+        document.getElementById('editPremium').checked = user.is_premium === true;
+        
+        // Exibe o modal
+        document.getElementById('overlayEdicaoUsuario').style.display = 'block';
+        document.getElementById('modalEdicaoUsuario').style.display = 'block';
+        
+        setTimeout(() => {
+            document.getElementById('overlayEdicaoUsuario').style.opacity = '1';
+            document.getElementById('modalEdicaoUsuario').classList.add('aberto');
+        }, 10);
+    } catch (err) {
+        alert("🚨 Erro ao buscar dados: " + err.message);
     }
-    
-    document.getElementById('editStatus').value = user.status === 'bloqueado' ? 'bloqueado' : 'ativo';
-    document.getElementById('editPremium').checked = user.is_premium === true;
-    
-    // Exibe o modal
-    document.getElementById('overlayEdicaoUsuario').style.display = 'block';
-    document.getElementById('modalEdicaoUsuario').style.display = 'block'; // Necessário para a transição inicial
-    
-    setTimeout(() => {
-        document.getElementById('overlayEdicaoUsuario').style.opacity = '1';
-        document.getElementById('modalEdicaoUsuario').classList.add('aberto');
-    }, 10);
 }
 
 function fecharModalEdicao() {
@@ -137,18 +148,33 @@ function fecharModalEdicao() {
 async function salvarEdicaoUsuario(event) {
     event.preventDefault();
     
+    // Captura os elementos com IDs exatos
     const id = document.getElementById('editUserId').value;
-    const nome = document.getElementById('editNome').value;
+    const nome = document.getElementById('editNome').value.trim();
+    const email = document.getElementById('editEmail').value.trim();
+    const whatsapp = document.getElementById('editWhatsapp').value.trim();
     const vencimento = document.getElementById('editVencimento').value;
     const status = document.getElementById('editStatus').value;
     const isPremium = document.getElementById('editPremium').checked;
+    const valorVendaRaw = document.getElementById('editValorVenda').value;
     
+    // Tratamento robusto para o valor (converte vírgula em ponto)
+    let valorVendaFinal = 0;
+    if (valorVendaRaw) {
+        valorVendaFinal = parseFloat(String(valorVendaRaw).replace(',', '.'));
+    }
+
     const payload = {
         nome_completo: nome || null,
+        email: email || null,
+        whatsapp: whatsapp || null,
         vencimento: vencimento || null,
         status: status,
-        is_premium: isPremium
+        is_premium: isPremium,
+        valor_venda: isNaN(valorVendaFinal) ? 0 : valorVendaFinal
     };
+    
+    console.log("🚀 Enviando atualização para ID:", id, payload);
     
     try {
         const response = await fetch(`/api/admin/usuarios/${id}`, {
@@ -157,15 +183,19 @@ async function salvarEdicaoUsuario(event) {
             body: JSON.stringify(payload)
         });
         
+        const resData = await response.json();
+        console.log("📥 Resposta do Servidor:", resData);
+        
         if (response.ok) {
+            alert("✅ Perfeito! Alterações salvas com sucesso.");
             fecharModalEdicao();
-            carregarUsuariosGlobais(); // Recarrega a tabela atualizada
+            carregarUsuariosGlobais(); 
         } else {
-            const err = await response.json();
-            alert("Erro ao salvar: " + (err.detail || "Tente novamente."));
+            alert("❌ O servidor recusou a alteração: " + (resData.detail || "Verifique os dados."));
         }
     } catch (e) {
-        alert("Erro de conexão.");
+        console.error("Erro fatal no salvamento:", e);
+        alert("🚨 Erro crítico: O motor do sistema não respondeu.");
     }
 }
 
@@ -193,6 +223,43 @@ async function excluirUsuario(id, username) {
             alert("Erro ao excluir.");
         }
     } catch (error) { alert("Erro de conexão."); }
+}
+
+async function renovarCliente(id, vencimentoAtual) {
+    try {
+        let dataBase = new Date();
+        
+        // Se já tem vencimento e ele é no futuro, soma a partir dele
+        if (vencimentoAtual && vencimentoAtual !== 'Sem data' && vencimentoAtual !== 'None') {
+            const dataVenc = new Date(vencimentoAtual + 'T12:00:00'); // Evita erro de fuso
+            if (dataVenc > dataBase) {
+                dataBase = dataVenc;
+            }
+        }
+        
+        // Adiciona 30 dias
+        dataBase.setDate(dataBase.getDate() + 30);
+        const novaData = dataBase.toISOString().split('T')[0];
+        
+        if (!confirm(`Deseja renovar o acesso por mais 30 dias?\nNova data: ${novaData}`)) return;
+
+        const response = await fetch(`/api/admin/usuarios/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ vencimento: novaData })
+        });
+
+        if (response.ok) {
+            // Pequeno efeito visual de sucesso antes de recarregar
+            alert(`✅ Renovado com sucesso até ${novaData}!`);
+            carregarUsuariosGlobais();
+        } else {
+            alert("Erro ao renovar cliente.");
+        }
+    } catch (err) {
+        console.error("Erro na renovação:", err);
+        alert("Erro ao processar renovação.");
+    }
 }
 
 function filtrarTabela() {

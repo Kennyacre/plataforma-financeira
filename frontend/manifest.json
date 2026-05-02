@@ -1,8 +1,24 @@
 {
-  "short_name": "MTConnect",
-  "name": "MTConnect V2 Official",
-  "start_url": "/",
+  "short_name": "TN INFO",
+  "name": "TN INFO - Gestão Financeira",
+  "description": "Plataforma de Gestão Financeira Luxury Monochrome",
+  "icons": [
+    {
+      "src": "assets/img/logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/img/logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ],
+  "start_url": "/index.html",
   "display": "standalone",
   "theme_color": "#000000",
-  "background_color": "#000000"
+  "background_color": "#000000",
+  "orientation": "portrait-primary",
+  "scope": "/"
 }

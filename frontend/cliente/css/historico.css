@@ -1,7 +1,7 @@
 /* Histórico de Transações - Versão Limpa e Responsiva */
 
 .historico-container {
-    background: #18181b;
+    background: #09090b;
     border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 15px;
     padding: 25px;
@@ -12,7 +12,7 @@
 
 /* SEÇÃO DE FILTROS */
 .filter-section {
-    background: #18181b;
+    background: #09090b;
     border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 15px;
     padding: 20px;
@@ -53,12 +53,11 @@
 
 /* TABELA PREMIUM */
 .table-container {
-    background: #18181b;
+    background: #09090b;
     border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 15px;
     margin-top: 20px;
     overflow-x: auto;
-    /* IMPORTANTE: Permite scroll horizontal em tabelas largas */
     width: 100%;
 }
 

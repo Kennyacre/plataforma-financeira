@@ -16,10 +16,11 @@ async function carregarDadosDashboard() {
 
         if (data.status === 'sucesso') {
             const h2s = document.querySelectorAll('.stat-card h2');
-            if (h2s.length >= 3) {
+            if (h2s.length >= 4) {
                 h2s[0].innerText = data.total_clientes;
                 h2s[1].innerText = `R$ ${data.total_receitas.toFixed(2).replace('.', ',')}`;
                 h2s[2].innerText = data.total_transacoes;
+                h2s[3].innerText = data.total_recuperacoes;
             }
 
             const tbody = document.querySelector('.premium-table tbody');
@@ -43,12 +44,12 @@ async function carregarDadosDashboard() {
                                 </div>
                             `;
                         } else {
-                            acoes = `<span class="material-symbols-rounded" style="color: #10b981;" title="Admin Supremo">security</span>`;
+                            acoes = `<span class="material-symbols-rounded" style="color: #ffffff;" title="Admin Supremo">security</span>`;
                         }
 
                         const role = u.role ? u.role.toLowerCase() : 'cliente';
-                        let badgeColor = role === 'admin' ? '#f59e0b' : (role === 'revenda' ? '#8b5cf6' : '#10b981');
-                        let badgeBg = role === 'admin' ? 'rgba(245, 158, 11, 0.1)' : (role === 'revenda' ? 'rgba(139, 92, 246, 0.1)' : 'rgba(16, 185, 129, 0.1)');
+                        let badgeColor = role === 'admin' ? '#ffffff' : (role === 'revenda' ? '#a1a1aa' : '#e2e8f0');
+                        let badgeBg = role === 'admin' ? 'rgba(255, 255, 255, 0.15)' : (role === 'revenda' ? 'rgba(161, 161, 170, 0.1)' : 'rgba(255, 255, 255, 0.05)');
 
                         tbody.innerHTML += `
                             <tr>

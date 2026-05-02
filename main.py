@@ -103,4 +103,5 @@ if __name__ == "__main__":
     import uvicorn
     print("\n🚀 SISTEMA MTCONNECT V2 INICIADO!")
     print("🌍 Acesse: http://localhost:8000")
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # Ativado o reload para que o sistema perceba as mudanças automaticamente
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

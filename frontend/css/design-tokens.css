@@ -1,0 +1,39 @@
+/* Design Tokens - Luxury Monochrome */
+:root {
+    /* Cores Primárias */
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #141414;
+    --bg-tertiary: #1f1f1f;
+    
+    /* Cores de Ação (Tons de Cinza/Branco) */
+    --accent-primary: #ffffff;
+    --accent-secondary: #e0e0e0;
+    --accent-dim: #94a3b8;
+    
+    /* Estados */
+    --success: #10b981;
+    --error: #ef4444;
+    --warning: #f59e0b;
+    --info: #3b82f6;
+    
+    /* Bordas e Divisores */
+    --border-color: rgba(255, 255, 255, 0.08);
+    --border-hover: rgba(255, 255, 255, 0.15);
+    
+    /* Sombras */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.6);
+    
+    /* Tipografia */
+    --font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Reset básico para garantir o Monochrome */
+body {
+    background-color: var(--bg-primary);
+    color: #ffffff;
+    font-family: var(--font-family);
+    margin: 0;
+    padding: 0;
+}
