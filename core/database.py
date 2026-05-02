@@ -56,6 +56,7 @@ def startup_db():
         check_and_add_column(cur, 'usuarios', 'is_premium', "BOOLEAN DEFAULT FALSE")
         check_and_add_column(cur, 'usuarios', 'whatsapp', "VARCHAR(255)")
         check_and_add_column(cur, 'usuarios', 'valor_venda', "NUMERIC(15, 2) DEFAULT 0.0")
+        check_and_add_column(cur, 'usuarios', 'must_change_password', "BOOLEAN DEFAULT FALSE")
 
         cur.execute("""
             CREATE TABLE IF NOT EXISTS financas (
