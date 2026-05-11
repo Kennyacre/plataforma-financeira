@@ -1,0 +1,31 @@
+
+        .sidebar { overflow-y: auto; max-height: 100vh; transition: 0.3s ease; }
+        .sidebar::-webkit-scrollbar { width: 5px; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+        .sidebar.escondida { display: none; }
+        
+        .header-left { display: flex; align-items: center; gap: 20px; }
+        .btn-menu { background: #1e293b; border: 1px solid rgba(255,255,255,0.1); color: #f8fafc; padding: 10px; border-radius: 10px; cursor: pointer; display: flex; transition: 0.3s; }
+
+        .table-container { background: #1e293b; border: 1px solid rgba(255,255,255,0.05); border-radius: 15px; padding: 25px; margin-top: 25px; overflow-x: auto; }
+        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 20px; flex-wrap: wrap; }
+        
+        .search-box { position: relative; flex: 1; max-width: 400px; }
+        .search-box input { width: 100%; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); padding: 12px 15px 12px 45px; border-radius: 10px; color: white; outline: none; transition: 0.3s; }
+        .search-box input:focus { border-color: #8b5cf6; }
+        .search-box span { position: absolute; left: 15px; top: 12px; color: #64748b; }
+
+        .premium-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .premium-table th { color: #94a3b8; font-size: 13px; padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .premium-table td { padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #f8fafc; font-size: 14px; }
+        
+        .status-pill { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+        .active-pill { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .expired-pill { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+        .trial-pill { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+
+        .actions-cell { display: flex; justify-content: flex-end; gap: 10px; }
+        .btn-renew { background: #8b5cf6; color: white; border: none; padding: 8px 15px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 5px; }
+        .btn-renew:hover { background: #7c3aed; transform: translateY(-2px); }
+        .btn-delete-client { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px; border-radius: 8px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; }
+        .btn-delete-client:hover { background: #ef4444; color: white; transform: scale(1.1); }

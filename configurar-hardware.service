@@ -1,0 +1,11 @@
+[Unit]
+Description=Configurar Fans e Rede Giga LAN ao iniciar
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /DATA/AppData/MTConnect_V2/configurar_hardware.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

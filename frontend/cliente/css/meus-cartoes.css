@@ -1,0 +1,237 @@
+/* meus-cartoes.css - MINIMALIST LUXURY EDITION */
+.cards-page-layout { 
+    display: flex; 
+    flex-wrap: wrap; /* Permite quebrar linha no celular */
+    gap: 30px; 
+    margin-top: 30px; 
+    align-items: flex-start; 
+}
+
+.form-section {
+    background: #09090b;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 28px;
+    padding: 30px;
+    width: 100%;
+    max-width: 400px; /* Trava a largura para não ficar muito larga */
+    box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+}
+@media (min-width: 1024px) {
+    .form-section { position: sticky; top: 20px; }
+}
+
+.form-header h2 {
+    color: #ffffff;
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.form-group label {
+    color: #a1a1aa;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+}
+
+.form-group input, .form-group select {
+    width: 100%;
+    background: #18181b;
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #ffffff;
+    padding: 16px 20px;
+    border-radius: 14px;
+    font-size: 15px;
+    outline: none;
+    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.form-group input:focus {
+    background: #27272a;
+    border-color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(255,255,255,0.05);
+}
+
+.btn-submit-premium {
+    width: 100%;
+    background: #ffffff;
+    color: #000000;
+    padding: 18px;
+    border-radius: 16px;
+    font-weight: 900;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: 0.4s;
+    border: none;
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.cards-list-section {
+    flex: 1;
+    min-width: 320px;
+}
+
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 350px); /* Trava em 350px fixos */
+    gap: 25px;
+}
+
+/* --- DESIGN SLEEK CARD --- */
+.credit-card-item {
+    width: 350px; /* Largura fixa */
+    height: 210px;
+    border-radius: 28px;
+    padding: 30px;
+    position: relative;
+    overflow: hidden;
+    color: white;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.credit-card-item:hover {
+    transform: scale(1.03) translateY(-5px);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+    border-color: rgba(255,255,255,0.3);
+}
+
+/* Brilho Sutil de Metal */
+.credit-card-item::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.cc-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cc-chip {
+    width: 42px;
+    height: 32px;
+    background: linear-gradient(135deg, #e2e8f0 0%, #94a3b8 100%);
+    border-radius: 6px;
+    opacity: 0.9;
+}
+
+.cc-bank-name {
+    font-size: 14px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    opacity: 0.9;
+}
+
+.cc-body {
+    margin-top: 10px;
+}
+
+.cc-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 2px;
+    margin: 0;
+}
+
+.cc-value {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin: 5px 0;
+}
+
+.cc-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.cc-sub-info {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.8);
+}
+
+/* Botões Minimalistas */
+.btn-pay-minimal {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-pay-minimal:hover {
+    background: #ffffff;
+    color: #000000;
+}
+
+.btn-del-minimal {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    font-size: 18px;
+    opacity: 0.3;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-del-minimal:hover {
+    opacity: 1;
+    color: #ef4444;
+}
+
+/* MEDIA QUERIES PARA CELULAR */
+@media (max-width: 768px) {
+    .cards-page-layout {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .form-section {
+        max-width: 100%;
+        padding: 20px;
+    }
+    
+    .credit-card-item {
+        width: 100%; /* No celular eles podem ocupar a largura da tela para não cortar */
+        max-width: 350px;
+        height: 190px;
+        padding: 20px;
+    }
+    
+    .cards-grid {
+        grid-template-columns: 1fr; /* Uma coluna no celular */
+        justify-items: center; /* Centraliza no mobile */
+    }
+}

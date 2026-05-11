@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar Cliente | TN INFO</title>
+
+    <script src="../js/security.js?v=2"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+    
+    <link rel="stylesheet" href="../cliente/css/dashboard.css?v=1">
+    <link rel="stylesheet" href="css/novo-cliente.css?v=1"> </head>
+<body>
+    <div class="dashboard-wrapper">
+        <nav class="sidebar" id="minha-sidebar">
+            
+            <div class="user-info" style="display: flex; flex-direction: column; align-items: center; padding: 20px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 10px;">
+                <img src="../assets/img/logo.jpg" alt="TN INFO" style="width: 140px; height: 140px; border-radius: 12px; object-fit: cover; border: 2px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+            </div>
+            
+            <ul class="nav-links">
+                <li onclick="location.href='painel-revenda.html'"><span class="material-symbols-rounded">dashboard</span> Meu Painel</li>
+                <li onclick="location.href='meus-clientes.html'"><span class="material-symbols-rounded">groups</span> Meus Clientes</li>
+                <li class="active" onclick="location.href='novo-cliente.html'"><span class="material-symbols-rounded">person_add</span> Cadastrar Cliente</li>
+                <li onclick="location.href='lixeira.html'"><span class="material-symbols-rounded">delete_sweep</span> Lixeira</li>
+                
+                <li class="separator">FINANCEIRO</li>
+                <li onclick="location.href='financeiro.html'"><span class="material-symbols-rounded">account_balance_wallet</span> Meu Financeiro</li>
+                <li onclick="location.href='solicitar-creditos.html'"><span class="material-symbols-rounded">add_card</span> Solicitar Créditos</li>
+                
+                <li class="separator">SISTEMA</li>
+                <li onclick="location.href='perfil-revenda.html'"><span class="material-symbols-rounded">manage_accounts</span> Meu Perfil</li>
+            </ul>
+            <div class="sidebar-footer">
+                <button class="btn-logout" onclick="fazerLogout()">
+                    <span class="material-symbols-rounded">logout</span> Sair
+                </button>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="header-left">
+                    <button id="btn-toggle-sidebar" class="btn-menu"><span class="material-symbols-rounded">menu</span></button>
+                    <div>
+                        <h1>Nova Assinatura</h1>
+                        <p>Registe um cliente oficial ou crie um teste grátis.</p>
+                    </div>
+                </div>
+            </header>
+
+            <div class="form-container">
+                <div class="form-section" style="background: #1e293b; padding: 30px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); border-top: 4px solid #8b5cf6;">
+                    
+                    <div class="section-header" style="display: flex; gap: 15px; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <span class="material-symbols-rounded" style="font-size: 30px; color: #8b5cf6;">person_add</span>
+                        <div>
+                            <h3 style="margin: 0; color: #f8fafc;">Dados do Utilizador</h3>
+                            <p style="margin: 0; font-size: 13px; color: #94a3b8;">Preencha as credenciais do novo cliente.</p>
+                        </div>
+                    </div>
+
+                    <form id="form-novo-cliente">
+                        <div class="form-grid">
+                            <div class="form-group full-width" style="display: flex; flex-direction: column; gap: 8px;">
+                                <label style="font-size: 13px; color: #94a3b8; font-weight: 600;">Nome de Usuário (Login)</label>
+                                <input type="text" id="username" placeholder="Ex: joao.silva" required style="width: 100%; padding: 12px; border-radius: 8px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: white; outline: none; box-sizing: border-box;">
+                            </div>
+                            
+                            <div class="form-group" style="display: flex; flex-direction: column; gap: 8px;">
+                                <label style="font-size: 13px; color: #94a3b8; font-weight: 600;">Senha de Acesso</label>
+                                <input type="password" id="password" placeholder="Mínimo 6 caracteres" required minlength="6" style="width: 100%; padding: 12px; border-radius: 8px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: white; outline: none; box-sizing: border-box;">
+                            </div>
+
+                            <div class="form-group" style="display: flex; flex-direction: column; gap: 8px;">
+                                <label style="font-size: 13px; color: #94a3b8; font-weight: 600;">Dias Iniciais de Acesso</label>
+                                <input type="number" id="dias_acesso" value="30" required min="1" style="width: 100%; padding: 12px; border-radius: 8px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: white; outline: none; box-sizing: border-box;">
+                            </div>
+
+                            <div class="form-group full-width" style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+                                <label style="font-size: 13px; color: #94a3b8; font-weight: 600;">Tipo de Criação</label>
+                                <select id="tipo_conta" style="width: 100%; padding: 12px; border-radius: 8px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: white; outline: none; box-sizing: border-box; cursor: pointer;">
+                                    <option value="oficial">⭐ Conta Oficial (Consome 1 Crédito)</option>
+                                    <option value="teste">⏱️ Teste Grátis 24h (Não consome crédito)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-actions" style="display: flex; justify-content: center; margin-top: 30px;">
+                            <button type="submit" class="btn-primary" style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color: white; border: none; padding: 15px 40px; border-radius: 10px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 16px; transition: 0.3s;">
+                                <span class="material-symbols-rounded">rocket_launch</span> CRIAR CLIENTE
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/novo-cliente.js?v=1"></script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redefinir Senha | TN INFO</title>
+    <link rel="shortcut icon" href="assets/img/logo.jpg" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ffffff;
+            --bg-dark: #09090b;
+            --card-bg: #18181b;
+            --text-main: #ffffff;
+            --text-muted: #a1a1aa;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-main);
+        }
+        .login-box {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 40px;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+        }
+        .logo-text { font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 800; margin-bottom: 10px; }
+        .subtitle { color: var(--text-muted); font-size: 14px; margin-bottom: 30px; }
+        .form-group { text-align: left; margin-bottom: 24px; }
+        .form-group label { display: block; margin-bottom: 10px; color: var(--text-muted); font-size: 13px; font-weight: 600; }
+        .form-control {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #09090b;
+            color: white;
+            font-size: 15px;
+        }
+        .btn-action {
+            width: 100%;
+            background: #ffffff;
+            color: #000000;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-action:hover { background: #e4e4e7; }
+        .msg { margin-top: 20px; padding: 12px; border-radius: 12px; display: none; font-size: 14px; }
+        .error { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <div class="logo-text">Nova Senha</div>
+        <div class="subtitle">Sua senha temporária expirou. Por favor, defina uma nova senha para continuar.</div>
+        <form id="formRedefinir">
+            <div class="form-group">
+                <label>Nova Senha</label>
+                <input type="password" id="nova_senha" class="form-control" placeholder="Mínimo 6 caracteres" required minlength="6">
+            </div>
+            <div class="form-group">
+                <label>Confirmar Nova Senha</label>
+                <input type="password" id="confirmar_senha" class="form-control" placeholder="Repita a nova senha" required>
+            </div>
+            <button type="submit" id="btnSubmit" class="btn-action">Salvar Nova Senha</button>
+        </form>
+        <div id="mensagem" class="msg error"></div>
+    </div>
+    <script>
+        const usuarioLogado = localStorage.getItem('usuarioLogado');
+        if (!usuarioLogado) window.location.href = 'index.html';
+
+        document.getElementById('formRedefinir').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nova_senha = document.getElementById('nova_senha').value;
+            const confirmar_senha = document.getElementById('confirmar_senha').value;
+            const msgDiv = document.getElementById('mensagem');
+            const btn = document.getElementById('btnSubmit');
+
+            if (nova_senha !== confirmar_senha) {
+                msgDiv.style.display = 'block';
+                msgDiv.innerText = 'As senhas não coincidem!';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = 'Processando...';
+            msgDiv.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/recuperar-senha/redefinir', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        username: usuarioLogado,
+                        nova_senha: nova_senha
+                    })
+                });
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert('Senha alterada com sucesso! Faça login novamente.');
+                    localStorage.clear();
+                    window.location.href = 'index.html';
+                } else {
+                    msgDiv.style.display = 'block';
+                    msgDiv.innerText = result.detail || 'Erro ao redefinir senha.';
+                }
+            } catch (err) {
+                msgDiv.style.display = 'block';
+                msgDiv.innerText = 'Erro de conexão.';
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Salvar Nova Senha';
+            }
+        });
+    </script>
+</body>
+</html>

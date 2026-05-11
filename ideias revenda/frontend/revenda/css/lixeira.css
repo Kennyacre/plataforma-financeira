@@ -1,0 +1,74 @@
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.btn-back {
+    background: #1e293b;
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-back:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.empty-trash-card {
+    padding: 100px 20px !important;
+    text-align: center;
+    border: 2px dashed var(--border) !important;
+    background: transparent !important;
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.empty-state span {
+    font-size: 64px;
+    color: var(--text-dim);
+    opacity: 0.2;
+}
+
+.empty-state h3 {
+    font-size: 20px;
+    color: var(--text-main);
+}
+
+.empty-state p {
+    color: var(--text-dim);
+    font-size: 15px;
+    max-width: 400px;
+}
+
+        .sidebar { overflow-y: auto; max-height: 100vh; transition: 0.3s ease; }
+        .sidebar::-webkit-scrollbar { width: 5px; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+        .sidebar.escondida { display: none; }
+        
+        .header-left { display: flex; align-items: center; gap: 20px; }
+        .btn-menu { background: #1e293b; border: 1px solid rgba(255,255,255,0.1); color: #f8fafc; padding: 10px; border-radius: 10px; cursor: pointer; display: flex; transition: 0.3s; }
+        
+        .table-container { background: #1e293b; border-radius: 15px; padding: 25px; margin-top: 25px; border: 1px solid rgba(255,255,255,0.05); }
+        .premium-table { width: 100%; border-collapse: collapse; color: white; text-align: left; }
+        .premium-table th { padding: 15px; color: #94a3b8; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
+        .premium-table td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }
+        
+        .actions { display: flex; gap: 10px; justify-content: flex-end; }
+        .btn-restore { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); padding: 8px 15px; border-radius: 8px; cursor: pointer; transition: 0.3s; font-weight: bold; font-size: 12px; }
+        .btn-restore:hover { background: #10b981; color: white; transform: translateY(-2px); }
+        .btn-perm-delete { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px; border-radius: 8px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; }
+        .btn-perm-delete:hover { background: #ef4444; color: white; transform: translateY(-2px); }
