@@ -27,4 +27,9 @@ node_modules/
 config_backup
 env_backup
 motor.log
+__pycache__/
+*.pyc
+*/__pycache__/
+nginx-proxy-manager/letsencrypt/credentials/
+instances/
 Terminal ID: 12510
