@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 Type=oneshot
-ExecStart=/bin/bash /DATA/AppData/MTConnect_V2/configurar_hardware.sh
+ExecStart=/bin/bash /home/kennyacre/mtconnect_v2/configurar_hardware.sh
 RemainAfterExit=yes
 
 [Install]

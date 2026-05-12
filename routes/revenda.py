@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from core.database import get_db_connection
-from models.schemas import PedidoCredito, NovoClienteRevenda
+from models.schemas import PedidoCredito, NovoClienteRevenda, PixUpdate
 from datetime import date, timedelta
 import requests
 
@@ -161,6 +161,20 @@ def excluir_permanente_revenda(revendedor: str, cliente: str):
         cur.close(); conn.close()
 
 @router.post("/toggle-bloqueio/{revendedor}/{cliente}")
+@router.post("/atualizar-pix")
+def atualizar_pix_revenda(dados: PixUpdate):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("UPDATE usuarios SET pix_chave = %s, pix_titular = %s, pix_banco = %s WHERE username = %s", (dados.pix_chave, dados.pix_titular, dados.pix_banco, dados.username))
+        conn.commit()
+        return {"status": "sucesso", "mensagem": "PIX atualizado!"}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cur.close(); conn.close()
+
 def toggle_bloqueio_revenda(revendedor: str, cliente: str):
     conn = get_db_connection()
     cur = conn.cursor()

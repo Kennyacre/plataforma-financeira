@@ -353,3 +353,43 @@
     background: #f8fafc;
     box-shadow: 0 6px 20px rgba(255,255,255,0.25);
 }
+
+/* MONITORAMENTO DO SERVIDOR */
+.monitor-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+.monitor-item {
+    background: rgba(255,255,255,0.03);
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+.monitor-label {
+    font-size: 11px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+}
+.progress-bar-bg {
+    background: rgba(255,255,255,0.05);
+    height: 6px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+.progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    transition: width 1s ease-in-out, background 0.3s;
+}
+.monitor-value {
+    font-size: 14px;
+    color: #ffffff;
+    font-weight: 600;
+    margin-top: 5px;
+}

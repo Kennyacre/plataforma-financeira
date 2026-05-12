@@ -1,7 +1,11 @@
+from fastapi import UploadFile, File
+import psutil
 from fastapi import APIRouter, HTTPException, Depends
 from core.database import get_db_connection
 from pydantic import BaseModel
 import os
+import shutil
+import subprocess
 from google import genai
 from google.genai import types
 
@@ -309,6 +313,115 @@ def gerar_backup():
     finally:
         cur.close(); conn.close()
 
+@router.post("/backup-telegram")
+def backup_para_telegram():
+    """
+    Gera backup do banco via psycopg2 (sem pg_dump),
+    compacta em .zip em memória e envia ao Telegram.
+    """
+    import zipfile
+    import io
+    import requests as req
+    from datetime import datetime
+
+    BOT_TOKEN = "8485787550:AAGQwt7bsSk5Q5MrJk5OgKmt1D4xndBfZlw"
+    CHAT_ID   = "6016539904"
+    TIMESTAMP = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    FILENAME  = f"backup_mtconnect_{TIMESTAMP}.sql"
+
+    conn = get_db_connection()
+    cur  = conn.cursor()
+
+    try:
+        sql_linhas = []
+        sql_linhas.append(f"-- Backup MTConnect V2 gerado em {TIMESTAMP}\n")
+        sql_linhas.append("SET client_encoding = 'UTF8';\n\n")
+
+        # Pega todas as tabelas do schema public
+        cur.execute("""
+            SELECT tablename FROM pg_tables
+            WHERE schemaname = 'public'
+            ORDER BY tablename
+        """)
+        tabelas = [r[0] for r in cur.fetchall()]
+
+        for tabela in tabelas:
+            sql_linhas.append(f"\n-- ============ Tabela: {tabela} ============\n")
+
+            # Pega as colunas
+            cur.execute("""
+                SELECT column_name
+                FROM information_schema.columns
+                WHERE table_schema = 'public' AND table_name = %s
+                ORDER BY ordinal_position
+            """, (tabela,))
+            colunas = [r[0] for r in cur.fetchall()]
+            cols_str = ", ".join(f'"{c}"' for c in colunas)
+
+            # Pega os dados
+            cur.execute(f'SELECT * FROM "{tabela}"')
+            rows = cur.fetchall()
+
+            if not rows:
+                sql_linhas.append(f"-- (sem dados em {tabela})\n")
+                continue
+
+            for row in rows:
+                valores = []
+                for v in row:
+                    if v is None:
+                        valores.append("NULL")
+                    elif isinstance(v, bool):
+                        valores.append("TRUE" if v else "FALSE")
+                    elif isinstance(v, (int, float)):
+                        valores.append(str(v))
+                    else:
+                        escaped = str(v).replace("'", "''")
+                        valores.append(f"'{escaped}'")
+                vals_str = ", ".join(valores)
+                sql_linhas.append(
+                    f'INSERT INTO "{tabela}" ({cols_str}) VALUES ({vals_str});\n'
+                )
+
+        sql_content = "".join(sql_linhas)
+
+        # Compacta em ZIP na memória
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr(FILENAME, sql_content)
+        zip_buffer.seek(0)
+
+        # Envia ao Telegram
+        caption     = f"📦 Backup Manual MTConnect V2 — {TIMESTAMP}"
+        tg_resp = req.post(
+            f"https://api.telegram.org/bot{BOT_TOKEN}/sendDocument",
+            data={"chat_id": CHAT_ID, "caption": caption},
+            files={"document": (FILENAME + ".zip", zip_buffer, "application/zip")},
+            timeout=60
+        )
+
+        tg_data = tg_resp.json()
+        if not tg_data.get("ok"):
+            raise HTTPException(
+                status_code=502,
+                detail=f"Telegram recusou: {tg_data.get('description', 'Erro desconhecido')}"
+            )
+
+        logging.info(f"✅ Backup Telegram enviado: {FILENAME}.zip")
+        return {
+            "status": "sucesso",
+            "mensagem": f"✅ Backup enviado para o Telegram com sucesso! ({TIMESTAMP})"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Erro no backup Telegram: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
+    finally:
+        cur.close()
+        conn.close()
+
 # --- ROTAS DE RECUPERAÇÃO DE SENHA (ADMIN) ---
 
 @router.get("/recuperacoes-pendentes")
@@ -477,7 +590,58 @@ def confirmar_acao_ia(dados: ConfirmacaoAcaoIA):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao executar ação autorizada: {str(e)}")
 
-# --- CONFIGURAÇÃO DO SISTEMA (Endereçamento) ---
+
+@router.get("/monitoramento")
+def monitoramento_sistema():
+    try:
+        cpu = psutil.cpu_percent(interval=1)
+        ram = psutil.virtual_memory()
+        disco_sys = psutil.disk_usage("/")
+        
+        # Monitoramento do HDD (Storage)
+        disco_hdd = {"percent": 0, "free": 0}
+        if os.path.exists("/app/storage"):
+            d_hdd = psutil.disk_usage("/app/storage")
+            disco_hdd = {
+                "percent": d_hdd.percent,
+                "free": round(d_hdd.free / (1024**3), 2)
+            }
+
+        net_1 = psutil.net_io_counters()
+        import time
+        time.sleep(1)
+        net_2 = psutil.net_io_counters()
+        upload = round((net_2.bytes_sent - net_1.bytes_sent) / 1024, 2)
+        download = round((net_2.bytes_recv - net_1.bytes_recv) / 1024, 2)
+        
+        temp_data = psutil.sensors_temperatures()
+        temp = "N/A"
+        if temp_data and "coretemp" in temp_data:
+            temp = temp_data["coretemp"][0].current
+        elif temp_data and "cpu_thermal" in temp_data:
+            temp = temp_data["cpu_thermal"][0].current
+        elif temp_data:
+            for name, entries in temp_data.items():
+                if entries:
+                    temp = entries[0].current
+                    break
+
+        return {
+            "cpu": cpu,
+            "ram_percent": ram.percent,
+            "ram_usada": round(ram.used / (1024**3), 2),
+            "ram_total": round(ram.total / (1024**3), 2),
+            "disco_percent": disco_sys.percent,
+            "disco_livre": round(disco_sys.free / (1024**3), 2),
+            "hdd_percent": disco_hdd["percent"],
+            "hdd_livre": disco_hdd["free"],
+            "upload": upload,
+            "download": download,
+            "temp": temp
+        }
+    except Exception as e:
+        return {"erro": str(e)}
+
 @router.get("/config")
 def get_config():
     config_path = "sistema_config.json"

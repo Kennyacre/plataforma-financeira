@@ -74,38 +74,32 @@ async function excluirUsuario(id, username) {
 }
 
 async function fazerBackup() {
-    if (!confirm("Deseja gerar e baixar um backup completo (Offline) de toda a base de dados agora?")) return;
+    if (!confirm("📦 Deseja gerar um backup completo do banco de dados e enviar para o Telegram agora?")) return;
 
-    const btn = document.querySelector('.btn-backup');
-    const txtOriginal = btn.innerHTML;
-    btn.innerHTML = '<span class="material-symbols-rounded">sync</span> Gerando...';
+    // Tenta encontrar o botão de backup em ambos os padrões de HTML
+    const btn = document.querySelector('[onclick*="fazerBackup"]') || document.querySelector('.btn-backup');
+    const txtOriginal = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="material-symbols-rounded" style="animation: spin 1s linear infinite;">sync</span> Enviando...';
+    }
 
     try {
-        const response = await fetch('/api/admin/backup');
-        if (!response.ok) throw new Error("Falha ao puxar os dados do motor.");
+        const response = await fetch('/api/admin/backup-telegram', { method: 'POST' });
+        const result = await response.json();
 
-        const data = await response.json();
-
-        // Transforma os dados numa string JSON formatada bonita
-        const jsonString = JSON.stringify(data, null, 2);
-        const blob = new Blob([jsonString], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-
-        // Cria um link invisível e clica nele para forçar o download
-        const link = document.createElement('a');
-        const dataHoje = new Date().toISOString().split('T')[0];
-        link.href = url;
-        link.download = `Backup_TNINFO_${dataHoje}.json`;
-
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        alert("✅ Backup descarregado com sucesso! Guarde este ficheiro num local seguro.");
+        if (response.ok && result.status === 'sucesso') {
+            alert("✅ Backup gerado e enviado para o Telegram com sucesso!\n\nVerifique o chat do bot 'Backup TN Info'.");
+        } else {
+            alert("⚠️ Erro ao enviar backup: " + (result.detail || result.mensagem || "Erro desconhecido."));
+        }
     } catch (error) {
-        alert("Erro ao realizar o backup.");
+        alert("❌ Erro de conexão ao tentar gerar o backup.");
         console.error(error);
     } finally {
-        btn.innerHTML = txtOriginal;
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = txtOriginal;
+        }
     }
 }

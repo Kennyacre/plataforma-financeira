@@ -205,3 +205,4 @@ async function bloquearUsuario(id, username) {
         }
     } catch (error) { alert("Erro de conexão."); }
 }
+atualizarMonitoramento();
