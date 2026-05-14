@@ -3,7 +3,9 @@ import psutil
 from fastapi import APIRouter, HTTPException, Depends
 from core.database import get_db_connection
 from pydantic import BaseModel
+from typing import Optional
 import os
+import speedtest
 import shutil
 import subprocess
 from google import genai
@@ -641,6 +643,137 @@ def monitoramento_sistema():
         }
     except Exception as e:
         return {"erro": str(e)}
+
+class FanControlRequest(BaseModel):
+    mode: str
+    speed: Optional[int] = None
+
+@router.post("/fan-control")
+def controle_ventoinha(dados: FanControlRequest):
+    try:
+        # Aqui você insere o comando real do seu servidor.
+        # Exemplo com ipmitool (comum em Dell/HP):
+        # Para manual 50%: ipmitool raw 0x30 0x30 0x02 0xff 0x32 (onde 0x32 = 50 em hex)
+        # Para auto: ipmitool raw 0x30 0x30 0x01 0x01
+        
+        if dados.mode == "auto":
+            logging.info("⚙️ Comando recebido: Setar ventoinha para AUTO")
+            # os.system("ipmitool raw 0x30 0x30 0x01 0x01")
+            return {"status": "sucesso", "mensagem": "Ventoinha em modo Automático!"}
+        
+        elif dados.mode == "manual":
+            if dados.speed is None or dados.speed < 0 or dados.speed > 100:
+                raise HTTPException(status_code=400, detail="Velocidade inválida (0-100).")
+                
+            logging.info(f"⚙️ Comando recebido: Setar ventoinha para MANUAL {dados.speed}%")
+            # hex_speed = hex(dados.speed)
+            # os.system(f"ipmitool raw 0x30 0x30 0x02 0xff {hex_speed}")
+            return {"status": "sucesso", "mensagem": f"Velocidade manual ({dados.speed}%) aplicada!"}
+            
+        else:
+            raise HTTPException(status_code=400, detail="Modo inválido. Use 'auto' ou 'manual'.")
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Erro no controle da ventoinha: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
+
+@router.post("/shutdown")
+def desligar_servidor():
+    try:
+        logging.info("🛑 Comando recebido: Desligar Servidor Físico (poweroff)")
+        # Execute o comando poweroff. Pode ser necessário configurar o sudoers para não pedir senha.
+        os.system("sudo poweroff")
+        return {"status": "sucesso", "mensagem": "Comando de desligamento enviado!"}
+    except Exception as e:
+        logging.error(f"Erro ao desligar o servidor: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
+
+@router.get("/speedtest")
+def executar_speedtest():
+    try:
+        st = speedtest.Speedtest()
+        st.get_best_server()
+        ping = st.results.ping
+        
+        # Download e Upload (retorna em bits/s, converter para Mbps)
+        download = st.download() / 1_000_000
+        upload = st.upload() / 1_000_000
+        
+        return {
+            "status": "sucesso",
+            "ping": round(ping, 2),
+            "download": round(download, 2),
+            "upload": round(upload, 2)
+        }
+    except Exception as e:
+        logging.error(f"Erro no Speedtest: {str(e)}")
+        return {"status": "erro", "mensagem": str(e)}
+
+class EnergiaRequest(BaseModel):
+    watts: float
+
+@router.post("/energia")
+def registrar_energia(dados: EnergiaRequest):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("INSERT INTO consumo_energia (watts) VALUES (%s)", (dados.watts,))
+        conn.commit()
+        return {"status": "sucesso", "mensagem": "Registro salvo"}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cur.close()
+        conn.close()
+
+@router.get("/energia")
+def obter_energia():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        # Último registro
+        cur.execute("SELECT watts FROM consumo_energia ORDER BY timestamp DESC LIMIT 1")
+        res = cur.fetchone()
+        atual_watts = float(res[0]) if res else 0.0
+
+        # Cálculo do mês (amostras a cada 1 min = 1/60 horas)
+        cur.execute("""
+            SELECT SUM(watts) * (1.0 / 60.0) / 1000.0
+            FROM consumo_energia 
+            WHERE date_trunc('month', timestamp) = date_trunc('month', CURRENT_DATE)
+        """)
+        res_kwh = cur.fetchone()
+        kwh_mes = float(res_kwh[0]) if res_kwh and res_kwh[0] else 0.0
+
+        return {"status": "sucesso", "atual_watts": atual_watts, "kwh_mes": round(kwh_mes, 2)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cur.close()
+        conn.close()
+
+@router.get("/energia/historico")
+def obter_historico_energia():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            SELECT to_char(timestamp, 'YYYY-MM') as mes, 
+                   SUM(watts) * (1.0 / 60.0) / 1000.0 as kwh
+            FROM consumo_energia
+            GROUP BY to_char(timestamp, 'YYYY-MM')
+            ORDER BY mes DESC
+        """)
+        historico = [{"mes": row[0], "kwh": round(float(row[1]), 2)} for row in cur.fetchall()]
+        return {"status": "sucesso", "historico": historico}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cur.close()
+        conn.close()
 
 @router.get("/config")
 def get_config():

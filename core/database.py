@@ -147,6 +147,14 @@ def startup_db():
             )
         """)
 
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS consumo_energia (
+                id SERIAL PRIMARY KEY,
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                watts NUMERIC(15, 2)
+            )
+        """)
+
         # Criar Admin Padrão se não existir
         cur.execute("SELECT username FROM usuarios WHERE username = 'admin'")
         if not cur.fetchone():

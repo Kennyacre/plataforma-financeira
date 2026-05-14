@@ -33,3 +33,4 @@ __pycache__/
 nginx-proxy-manager/letsencrypt/credentials/
 instances/
 Terminal ID: 12510
+nginx-proxy-manager/data/database.sqlite

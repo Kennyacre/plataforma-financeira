@@ -65,7 +65,6 @@
         </div>
         <ul>
             <li class="list"><a href="painel-admin.html"><span class="icon"><span class="material-symbols-rounded">bar_chart</span></span><span class="title">Visão Geral</span></a></li>
-<li class="list"><a href="saude.html"><span class="icon"><span class="material-symbols-rounded">monitor_heart</span></span><span class="title">Saúde do Servidor</span></a></li>
             <li class="list active"><a href="saude.html"><span class="icon"><span class="material-symbols-rounded">monitor_heart</span></span><span class="title">Saúde do Servidor</span></a></li>
             <li class="list"><a href="recuperacoes.html"><span class="icon"><span class="material-symbols-rounded">lock_reset</span></span><span class="title">Recuperações</span></a></li>
             <li class="list"><a href="novo-cliente.html"><span class="icon"><span class="material-symbols-rounded">person_add</span></span><span class="title">Criar Cliente</span></a></li>
@@ -132,15 +131,107 @@
                 </div>
                 <div class="detail-text">Interface de rede ativa</div>
             </div>
+
+            <!-- CONTROLE DE VENTOINHA -->
+            <div class="monitor-card">
+                <h3><span class="material-symbols-rounded" style="color: #14b8a6;">mode_fan</span> Controle de Ventoinha</h3>
+                
+                <div style="margin: 20px 0;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span class="detail-text" style="color: white; font-weight: 600;">Velocidade Manual</span>
+                        <span id="fan-speed-display" style="color: #14b8a6; font-weight: bold;">50%</span>
+                    </div>
+                    <input type="range" id="fan-slider" min="0" max="100" value="50" style="width: 100%; cursor: pointer; accent-color: #14b8a6;" oninput="document.getElementById('fan-speed-display').innerText = this.value + '%'">
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button onclick="aplicarVelocidadeFan()" style="flex: 1; background: #14b8a6; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: 'Inter', sans-serif; transition: 0.2s;">
+                        Aplicar <span id="fan-aplicar-val">50%</span>
+                    </button>
+                    <button onclick="setarFanAuto()" style="background: rgba(255,255,255,0.1); color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: 'Inter', sans-serif; transition: 0.2s;">
+                        Auto
+                    </button>
+                </div>
+                <div id="fan-status" class="detail-text" style="margin-top: 10px; text-align: center; height: 18px;"></div>
+            </div>
+
+            <!-- TESTE DE VELOCIDADE -->
+            <div class="monitor-card">
+                <h3><span class="material-symbols-rounded" style="color: #8b5cf6;">speed</span> Teste de Velocidade</h3>
+                <div style="margin: 15px 0;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span class="detail-text" style="color: white;">Ping:</span>
+                        <span id="st-ping" style="color: #94a3b8; font-weight: bold;">-- ms</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span class="detail-text" style="color: white;">Download:</span>
+                        <span id="st-down" style="color: #10b981; font-weight: bold;">-- Mbps</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span class="detail-text" style="color: white;">Upload:</span>
+                        <span id="st-up" style="color: #6366f1; font-weight: bold;">-- Mbps</span>
+                    </div>
+                </div>
+
+                <button id="btn-speedtest" onclick="iniciarSpeedtest()" style="width: 100%; background: #8b5cf6; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: 'Inter', sans-serif; transition: 0.2s;">
+                    Iniciar Teste
+                </button>
+                <div id="st-status" class="detail-text" style="margin-top: 10px; text-align: center; height: 18px;"></div>
+            </div>
+
+            <!-- CONSUMO DE ENERGIA -->
+            <div class="monitor-card">
+                <h3><span class="material-symbols-rounded" style="color: #eab308;">bolt</span> Consumo de Energia</h3>
+                <div class="big-value" id="energia-watts-val">0 W</div>
+                <div class="progress-bar-bg" style="background: rgba(234, 179, 8, 0.1);">
+                    <div id="energia-bar" class="progress-bar-fill" style="background: #eab308; width: 0%;"></div>
+                </div>
+                <div class="detail-text" style="margin-top: 15px; font-size: 14px;">
+                    <span style="color: white; font-weight: 600;">Acumulado Mensal (Est.):</span> 
+                    <span id="energia-kwh-val" style="color: #eab308; font-weight: bold; font-size: 16px;">0.00 kWh</span>
+                </div>
+            </div>
+
+            <!-- CONTROLE DE ENERGIA -->
+            <div class="monitor-card">
+                <h3><span class="material-symbols-rounded" style="color: #ef4444;">power_settings_new</span> Energia do Servidor</h3>
+                <p class="detail-text" style="margin: 15px 0;">Desligue o servidor físico completamente. Esta ação interromperá todos os serviços.</p>
+                
+                <button id="btn-shutdown" onclick="desligarServidor()" style="width: 100%; background: #ef4444; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: 'Inter', sans-serif; transition: 0.2s; margin-top: 5px;">
+                    Desligar Agora
+                </button>
+                <div id="shutdown-status" class="detail-text" style="margin-top: 10px; text-align: center; height: 18px;"></div>
+            </div>
+
+            <!-- HISTÓRICO DE ENERGIA (LARGURA TOTAL) -->
+            <div class="monitor-card" style="grid-column: 1 / -1;">
+                <h3><span class="material-symbols-rounded" style="color: #f59e0b;">receipt_long</span> Histórico de Fatura (Energia)</h3>
+                
+                <div style="display: flex; align-items: center; gap: 10px; margin: 15px 0;">
+                    <span class="detail-text" style="color: white;">Preço do kWh (R$):</span>
+                    <input type="number" id="kwh-price" value="0.90" step="0.01" style="width: 80px; padding: 5px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 4px;" onchange="renderHistorico()">
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left; color: white; font-size: 14px;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: #94a3b8;">
+                                <th style="padding: 10px 5px;">Mês</th>
+                                <th style="padding: 10px 5px;">Consumo (kWh)</th>
+                                <th style="padding: 10px 5px;">Custo Estimado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historico-tbody">
+                            <!-- Injetado via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </main>
 </div>
 
 <script>
-    document.getElementById('btn-toggle-sidebar').addEventListener('click', () => {
-        document.getElementById('minha-sidebar').classList.toggle('aberta');
-    });
-
     async function atualizarSaude() {
         try {
             const res = await fetch('/api/admin/monitoramento');
@@ -173,8 +264,182 @@
         } catch (e) { console.error(e); }
     }
 
+    // Funcionalidade de Energia
+    async function atualizarEnergia() {
+        try {
+            const res = await fetch('/api/admin/energia');
+            const data = await res.json();
+            if (data.status === 'sucesso') {
+                document.getElementById('energia-watts-val').innerText = data.atual_watts + ' W';
+                document.getElementById('energia-kwh-val').innerText = data.kwh_mes + ' kWh';
+                
+                // Barra baseada num servidor comum de 500W (apenas visual)
+                let pct = (data.atual_watts / 500) * 100;
+                if (pct > 100) pct = 100;
+                document.getElementById('energia-bar').style.width = pct + '%';
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    let historicoData = [];
+
+    async function carregarHistoricoEnergia() {
+        try {
+            const res = await fetch('/api/admin/energia/historico');
+            const data = await res.json();
+            if (data.status === 'sucesso') {
+                historicoData = data.historico;
+                renderHistorico();
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    function renderHistorico() {
+        const tbody = document.getElementById('historico-tbody');
+        const preco = parseFloat(document.getElementById('kwh-price').value) || 0;
+        
+        tbody.innerHTML = '';
+        if(historicoData.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" style="padding: 10px 5px; text-align: center; color: #64748b;">Nenhum histórico disponível ainda. O script físico precisa registrar os dados primeiro.</td></tr>';
+            return;
+        }
+
+        historicoData.forEach(item => {
+            const custo = (item.kwh * preco).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
+            tbody.innerHTML += `
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <td style="padding: 10px 5px;">${item.mes}</td>
+                    <td style="padding: 10px 5px; color: #eab308;">${item.kwh} kWh</td>
+                    <td style="padding: 10px 5px; color: #10b981; font-weight: bold;">${custo}</td>
+                </tr>
+            `;
+        });
+    }
+
+    // Funcionalidades de Fan
+    document.getElementById('fan-slider').addEventListener('input', function() {
+        document.getElementById('fan-aplicar-val').innerText = this.value + '%';
+    });
+
+    async function aplicarVelocidadeFan() {
+        const speed = document.getElementById('fan-slider').value;
+        await enviarComandoFan({ mode: 'manual', speed: parseInt(speed) });
+    }
+
+    async function setarFanAuto() {
+        await enviarComandoFan({ mode: 'auto', speed: null });
+    }
+
+    async function enviarComandoFan(payload) {
+        const statusDiv = document.getElementById('fan-status');
+        statusDiv.innerText = "Aplicando...";
+        statusDiv.style.color = "#f59e0b"; // yellow
+        
+        try {
+            const res = await fetch('/api/admin/fan-control', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            
+            if (res.ok) {
+                statusDiv.innerText = data.mensagem || "Aplicado com sucesso!";
+                statusDiv.style.color = "#10b981"; // green
+            } else {
+                statusDiv.innerText = "Erro: " + (data.detail || "Falha na requisição");
+                statusDiv.style.color = "#ef4444"; // red
+            }
+        } catch (e) {
+            statusDiv.innerText = "Erro de conexão";
+            statusDiv.style.color = "#ef4444";
+        }
+        
+        // Limpa a mensagem após 3 segundos
+        setTimeout(() => { if (statusDiv.innerText.includes("sucesso") || statusDiv.innerText.includes("Erro")) statusDiv.innerText = ""; }, 3000);
+    }
+
+    // Funcionalidades de Speedtest
+    async function iniciarSpeedtest() {
+        const btn = document.getElementById('btn-speedtest');
+        const statusDiv = document.getElementById('st-status');
+        
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.style.cursor = 'not-allowed';
+        statusDiv.innerText = "Testando... (Pode demorar 30s)";
+        statusDiv.style.color = "#f59e0b";
+        
+        document.getElementById('st-ping').innerText = "-- ms";
+        document.getElementById('st-down').innerText = "-- Mbps";
+        document.getElementById('st-up').innerText = "-- Mbps";
+        
+        try {
+            const res = await fetch('/api/admin/speedtest');
+            const data = await res.json();
+            
+            if (data.status === 'sucesso') {
+                document.getElementById('st-ping').innerText = data.ping + " ms";
+                document.getElementById('st-down').innerText = data.download + " Mbps";
+                document.getElementById('st-up').innerText = data.upload + " Mbps";
+                statusDiv.innerText = "Teste finalizado!";
+                statusDiv.style.color = "#10b981";
+            } else {
+                statusDiv.innerText = "Erro: " + (data.mensagem || "Falha");
+                statusDiv.style.color = "#ef4444";
+            }
+        } catch (e) {
+            statusDiv.innerText = "Erro de conexão";
+            statusDiv.style.color = "#ef4444";
+        }
+        
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+        setTimeout(() => { if (statusDiv.innerText.includes("finalizado") || statusDiv.innerText.includes("Erro")) statusDiv.innerText = ""; }, 5000);
+    }
+    // Funcionalidade de Desligamento
+    async function desligarServidor() {
+        const confirmacao = confirm("ATENÇÃO: Você está prestes a desligar o servidor físico completamente.\nIsso interromperá o MTConnect e todos os serviços de rede associados.\n\nDeseja continuar?");
+        if (!confirmacao) return;
+
+        const btn = document.getElementById('btn-shutdown');
+        const statusDiv = document.getElementById('shutdown-status');
+        
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.innerText = "Desligando...";
+        statusDiv.innerText = "Enviando comando...";
+        statusDiv.style.color = "#f59e0b";
+        
+        try {
+            const res = await fetch('/api/admin/shutdown', { method: 'POST' });
+            const data = await res.json();
+            
+            if (res.ok) {
+                statusDiv.innerText = "Servidor desligando. Perderemos conexão em breve...";
+                statusDiv.style.color = "#10b981";
+            } else {
+                statusDiv.innerText = "Erro: " + (data.detail || "Falha ao desligar");
+                statusDiv.style.color = "#ef4444";
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.innerText = "Desligar Agora";
+            }
+        } catch (e) {
+            statusDiv.innerText = "Erro de conexão";
+            statusDiv.style.color = "#ef4444";
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.innerText = "Desligar Agora";
+        }
+    }
+
     setInterval(atualizarSaude, 5000);
+    setInterval(atualizarEnergia, 30000); // A cada 30 segundos
     atualizarSaude();
+    atualizarEnergia();
+    carregarHistoricoEnergia();
 </script>
 </body>
 </html>

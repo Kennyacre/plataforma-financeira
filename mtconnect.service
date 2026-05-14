@@ -1,0 +1,14 @@
+[Unit]
+Description=MTConnect V2 Python Server
+After=network.target
+
+[Service]
+Type=simple
+User=kennyacre
+WorkingDirectory=/home/kennyacre/mtconnect_v2
+ExecStart=/home/kennyacre/mtconnect_v2/venv/bin/python main.py
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
