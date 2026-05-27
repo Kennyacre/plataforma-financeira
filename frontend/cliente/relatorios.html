@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Relat??rios Financeiros | TN INFO</title>
+    <link rel="shortcut icon" href="../assets/img/logo.jpg" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+    <link href="css/dashboard.css" rel="stylesheet"/>
+    <link href="css/cliente.css" rel="stylesheet"/>
+    <script src="../js/security.js?v=2"></script>
+    <!-- PWA -->
+    <link href="../manifest.json" rel="manifest"/>
+    <meta content="#3b82f6" name="theme-color"/>
+    <meta content="yes" name="apple-mobile-web-app-capable"/>
+    <style>
+        /* TEMA LUXURY MONOCHROME - RELAT??RIOS */
+        .relatorios-container {
+            background: #09090b;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+        .filter-bar {
+            background: #111111;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+            align-items: flex-end;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+            min-width: 200px;
+        }
+        .filter-group label {
+            font-size: 12px;
+            color: #a1a1aa;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .filter-control {
+            background: #000000;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            padding: 12px;
+            border-radius: 8px;
+            outline: none;
+            font-size: 14px;
+            width: 100%;
+            transition: 0.3s;
+        }
+        .filter-control:focus {
+            border-color: #ffffff;
+        }
+        .reports-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        .report-card {
+            background: #111111;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            max-height: 450px;
+        }
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+        .report-header h2 {
+            font-size: 16px;
+            color: #ffffff;
+            margin: 0;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .report-total {
+            font-size: 15px;
+            font-weight: 700;
+        }
+        .report-total.income { color: #10b981; }
+        .report-total.expense { color: #ef4444; }
+        
+        .report-body-list {
+            overflow-y: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-right: 5px;
+        }
+        .report-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.2s;
+        }
+        .report-item:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+        .item-main {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .item-desc {
+            font-weight: 600;
+            font-size: 13px;
+            color: #ffffff;
+        }
+        .item-meta {
+            font-size: 11px;
+            color: #71717a;
+            display: flex;
+            gap: 8px;
+        }
+        .item-val {
+            font-weight: 700;
+            font-size: 13px;
+        }
+        .item-val.pos { color: #10b981; }
+        .item-val.neg { color: #ef4444; }
+        
+        .comparative-card {
+            background: #111111;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            grid-column: span 2;
+        }
+        .comp-item-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            align-items: center;
+            font-size: 13px;
+            color: #a1a1aa;
+        }
+        .comp-item-row.header {
+            font-weight: 700;
+            color: #ffffff;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .comp-item-row:not(.header):hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .badge-delta {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            width: fit-content;
+        }
+        .badge-delta.down {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+        .badge-delta.up {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+        .badge-delta.equal {
+            background: rgba(255, 255, 255, 0.05);
+            color: #a1a1aa;
+        }
+        .no-data-msg {
+            color: #71717a;
+            font-size: 13px;
+            text-align: center;
+            padding: 30px;
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard-wrapper">
+    <div class="navigation" id="minha-sidebar">
+        <div class="user-info" style="display: flex; flex-direction: column; align-items: center; padding: 20px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 10px;">
+            <img alt="TN INFO" src="../assets/img/logo.jpg" style="width: 140px; height: 140px; border-radius: 12px; object-fit: cover; border: 2px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.3);"/>
+        </div>
+        <ul>
+            <li class="list"><a href="painel-cliente.html"><span class="icon"><span class="material-symbols-rounded">dashboard</span></span><span class="title">Minha ??rea</span></a></li>
+            <li class="list"><a href="minhas-financas.html"><span class="icon"><span class="material-symbols-rounded">account_balance</span></span><span class="title">Minhas Finan??as</span></a></li>
+            <li class="list"><a href="previsao.html"><span class="icon"><span class="material-symbols-rounded">trending_up</span></span><span class="title">Previs??o</span></a></li>
+            <li class="list active"><a href="relatorios.html"><span class="icon"><span class="material-symbols-rounded">bar_chart</span></span><span class="title">Relat??rios</span></a></li>
+            <li class="list"><a href="parcelamentos.html"><span class="icon"><span class="material-symbols-rounded">payments</span></span><span class="title">Meus Parcelamentos</span></a></li>
+            <li class="list"><a href="calendario.html"><span class="icon"><span class="material-symbols-rounded">calendar_month</span></span><span class="title">Calend??rio</span></a></li>
+            <li class="separator"><span class="title">OPERACIONAL</span></li>
+            <li class="list"><a href="novo-lancamento.html"><span class="icon"><span class="material-symbols-rounded">add_circle</span></span><span class="title">Novo Lan??amento</span></a></li>
+            <li class="list"><a href="historico.html"><span class="icon"><span class="material-symbols-rounded">history</span></span><span class="title">Hist??rico</span></a></li>
+            <li class="list"><a href="metas-gastos.html"><span class="icon"><span class="material-symbols-rounded">ads_click</span></span><span class="title">Metas de Gastos</span></a></li>
+            <li class="separator"><span class="title">CONTA</span></li>
+            <li class="list"><a href="meus-cartoes.html"><span class="icon"><span class="material-symbols-rounded">credit_card</span></span><span class="title">Meus Cart??es</span></a></li>
+            <li class="list"><a href="preferencias.html"><span class="icon"><span class="material-symbols-rounded">settings</span></span><span class="title">Prefer??ncias</span></a></li>
+            <li class="list"><a href="minha-assinatura.html"><span class="icon"><span class="material-symbols-rounded">verified_user</span></span><span class="title">Minha Assinatura</span></a></li>
+            <li class="list"><a href="perfil.html"><span class="icon"><span class="material-symbols-rounded">person</span></span><span class="title">Meu Perfil</span></a></li>
+        </ul>
+    </div>
+    <main class="main-content">
+        <header class="top-bar">
+            <div class="header-left">
+                <button class="btn-menu" id="btn-toggle-sidebar"><span class="material-symbols-rounded">menu</span></button>
+                <div>
+                    <h1>Relat??rios Financeiros</h1>
+                    <p>Resumo anal??tico para <span id="periodo-selecionado">Maio/2026</span></p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="periodo-navegacao-premium">
+                    <button class="btn-nav-periodo" onclick="alterarMes(-1)">
+                        <span class="material-symbols-rounded">chevron_left</span>
+                    </button>
+                    <div class="periodo-identificador" onclick="toggleMonthPicker()">
+                        <span class="material-symbols-rounded">calendar_month</span>
+                        <span id="texto-periodo">Maio 2026</span>
+                        <span class="material-symbols-rounded">expand_more</span>
+                    </div>
+                    <button class="btn-nav-periodo" onclick="alterarMes(1)">
+                        <span class="material-symbols-rounded">chevron_right</span>
+                    </button>
+                </div>
+                <!-- Filtros originais escondidos para manter compatibilidade com o JS atual -->
+                <div style="display: none;">
+                    <select id="filtro-mes">
+                        <option value="1">Janeiro</option>
+                        <option value="2">Fevereiro</option>
+                        <option value="3">Mar??o</option>
+                        <option value="4">Abril</option>
+                        <option selected="" value="5">Maio</option>
+                        <option value="6">Junho</option>
+                        <option value="7">Julho</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Setembro</option>
+                        <option value="10">Outubro</option>
+                        <option value="11">Novembro</option>
+                        <option value="12">Dezembro</option>
+                    </select>
+                    <select id="filtro-ano">
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                        <option selected="" value="2026">2026</option>
+                    </select>
+                </div>
+            </div>
+            <div class="top-actions" style="display: flex; gap: 10px; align-items: center; margin-left: auto;">
+                <button class="btn-top-action btn-top-action-monochrome" onclick="forcarAtualizacao()" title="Atualizar App">
+                    <span class="material-symbols-rounded" style="font-size: 20px;">sync</span>
+                    <span class="action-text">Atualizar</span>
+                </button>
+                <button class="btn-top-action" onclick="location.href='../index.html'" title="Sair" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s; font-weight: 600;">
+                    <span class="material-symbols-rounded" style="font-size: 20px;">logout</span>
+                    <span class="action-text">Sair</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="relatorios-container">
+            <!-- Barra de Filtros -->
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label for="filtro-categoria">Categoria</label>
+                    <select class="filter-control" id="filtro-categoria" onchange="aplicarFiltrosRelatorios()">
+                        <option value="">Todas as Categorias</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filtro-pagamento">Forma de Pagamento</label>
+                    <select class="filter-control" id="filtro-pagamento" onchange="aplicarFiltrosRelatorios()">
+                        <option value="">Todas as Formas</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Grids de Relat??rios -->
+            <div class="reports-grid">
+                <!-- Receitas -->
+                <div class="report-card">
+                    <div class="report-header">
+                        <h2>
+                            <span class="material-symbols-rounded" style="color: #10b981;">trending_up</span>
+                            Recebimentos / Receitas
+                        </h2>
+                        <span class="report-total income" id="total-receitas-relatorio">R$ 0,00</span>
+                    </div>
+                    <div class="report-body-list" id="lista-receitas">
+                        <p class="no-data-msg">Nenhum recebimento encontrado no per??odo.</p>
+                    </div>
+                </div>
+
+                <!-- Despesas -->
+                <div class="report-card">
+                    <div class="report-header">
+                        <h2>
+                            <span class="material-symbols-rounded" style="color: #ef4444;">trending_down</span>
+                            Gastos / Despesas
+                        </h2>
+                        <span class="report-total expense" id="total-despesas-relatorio">R$ 0,00</span>
+                    </div>
+                    <div class="report-body-list" id="lista-despesas">
+                        <p class="no-data-msg">Nenhum gasto encontrado no per??odo.</p>
+                    </div>
+                </div>
+
+                <!-- Comparativo Mensal por Categorias -->
+                <div class="comparative-card">
+                    <div class="report-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 15px; margin-bottom: 15px;">
+                        <h2>
+                            <span class="material-symbols-rounded" style="color: #ffffff;">compare_arrows</span>
+                            Comparativo de Categorias (M??s Atual vs M??s Anterior)
+                        </h2>
+                    </div>
+                    <div class="comp-item-row header">
+                        <span>Categoria</span>
+                        <span style="text-align: right;">M??s Anterior</span>
+                        <span style="text-align: right;">M??s Atual</span>
+                        <span style="text-align: right; padding-right: 12px;">Diferen??a / A????o</span>
+                    </div>
+                    <div id="comparativo-categorias-container">
+                        <p class="no-data-msg">Buscando comparativos de categoria...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Modal Picker de Per??odo -->
+<div class="month-picker-overlay" id="monthPickerModal" onclick="toggleMonthPicker()">
+    <div class="month-picker-content" onclick="event.stopPropagation()">
+        <div class="month-picker-header">
+            <h3>Selecionar Per??odo</h3>
+            <button class="btn-close-picker" onclick="toggleMonthPicker()">
+                <span class="material-symbols-rounded">close</span>
+            </button>
+        </div>
+        <div class="year-selector-inner">
+            <button onclick="mudarAnoPicker(-1)"><span class="material-symbols-rounded">chevron_left</span></button>
+            <span id="picker-ano-atual">2026</span>
+            <button onclick="mudarAnoPicker(1)"><span class="material-symbols-rounded">chevron_right</span></button>
+        </div>
+        <div class="months-grid">
+            <div class="month-item" onclick="selecionarMesPicker(1)">Jan</div>
+            <div class="month-item" onclick="selecionarMesPicker(2)">Fev</div>
+            <div class="month-item" onclick="selecionarMesPicker(3)">Mar</div>
+            <div class="month-item" onclick="selecionarMesPicker(4)">Abr</div>
+            <div class="month-item current" onclick="selecionarMesPicker(5)">Mai</div>
+            <div class="month-item" onclick="selecionarMesPicker(6)">Jun</div>
+            <div class="month-item" onclick="selecionarMesPicker(7)">Jul</div>
+            <div class="month-item" onclick="selecionarMesPicker(8)">Ago</div>
+            <div class="month-item" onclick="selecionarMesPicker(9)">Set</div>
+            <div class="month-item" onclick="selecionarMesPicker(10)">Out</div>
+            <div class="month-item" onclick="selecionarMesPicker(11)">Nov</div>
+            <div class="month-item" onclick="selecionarMesPicker(12)">Dez</div>
+        </div>
+    </div>
+</div>
+
+<script src="js/relatorios.js"></script>
+</body>
+</html>
+

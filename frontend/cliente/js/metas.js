@@ -19,12 +19,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         e.preventDefault();
         const categoria = document.getElementById('categoria').value;
         const limite = document.getElementById('limite').value;
+        const tipo_periodo = document.getElementById('tipo_periodo').value;
         
         try {
             const res = await fetch('/api/metas', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: user, categoria, limite: parseFloat(limite) })
+                body: JSON.stringify({ username: user, categoria, limite: parseFloat(limite), tipo_periodo })
             });
             if(res.ok) {
                 document.getElementById('form-meta').reset();
@@ -62,7 +63,9 @@ async function carregarMetas() {
         const mesAtual = (new Date().getMonth() + 1).toString().padStart(2, '0');
 
         metas.forEach(meta => {
-            // Soma os gastos reais do usuário nessa categoria neste mês
+            const isPeriodo = (meta.tipo_periodo || 'mes') === 'periodo';
+            
+            // Soma os gastos reais do usu??rio nessa categoria neste m??s
             const gastoAtual = lancamentos
                 .filter(l => l.tipo === 'gasto' && l.categoria === meta.categoria && l.data.split('/')[1] === mesAtual)
                 .reduce((acc, curr) => acc + parseFloat(curr.valor), 0);
@@ -75,6 +78,20 @@ async function carregarMetas() {
             const barraLargura = Math.min(porcentagem, 100);
 
             container.innerHTML += `
+                <div class="goal-card">
+                    <div class="goal-header">
+                        <div class="goal-title">
+                            <div class="goal-icon"><span class="material-symbols-rounded">category</span></div>
+                            ${meta.categoria}
+                        </div>
+                        <button class="btn-delete" onclick="deletarMeta('${meta.categoria}')">
+                            <span class="material-symbols-rounded">delete</span>
+                        </button>
+                    </div>
+                    <div class="goal-stats">
+                        <span class="g-spent">Gasto: ${formatarMoeda(gastoAtual)}</span>
+                        <span class="g-limit">Meta: ${formatarMoeda(meta.limite)} <small style="color: #71717a; font-size:10px;">(${isPeriodo ? 'Per??odo' : 'Fixo'})</small></span>
+                    </div>
                 <div class="goal-card">
                     <div class="goal-header">
                         <div class="goal-title">

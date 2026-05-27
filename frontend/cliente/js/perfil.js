@@ -32,6 +32,9 @@ async function carregarDadosPerfil() {
             if (document.getElementById('perfil-email')) {
                 document.getElementById('perfil-email').value = data.email || '';
             }
+            if (document.getElementById('perfil-whatsapp')) {
+                document.getElementById('perfil-whatsapp').value = data.whatsapp || '';
+            }
 
             if (data.nome_completo && document.getElementById('nome-cliente-sidebar')) {
                 document.getElementById('nome-cliente-sidebar').innerText = data.nome_completo.toUpperCase();
@@ -45,6 +48,7 @@ async function carregarDadosPerfil() {
 async function salvarPerfil() {
     const nome = document.getElementById('perfil-nome').value;
     const email = document.getElementById('perfil-email') ? document.getElementById('perfil-email').value : null;
+    const whatsapp = document.getElementById('perfil-whatsapp') ? document.getElementById('perfil-whatsapp').value : null;
     const btn = document.querySelector('.btn-login');
     const originalText = btn.innerText;
 
@@ -58,7 +62,8 @@ async function salvarPerfil() {
             body: JSON.stringify({
                 username: user,
                 nome_completo: nome,
-                email: email
+                email: email,
+                whatsapp: whatsapp
             })
         });
 

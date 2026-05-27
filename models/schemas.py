@@ -63,11 +63,13 @@ class MetaRequest(BaseModel):
     username: str
     categoria: str
     limite: float
+    tipo_periodo: Optional[str] = "mes"
 
 class PerfilUpdate(BaseModel):
     username: str
     nome_completo: str
     email: Optional[str] = None
+    whatsapp: Optional[str] = None
 
 class ManualRegistrationRequest(BaseModel):
     username: str

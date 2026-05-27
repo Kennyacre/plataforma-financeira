@@ -22,13 +22,13 @@ def login(request: LoginRequest):
         
         user = cur.fetchone()
         if not user:
-            raise HTTPException(status_code=401, detail="Utilizador não encontrado ou inativo.")
+            raise HTTPException(status_code=401, detail="Utilizador n??o encontrado ou inativo.")
             
         if user[1] != request.password:
             raise HTTPException(status_code=401, detail="Senha incorreta.")
             
         if user[3] == 'bloqueado':
-            raise HTTPException(status_code=403, detail="A sua conta está bloqueada.")
+            raise HTTPException(status_code=403, detail="A sua conta est?? bloqueada.")
             
         return {
             "status": "sucesso", 
@@ -49,7 +49,7 @@ def cadastro_manual(dados: ManualRegistrationRequest):
 
         cur.execute("SELECT id FROM usuarios WHERE username = %s OR email = %s", (username, email))
         if cur.fetchone():
-            raise HTTPException(status_code=400, detail="Utilizador ou E-mail já em uso.")
+            raise HTTPException(status_code=400, detail="Utilizador ou E-mail j?? em uso.")
         
         gestor = None
         if dados.id_indicacao:
@@ -66,7 +66,7 @@ def cadastro_manual(dados: ManualRegistrationRequest):
         """, (username, dados.password, email, dados.nome_completo, gestor, vencimento))
         
         conn.commit()
-        return {"status": "sucesso", "mensagem": "Registo concluído!"}
+        return {"status": "sucesso", "mensagem": "Registo conclu??do!"}
     except HTTPException: raise
     except Exception as e:
         conn.rollback()
@@ -79,10 +79,10 @@ def get_perfil(username: str):
     conn = get_db_connection()
     cur = conn.cursor()
     try:
-        cur.execute("SELECT username, email, role, revendedor, nome_completo, vencimento FROM usuarios WHERE username = %s AND deletado = FALSE", (username,))
+        cur.execute("SELECT username, email, role, revendedor, nome_completo, vencimento, whatsapp, id FROM usuarios WHERE username = %s AND deletado = FALSE", (username,))
         row = cur.fetchone()
         if not row:
-            raise HTTPException(status_code=404, detail="Perfil não encontrado.")
+            raise HTTPException(status_code=404, detail="Perfil n??o encontrado.")
         
         # Mapeamento manual para substituir o RealDictCursor
         user = {
@@ -91,7 +91,9 @@ def get_perfil(username: str):
             "role": row[2],
             "revendedor": row[3],
             "nome_completo": row[4],
-            "vencimento": row[5]
+            "vencimento": row[5].strftime("%Y-%m-%d") if row[5] else None,
+            "whatsapp": row[6] if row[6] else "",
+            "id": row[7]
         }
         return user
     finally:
@@ -102,7 +104,8 @@ def update_perfil(username: str, data: PerfilUpdate):
     conn = get_db_connection()
     cur = conn.cursor()
     try:
-        cur.execute("UPDATE usuarios SET nome_completo = %s, email = %s WHERE username = %s AND deletado = FALSE", (data.nome_completo, data.email.lower().strip(), username))
+        email_val = data.email.lower().strip() if data.email else None
+        cur.execute("UPDATE usuarios SET nome_completo = %s, email = %s, whatsapp = %s WHERE username = %s AND deletado = FALSE", (data.nome_completo, email_val, data.whatsapp, username))
         conn.commit()
         return {"status": "sucesso", "mensagem": "Perfil atualizado!"}
     except Exception as e:
@@ -119,13 +122,13 @@ def check_sessao(username: str):
         cur.execute("SELECT status, vencimento, role FROM usuarios WHERE username = %s AND deletado IS NOT TRUE", (username,))
         res = cur.fetchone()
         if not res:
-            raise HTTPException(status_code=404, detail="Sessão inválida ou utilizador removido.")
+            raise HTTPException(status_code=404, detail="Sess??o inv??lida ou utilizador removido.")
         
         status, vencimento, role = res
         from datetime import date
         dias_restantes = (vencimento - date.today()).days if vencimento else None
         
-        # Bloqueio automático por vencimento para clientes
+        # Bloqueio autom??tico por vencimento para clientes
         if role == 'cliente' and dias_restantes is not None and dias_restantes < 0:
             status = 'bloqueado'
             
@@ -142,7 +145,7 @@ def get_pix_pagamento(username: str):
     conn = get_db_connection()
     cur = conn.cursor()
     try:
-        # 1. Busca quem é o gestor do usuário
+        # 1. Busca quem ?? o gestor do usu??rio
         cur.execute("SELECT revendedor FROM usuarios WHERE username = %s", (username,))
         res = cur.fetchone()
         gestor = res[0] if res else None
@@ -159,7 +162,7 @@ def get_pix_pagamento(username: str):
                 pix_titular = res_pix[1]
                 pix_banco = res_pix[2]
 
-        # 3. Se não tem gestor ou gestor não tem PIX, busca do admin (priorizando o usuário 'admin' principal)
+        # 3. Se n??o tem gestor ou gestor n??o tem PIX, busca do admin (priorizando o usu??rio 'admin' principal)
         if not pix_chave:
             cur.execute("""
                 SELECT pix_chave, pix_titular, pix_banco 
@@ -174,16 +177,16 @@ def get_pix_pagamento(username: str):
                 pix_titular = res_admin[1]
                 pix_banco = res_admin[2]
 
-        # 4. Busca o valor de venda do próprio usuário
+        # 4. Busca o valor de venda do pr??prio usu??rio
         cur.execute("SELECT valor_venda FROM usuarios WHERE username = %s", (username,))
         res_user = cur.fetchone()
         valor = res_user[0] if res_user else 0.0
 
         return {
             "status": "sucesso",
-            "pix_chave": pix_chave or "Não cadastrada",
+            "pix_chave": pix_chave or "N??o cadastrada",
             "pix_titular": pix_titular or "Administrador",
-            "pix_banco": pix_banco or "Não informado",
+            "pix_banco": pix_banco or "N??o informado",
             "valor": valor
         }
     except Exception as e:
@@ -198,7 +201,7 @@ def get_info_indicacao(usuario_id: int):
     try:
         cur.execute("SELECT username, role, nome_completo FROM usuarios WHERE id = %s AND deletado = FALSE", (usuario_id,))
         res = cur.fetchone()
-        if not res: raise HTTPException(status_code=404, detail="Indicação não encontrada.")
+        if not res: raise HTTPException(status_code=404, detail="Indica????o n??o encontrada.")
         return {"username": res[0], "role": res[1], "nome": res[2] or res[0]}
     finally:
         cur.close(); conn.close()
@@ -209,19 +212,19 @@ def solicitar_recuperacao(dados: SolicitacaoRecuperacao):
     cur = conn.cursor()
     try:
         username = dados.username.lower().strip()
-        # Verifica se o usuário existe
+        # Verifica se o usu??rio existe
         cur.execute("SELECT id FROM usuarios WHERE username = %s AND deletado = FALSE", (username,))
         if not cur.fetchone():
-            raise HTTPException(status_code=404, detail="Utilizador não encontrado.")
+            raise HTTPException(status_code=404, detail="Utilizador n??o encontrado.")
         
-        # Verifica se já tem uma solicitação pendente
+        # Verifica se j?? tem uma solicita????o pendente
         cur.execute("SELECT id FROM recuperacao_senha WHERE username = %s AND status = 'pendente'", (username,))
         if cur.fetchone():
-            return {"status": "sucesso", "mensagem": "Já existe uma solicitação pendente para este utilizador."}
+            return {"status": "sucesso", "mensagem": "J?? existe uma solicita????o pendente para este utilizador."}
 
         cur.execute("INSERT INTO recuperacao_senha (username) VALUES (%s)", (username,))
         conn.commit()
-        return {"status": "sucesso", "mensagem": "Solicitação de recuperação enviada com sucesso!"}
+        return {"status": "sucesso", "mensagem": "Solicita????o de recupera????o enviada com sucesso!"}
     except HTTPException: raise
     except Exception as e:
         conn.rollback()
@@ -242,7 +245,7 @@ def redefinir_senha(dados: RedefinirSenha):
         """, (dados.nova_senha, username))
         
         if cur.rowcount == 0:
-            raise HTTPException(status_code=404, detail="Utilizador não encontrado.")
+            raise HTTPException(status_code=404, detail="Utilizador n??o encontrado.")
             
         conn.commit()
         return {"status": "sucesso", "mensagem": "Senha redefinida com sucesso!"}
@@ -258,6 +261,7 @@ def solicitar_desbloqueio(username: str):
     try:
         cur.execute("UPDATE usuarios SET solicitacao_renovacao = TRUE WHERE username = %s", (username,))
         conn.commit()
-        return {"status": "sucesso", "mensagem": "Solicitação enviada! Aguarde a confirmação do administrador."}
+        return {"status": "sucesso", "mensagem": "Solicita????o enviada! Aguarde a confirma????o do administrador."}
     finally:
         cur.close(); conn.close()
+

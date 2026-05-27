@@ -430,8 +430,8 @@ def get_metas(username: str):
     conn = get_db_connection()
     cur = conn.cursor()
     try:
-        cur.execute("SELECT categoria, limite FROM metas_gastos WHERE username = %s ORDER BY categoria ASC", (username,))
-        dados = [{"categoria": r[0], "limite": float(r[1])} for r in cur.fetchall()]
+        cur.execute("SELECT categoria, limite, COALESCE(tipo_periodo, 'mes') FROM metas_gastos WHERE username = %s ORDER BY categoria ASC", (username,))
+        dados = [{"categoria": r[0], "limite": float(r[1]), "tipo_periodo": r[2]} for r in cur.fetchall()]
         return dados
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -444,10 +444,10 @@ def salvar_meta(request: MetaRequest):
     cur = conn.cursor()
     try:
         cur.execute("""
-            INSERT INTO metas_gastos (username, categoria, limite)
-            VALUES (%s, %s, %s)
-            ON CONFLICT (username, categoria) DO UPDATE SET limite = EXCLUDED.limite
-        """, (request.username, request.categoria, request.limite))
+            INSERT INTO metas_gastos (username, categoria, limite, tipo_periodo)
+            VALUES (%s, %s, %s, %s)
+            ON CONFLICT (username, categoria) DO UPDATE SET limite = EXCLUDED.limite, tipo_periodo = EXCLUDED.tipo_periodo
+        """, (request.username, request.categoria, request.limite, request.tipo_periodo or 'mes'))
         conn.commit()
         return {"status": "sucesso"}
     except Exception as e:

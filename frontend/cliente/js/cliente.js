@@ -42,6 +42,7 @@ window.atualizarDashboard = async () => {
     // 3. Processar dados para os cards e pizzas
     atualizarCardsResumo(listaGlobalLancamentos, mes, ano);
     processarDadosParaPizzas(listaGlobalLancamentos, mes, ano);
+    carregarMetasDashboard(listaGlobalLancamentos, mes, ano);
 };
 
 function atualizarCardsResumo(lancamentos, mesAlvo, anoAlvo) {
@@ -363,7 +364,7 @@ async function carregarOpcoesPagamento() {
         const res = await fetch(`/api/formas-pagamento/${user}`);
         const data = await res.json();
         sel.innerHTML = '<option value="" disabled selected>Selecione...</option>';
-        const padroes = ["PIX", "Dinheiro", "Boleto", "Saldo em Conta", "Cartão de Crédito", "Cartão de Débito", "Transferência", "Outros"];
+        const padroes = ["PIX", "Dinheiro", "Parcelado", "Boleto", "Saldo em Conta", "Cartão de Crédito", "Cartão de Débito", "Transferência", "Outros"];
         padroes.forEach(p => sel.add(new Option(p, p)));
 
         const resC = await fetch(`/api/cartoes/${user}`);
@@ -518,4 +519,67 @@ if (formL) {
         } catch (err) { console.error(err); }
         finally { btn.innerText = original; btn.disabled = false; }
     });
+}
+
+async function carregarMetasDashboard(lancamentos, mesAlvo, anoAlvo) {
+    const container = document.getElementById('dashboard-metas-container');
+    if (!container) return;
+
+    try {
+        const res = await fetch(`/api/metas/${user}`);
+        const metas = await res.json();
+
+        if (!metas || metas.length === 0) {
+            container.innerHTML = '<p class="no-cards-msg" style="color: #71717a; text-align: center; padding: 20px;">Nenhuma meta de gastos definida.</p>';
+            return;
+        }
+
+        container.innerHTML = '';
+        const mesCorrente = new Date().getMonth() + 1;
+        const anoCorrente = new Date().getFullYear();
+
+        metas.forEach(meta => {
+            const isPeriodo = (meta.tipo_periodo || 'mes') === 'periodo';
+            const mAlvo = isPeriodo ? mesAlvo : mesCorrente;
+            const aAlvo = isPeriodo ? anoAlvo : anoCorrente;
+
+            const gastoAtual = lancamentos.filter(l => {
+                const tipo = (l.tipo || "").toLowerCase();
+                const isDespesa = tipo === 'gasto' || tipo === 'despesa';
+                if (!isDespesa || l.categoria !== meta.categoria || !l.data) return false;
+                const partes = l.data.split('/');
+                if (partes.length < 3) return false;
+                return parseInt(partes[1]) === mAlvo && parseInt(partes[2]) === aAlvo;
+            }).reduce((acc, curr) => acc + parseFloat(curr.valor || 0), 0);
+
+            const porcentagem = (gastoAtual / meta.limite) * 100;
+            let statusClass = 'fill-good';
+            if (porcentagem > 75) statusClass = 'fill-warning';
+            if (porcentagem > 100) statusClass = 'fill-danger';
+
+            const barraLargura = Math.min(porcentagem, 100);
+
+            container.innerHTML += `
+                <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 10px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px; align-items: center;">
+                        <span style="font-weight: 600; font-size: 13px; color: #ffffff;">${meta.categoria}</span>
+                        <span style="font-size: 10px; color: #a1a1aa; font-weight: 600; background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px;">
+                            ${isPeriodo ? 'Per\u00edodo' : 'Fixo'}
+                        </span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 8px; color: #a1a1aa;">
+                        <span>Gasto: ${formatarMoeda(gastoAtual)}</span>
+                        <span>Meta: ${formatarMoeda(meta.limite)}</span>
+                    </div>
+                    <div class="progress-track" style="background: rgba(255,255,255,0.05); height: 6px; border-radius: 4px; overflow: hidden; width: 100%;">
+                        <div class="progress-fill ${statusClass}" style="width: ${barraLargura}%; height: 100%; border-radius: 4px; transition: width 0.5s ease;"></div>
+                    </div>
+                    ${porcentagem > 100 ? `<div style="color: #ef4444; font-size: 10px; margin-top: 5px; font-weight: 600; text-align: right;">\u26a0\ufe0f Or\u00e7amento estourado!</div>` : ''}
+                </div>
+            `;
+        });
+    } catch (e) {
+        console.error("Erro ao processar metas no dashboard:", e);
+        container.innerHTML = '<p class="no-cards-msg" style="color: #ef4444;">Erro ao carregar metas.</p>';
+    }
 }

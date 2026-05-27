@@ -14,22 +14,22 @@ DB_CONFIG = {
 }
 
 def get_db_connection():
-    """Retorna uma conexão com a base de dados."""
+    """Retorna uma conex??o com a base de dados."""
     return pg8000.connect(**DB_CONFIG)
 
 def check_and_add_column(cur, table, column, definition):
-    """Auxiliar para adicionar colunas se não existirem (Soft Migrations)."""
+    """Auxiliar para adicionar colunas se n??o existirem (Soft Migrations)."""
     cur.execute("""
         SELECT column_name 
         FROM information_schema.columns 
         WHERE table_name=%s AND column_name=%s
     """, (table, column))
     if not cur.fetchone():
-        logging.info(f"Adicionando coluna {column} à tabela {table}...")
+        logging.info(f"Adicionando coluna {column} ?? tabela {table}...")
         cur.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
 
 def startup_db():
-    """Inicializa as tabelas e garante que as colunas necessárias existam."""
+    """Inicializa as tabelas e garante que as colunas necess??rias existam."""
     conn = get_db_connection()
     cur = conn.cursor()
 
@@ -143,9 +143,11 @@ def startup_db():
                 username VARCHAR(50),
                 categoria VARCHAR(100),
                 limite NUMERIC(15, 2),
+                tipo_periodo VARCHAR(20) DEFAULT 'mes',
                 UNIQUE(username, categoria)
             )
         """)
+        check_and_add_column(cur, 'metas_gastos', 'tipo_periodo', "VARCHAR(20) DEFAULT 'mes'")
 
         cur.execute("""
             CREATE TABLE IF NOT EXISTS consumo_energia (
@@ -155,7 +157,7 @@ def startup_db():
             )
         """)
 
-        # Criar Admin Padrão se não existir
+        # Criar Admin Padr??o se n??o existir
         cur.execute("SELECT username FROM usuarios WHERE username = 'admin'")
         if not cur.fetchone():
             cur.execute("INSERT INTO usuarios (username, password, role, status) VALUES ('admin', '451630', 'admin', 'ativo')")
@@ -170,3 +172,4 @@ def startup_db():
     finally:
         cur.close()
         conn.close()
+

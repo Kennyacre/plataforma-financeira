@@ -195,7 +195,7 @@ async function carregarOpcoesPagamento() {
         const res = await fetch(`/api/formas-pagamento/${user}`);
         const data = await res.json();
         sel.innerHTML = '<option value="" disabled selected>Selecione...</option>';
-        const padroes = ["PIX", "Dinheiro", "Boleto", "Saldo em Conta", "Cartão de Crédito", "Cartão de Débito", "Transferência", "Outros"];
+        const padroes = ["PIX", "Dinheiro", "Parcelado", "Boleto", "Saldo em Conta", "Cartão de Crédito", "Cartão de Débito", "Transferência", "Outros"];
         padroes.forEach(p => sel.add(new Option(p, p)));
 
         // Buscar Cartões também
