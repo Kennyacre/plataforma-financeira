@@ -65,7 +65,7 @@ async function carregarMetas() {
         metas.forEach(meta => {
             const isPeriodo = (meta.tipo_periodo || 'mes') === 'periodo';
             
-            // Soma os gastos reais do usu??rio nessa categoria neste m??s
+            // Soma os gastos reais do usuário nessa categoria neste mês
             const gastoAtual = lancamentos
                 .filter(l => l.tipo === 'gasto' && l.categoria === meta.categoria && l.data.split('/')[1] === mesAtual)
                 .reduce((acc, curr) => acc + parseFloat(curr.valor), 0);
@@ -90,7 +90,7 @@ async function carregarMetas() {
                     </div>
                     <div class="goal-stats">
                         <span class="g-spent">Gasto: ${formatarMoeda(gastoAtual)}</span>
-                        <span class="g-limit">Meta: ${formatarMoeda(meta.limite)} <small style="color: #71717a; font-size:10px;">(${isPeriodo ? 'Per??odo' : 'Fixo'})</small></span>
+                        <span class="g-limit">Meta: ${formatarMoeda(meta.limite)} <small style="color: #71717a; font-size:10px;">(${isPeriodo ? 'Período' : 'Fixo'})</small></span>
                     </div>
                 <div class="goal-card">
                     <div class="goal-header">

@@ -14,19 +14,19 @@ const formatarMoeda = (valor) => {
 document.addEventListener('DOMContentLoaded', async () => {
     if (!user) { window.location.href = '../index.html'; return; }
 
-    // Atualizar cabe??alho e sidebar
+    // Atualizar cabeçalho e sidebar
     const elNome = document.getElementById('nome-cliente-sidebar');
     const elAvatar = document.getElementById('user-avatar');
     if (elNome) elNome.innerText = user.toUpperCase();
     if (elAvatar) elAvatar.innerText = user.substring(0, 2).toUpperCase();
 
-    // Carregar filtros din??micos
+    // Carregar filtros dinâmicos
     await Promise.all([
         carregarFiltroCategorias(),
         carregarFiltroPagamentos()
     ]);
 
-    // Buscar lan??amentos e atualizar relat??rios
+    // Buscar lançamentos e atualizar relatórios
     await buscarLancamentos();
 });
 
@@ -49,7 +49,7 @@ async function carregarFiltroCategorias() {
         const data = await res.json();
 
         select.innerHTML = '<option value="">Todas as Categorias</option>';
-        const padroes = ["Alimenta????o", "Moradia", "Transporte", "Sa??de", "Lazer e Viagens", "Educa????o", "Sal??rio", "Vestu??rio", "Investimentos", "Impostos / Taxas", "Cuidados Pessoais", "Outros"];
+        const padroes = ["Alimentação", "Moradia", "Transporte", "Saúde", "Lazer e Viagens", "Educação", "Salário", "Vestuário", "Investimentos", "Impostos / Taxas", "Cuidados Pessoais", "Outros"];
         
         padroes.forEach(p => {
             const opt = new Option(p, p);
@@ -57,7 +57,7 @@ async function carregarFiltroCategorias() {
         });
 
         if (data.status === 'sucesso' && data.dados.length > 0) {
-            const optGroup = new Option("?????? MINHAS CATEGORIAS ??????", "", false, false);
+            const optGroup = new Option("📁 MINHAS CATEGORIAS 📁", "", false, false);
             optGroup.disabled = true;
             select.add(optGroup);
 
@@ -78,7 +78,7 @@ async function carregarFiltroPagamentos() {
         const data = await res.json();
 
         select.innerHTML = '<option value="">Todas as Formas</option>';
-        const padroes = ["PIX", "Dinheiro", "Parcelado", "Boleto", "Saldo em Conta", "Cart??o de Cr??dito", "Cart??o de D??bito", "Transfer??ncia", "Outros"];
+        const padroes = ["PIX", "Dinheiro", "Parcelado", "Boleto", "Saldo em Conta", "Cartão de Crédito", "Cartão de Débito", "Transferência", "Outros"];
         
         padroes.forEach(p => {
             select.add(new Option(p, p));
@@ -87,17 +87,17 @@ async function carregarFiltroPagamentos() {
         const resC = await fetch(`/api/cartoes/${user}`);
         const dataC = await resC.json();
         if (dataC.status === 'sucesso' && dataC.cartoes.length > 0) {
-            const optGroup = new Option("?????? SEUS CART??ES ??????", "", false, false);
+            const optGroup = new Option("💳 SEUS CARTÕES 💳", "", false, false);
             optGroup.disabled = true;
             select.add(optGroup);
 
             dataC.cartoes.forEach(cartao => {
-                select.add(new Option(`???? ${cartao.nome}`, cartao.nome));
+                select.add(new Option(`💳 ${cartao.nome}`, cartao.nome));
             });
         }
 
         if (data.status === 'sucesso' && data.dados.length > 0) {
-            const optGroup = new Option("?????? MINHAS FORMAS ??????", "", false, false);
+            const optGroup = new Option("⚙️ MINHAS FORMAS ⚙️", "", false, false);
             optGroup.disabled = true;
             select.add(optGroup);
 
@@ -151,13 +151,13 @@ function atualizarRelatorios() {
     if (elPeriodoSelen) elPeriodoSelen.innerText = periodoTexto.replace(' ', '/');
     if (elPickerAno) elPickerAno.innerText = anoSelecionado;
 
-    // Marcar m??s no calend??rio modal
+    // Marcar mês no calendário modal
     document.querySelectorAll('.month-item').forEach((item, idx) => {
         if (idx + 1 === mesSelecionado) item.classList.add('current');
         else item.classList.remove('current');
     });
 
-    // 2. Aplicar filtragem de transa????es para o m??s selecionado
+    // 2. Aplicar filtragem de transações para o mês selecionado
     const filtroCat = document.getElementById('filtro-categoria')?.value || "";
     const filtroPag = document.getElementById('filtro-pagamento')?.value || "";
 
@@ -199,9 +199,9 @@ function atualizarRelatorios() {
                     <div class="item-main">
                         <span class="item-desc">${r.descricao}</span>
                         <div class="item-meta">
-                            <span>???? ${r.data}</span>
-                            <span>??????? ${r.categoria}</span>
-                            <span>???? ${r.pagamento}</span>
+                            <span>📅 ${r.data}</span>
+                            <span>📁 ${r.categoria}</span>
+                            <span>💳 ${r.pagamento}</span>
                         </div>
                     </div>
                     <span class="item-val pos">+ ${formatarMoeda(r.valor)}</span>
@@ -220,9 +220,9 @@ function atualizarRelatorios() {
                     <div class="item-main">
                         <span class="item-desc">${d.descricao}</span>
                         <div class="item-meta">
-                            <span>???? ${d.data}</span>
-                            <span>??????? ${d.categoria}</span>
-                            <span>???? ${d.pagamento}</span>
+                            <span>📅 ${d.data}</span>
+                            <span>📁 ${d.categoria}</span>
+                            <span>💳 ${d.pagamento}</span>
                         </div>
                     </div>
                     <span class="item-val neg">- ${formatarMoeda(d.valor)}</span>
@@ -234,7 +234,7 @@ function atualizarRelatorios() {
     if (elTotalReceitas) elTotalReceitas.innerText = formatarMoeda(totalReceitas);
     if (elTotalDespesas) elTotalDespesas.innerText = formatarMoeda(totalDespesas);
 
-    // 4. Computar Comparativo de Categorias (M??s Atual vs M??s Anterior)
+    // 4. Computar Comparativo de Categorias (Mês Atual vs Mês Anterior)
     atualizarComparativos(filtroCat, filtroPag);
 }
 
@@ -242,12 +242,12 @@ function atualizarComparativos(filtroCat, filtroPag) {
     const container = document.getElementById('comparativo-categorias-container');
     if (!container) return;
 
-    // Calcular m??s anterior
+    // Calcular mês anterior
     let mesAnterior = mesSelecionado - 1;
     let anoAnterior = anoSelecionado;
     if (mesAnterior < 1) { mesAnterior = 12; anoAnterior--; }
 
-    // Filtrar despesas do m??s anterior
+    // Filtrar despesas do mês anterior
     const despesasMesAnterior = listaGlobalLancamentos.filter(l => {
         const tipo = (l.tipo || "").toLowerCase();
         const isDespesa = tipo === 'gasto' || tipo === 'despesa';
@@ -262,7 +262,7 @@ function atualizarComparativos(filtroCat, filtroPag) {
         return true;
     });
 
-    // Filtrar despesas do m??s atual
+    // Filtrar despesas do mês atual
     const despesasMesAtual = listaGlobalLancamentos.filter(l => {
         const tipo = (l.tipo || "").toLowerCase();
         const isDespesa = tipo === 'gasto' || tipo === 'despesa';
@@ -295,7 +295,7 @@ function atualizarComparativos(filtroCat, filtroPag) {
     const listaCategorias = Array.from(categoriasSet).sort();
 
     if (listaCategorias.length === 0) {
-        container.innerHTML = '<p class="no-data-msg">Nenhum dado comparativo para despesas nesta sele????o.</p>';
+        container.innerHTML = '<p class="no-data-msg">Nenhum dado comparativo para despesas nesta seleção.</p>';
         return;
     }
 
