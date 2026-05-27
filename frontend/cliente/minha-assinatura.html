@@ -115,8 +115,7 @@
 <li class="list"><a href="meus-cartoes.html"><span class="icon"><span class="material-symbols-rounded">credit_card</span></span><span class="title">Meus Cartões</span></a></li>
 <li class="list"><a href="preferencias.html"><span class="icon"><span class="material-symbols-rounded">settings</span></span><span class="title">Preferências</span></a></li>
 <li class="list active"><a href="minha-assinatura.html"><span class="icon"><span class="material-symbols-rounded">verified_user</span></span><span class="title">Minha Assinatura</span></a></li>
-<li class="list"><a href="perfil.html"><span class="icon"><span class="material-symbols-rounded">person</span></span><span class="title">Meu
-                    Perfil</span></a></li>
+<li class="list"><a href="perfil.html"><span class="icon"><span class="material-symbols-rounded">person</span></span><span class="title">Meu Perfil</span></a></li>
 </ul>
 </div>
 <main class="main-content">
@@ -129,7 +128,7 @@
 </div>
 </div>
 <div class="top-actions" style="display: flex; gap: 10px; align-items: center; margin-left: auto;">
-    <button class="btn-top-action" onclick="forcarAtualizacao()" title="Atualizar App" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s; font-weight: 600;">
+    <button class="btn-top-action" onclick="window.location.reload()" title="Atualizar App" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s; font-weight: 600;">
         <span class="material-symbols-rounded" style="font-size: 20px;">sync</span>
         <span class="action-text">Atualizar</span>
     </button>
@@ -161,8 +160,7 @@
 <p id="pix-superior-titular">---</p>
 </div>
 </div>
-<p style="font-size: 12px; color: #94a3b8; margin-top: 15px;">* Realize o pagamento e envie o
-                    comprovante para o seu consultor para validar a renovação.</p>
+<p style="font-size: 12px; color: #94a3b8; margin-top: 15px;">* Realize o pagamento e envie o comprovante para o seu consultor para validar a renovação.</p>
 </div>
 </main>
 </div>
@@ -171,36 +169,59 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             if (!user) { window.location.href = '../index.html'; return; }
-            document.getElementById('nome-cliente-sidebar').innerText = user.toUpperCase();
-            document.getElementById('user-avatar').innerText = user.substring(0, 2).toUpperCase();
+            const elNome = document.getElementById('nome-cliente-sidebar');
+            const elAvatar = document.getElementById('user-avatar');
+            if (elNome) elNome.innerText = user.toUpperCase();
+            if (elAvatar) elAvatar.innerText = user.substring(0, 2).toUpperCase();
 
             carregarDadosAssinatura();
         });
 
         async function carregarDadosAssinatura() {
             try {
-                // 1. Busca vencimento do cliente (Usando a rota de perfil que já existe)
-                const resUser = await fetch(`/api/revenda/perfil/${user}`);
+                // 1. Busca vencimento do cliente (Usando a rota de perfil correta)
+                const resUser = await fetch(`/api/usuarios/perfil/${user}`);
                 const dataUser = await resUser.json();
 
-                // Supondo que a rota de perfil retorne o vencimento. Se não, podemos usar a data que salvamos no login.
-                // Aqui vamos simular a busca do vencimento real.
+                // 2. Exibe o PIX do Revendedor (ou Admin)
                 const resPix = await fetch(`/api/pix-pagamento/${user}`);
                 const dataPix = await resPix.json();
 
-                // 2. Exibe o PIX do Revendedor (ou Admin)
                 if (dataPix.status === 'sucesso' && dataPix.pix_chave !== "Não cadastrada") {
                     document.getElementById('box-pix-cliente').style.display = 'block';
                     document.getElementById('pix-superior-chave').innerText = dataPix.pix_chave;
                     document.getElementById('pix-superior-titular').innerText = dataPix.pix_titular;
                 }
 
-                // Para mostrar a data de vencimento, você pode precisar que a API de perfil retorne o campo 'vencimento'
-                // No seu main.py, a tabela usuarios tem a coluna vencimento.
-                // Vamos usar um placeholder por agora ou ajustar a rota /api/revenda/perfil para enviar o vencimento.
-                document.getElementById('data-vencimento').innerText = "Verifique com seu consultor";
+                // 3. Exibe a data de vencimento formatada
+                if (dataUser && dataUser.vencimento) {
+                    const partes = dataUser.vencimento.split('-');
+                    if (partes.length === 3) {
+                        document.getElementById('data-vencimento').innerText = `${partes[2]}/${partes[1]}/${partes[0]}`;
+                    } else {
+                        document.getElementById('data-vencimento').innerText = dataUser.vencimento;
+                    }
+                    
+                    // Mostra um badge de status
+                    const dataVenc = new Date(dataUser.vencimento + 'T00:00:00');
+                    const hoje = new Date();
+                    hoje.setHours(0,0,0,0);
+                    const statusDiv = document.getElementById('status-vencimento');
+                    if (statusDiv) {
+                        if (dataVenc < hoje) {
+                            statusDiv.innerHTML = '<span style="background: rgba(239, 68, 68, 0.2); color: #ef4444; padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 12px; border: 1px solid rgba(239, 68, 68, 0.4);">VENCIDA</span>';
+                        } else {
+                            statusDiv.innerHTML = '<span style="background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 12px; border: 1px solid rgba(16, 185, 129, 0.4);">ATIVA</span>';
+                        }
+                    }
+                } else {
+                    document.getElementById('data-vencimento').innerText = "Não configurada";
+                }
 
-            } catch (e) { console.error("Erro ao carregar dados."); }
+            } catch (e) { 
+                console.error("Erro ao carregar dados:", e);
+                document.getElementById('data-vencimento').innerText = "Não disponível";
+            }
         }
     </script>
 </body>

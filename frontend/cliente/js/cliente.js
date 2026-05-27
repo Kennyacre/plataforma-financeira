@@ -144,6 +144,24 @@ function processarDadosParaPizzas(lancamentos, mesAlvo, anoAlvo) {
 document.addEventListener('DOMContentLoaded', async () => {
     if (!user) { window.location.href = '../index.html'; return; }
 
+    // --- INICIALIZAÇÃO NO MÊS/ANO ATUAL ---
+    const selMes = document.getElementById('filtro-mes');
+    const selAno = document.getElementById('filtro-ano');
+    const agora = new Date();
+    if (selMes) selMes.value = agora.getMonth() + 1;
+    if (selAno) {
+        const anoAtual = agora.getFullYear();
+        let existe = false;
+        for (let i = 0; i < selAno.options.length; i++) {
+            if (parseInt(selAno.options[i].value) === anoAtual) { existe = true; break; }
+        }
+        if (!existe) {
+            const opt = new Option(anoAtual, anoAtual);
+            selAno.add(opt);
+        }
+        selAno.value = anoAtual;
+    }
+
     // Sidebar Info
     const elNome = document.getElementById('nome-cliente-sidebar');
     const elAvatar = document.getElementById('user-avatar');
@@ -193,14 +211,134 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Gráfico de Evolução (Barras)
         await carregarDadosGrafico(new Date().getFullYear());
 
+        // Verificar Assinatura e Mostrar Alerta se necessário
+        await verificarVencimentoAssinatura();
+
     } catch (e) {
         console.error("Erro ao carregar dashboard:", e);
     }
 });
 
 // ==========================================
-// 4. FUNÇÕES AUXILIARES (CARTÕES, GRÁFICOS, MODAL)
-// ==========================================
+// 4. FUNÇÕES AUXILIARES (CARTÕES, GRÁFICOS, MODAL, VENCIMENTO)
+async function verificarVencimentoAssinatura() {
+    try {
+        const resPerfil = await fetch(`/api/usuarios/perfil/${user}`);
+        if (resPerfil.ok) {
+            const dataUser = await resPerfil.json();
+            if (dataUser.vencimento) {
+                const dataVenc = new Date(dataUser.vencimento + 'T00:00:00');
+                const hoje = new Date();
+                hoje.setHours(0,0,0,0);
+                
+                const diffTime = dataVenc - hoje;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                // Se faltar 5 dias ou menos, ou já estiver vencida
+                if (diffDays <= 5) {
+                    const mainContent = document.querySelector('.main-content');
+                    if (mainContent) {
+                        if (document.querySelector('.subscription-alert-banner')) return;
+
+                        const alertDiv = document.createElement('div');
+                        alertDiv.className = 'subscription-alert-banner';
+                        
+                        if (!document.getElementById('sub-alert-styles')) {
+                            const styles = document.createElement('style');
+                            styles.id = 'sub-alert-styles';
+                            styles.innerHTML = `
+                                .subscription-alert-banner {
+                                    width: 100%;
+                                    margin-bottom: 20px;
+                                    font-family: inherit;
+                                    font-size: 14px;
+                                    animation: fadeInDown 0.3s ease-out;
+                                }
+                                .subscription-alert-banner .alert-content {
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 12px;
+                                    padding: 14px 18px;
+                                    border-radius: 12px;
+                                    color: #ffffff;
+                                    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+                                }
+                                .subscription-alert-banner .alert-content.warning {
+                                    background: linear-gradient(135deg, #b45309 0%, #d97706 100%);
+                                    border: 1px solid rgba(245, 158, 11, 0.4);
+                                }
+                                .subscription-alert-banner .alert-content.error {
+                                    background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%);
+                                    border: 1px solid rgba(239, 68, 68, 0.4);
+                                }
+                                .subscription-alert-banner .btn-renovar-banner {
+                                    margin-left: auto;
+                                    background-color: #ffffff;
+                                    color: #1e293b;
+                                    padding: 8px 16px;
+                                    border-radius: 8px;
+                                    font-weight: bold;
+                                    text-decoration: none;
+                                    transition: all 0.2s ease;
+                                    white-space: nowrap;
+                                    font-size: 13px;
+                                    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+                                }
+                                .subscription-alert-banner .btn-renovar-banner:hover {
+                                    background-color: #f1f5f9;
+                                    transform: translateY(-1px);
+                                }
+                                @keyframes fadeInDown {
+                                    from { opacity: 0; transform: translateY(-10px); }
+                                    to { opacity: 1; transform: translateY(0); }
+                                }
+                                @media (max-width: 768px) {
+                                    .subscription-alert-banner .alert-content {
+                                        flex-direction: column;
+                                        align-items: flex-start;
+                                        gap: 10px;
+                                    }
+                                    .subscription-alert-banner .btn-renovar-banner {
+                                        margin-left: 0;
+                                        width: 100%;
+                                        text-align: center;
+                                    }
+                                }
+                            `;
+                            document.head.appendChild(styles);
+                        }
+                        
+                        const partes = dataUser.vencimento.split('-');
+                        const dataVencBR = `${partes[2]}/${partes[1]}/${partes[0]}`;
+                        
+                        if (diffDays < 0) {
+                            alertDiv.innerHTML = `
+                                <div class="alert-content error">
+                                    <span class="material-symbols-rounded" style="font-size: 24px;">gpp_maybe</span>
+                                    <span><strong>Atenção! Sua assinatura premium venceu em ${dataVencBR}!</strong> Os seus serviços de gestão financeira podem ser suspensos a qualquer momento.</span>
+                                    <a href="minha-assinatura.html" class="btn-renovar-banner">Renovar Acesso</a>
+                                </div>
+                            `;
+                        } else {
+                            alertDiv.innerHTML = `
+                                <div class="alert-content warning">
+                                    <span class="material-symbols-rounded" style="font-size: 24px;">warning</span>
+                                    <span><strong>Sua assinatura premium está próxima do vencimento (${dataVencBR})!</strong> Faltam apenas ${diffDays} dia(s). Faça sua renovação para evitar interrupções.</span>
+                                    <a href="minha-assinatura.html" class="btn-renovar-banner">Renovar Agora</a>
+                                </div>
+                            `;
+                        }
+                        
+                        mainContent.insertBefore(alertDiv, mainContent.firstChild);
+                    }
+                }
+            }
+        }
+    } catch (e) {
+        console.error("Erro ao verificar vencimento da assinatura:", e);
+    }
+}
+
 async function carregarOpcoesCategorias() {
     const sel = document.getElementById('catLancamento');
     if (!sel) return;

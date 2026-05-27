@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from core.database import get_db_connection
 from models.schemas import LancamentoRequest, CategoriaRequest, FormaPagamentoRequest, MetaRequest
 from datetime import datetime
 import calendar
+import logging
 
 router = APIRouter(prefix="/api", tags=["Financeiro e Cliente"])
 
@@ -466,5 +467,292 @@ def deletar_meta(username: str, categoria: str):
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+  # ==========================================
+# 6. WEBHOOK WHATSAPP AUTOMATION
+# ==========================================
+@router.post("/webhook/whatsapp")
+async def webhook_whatsapp(request: Request):
+    import json
+    payload = await request.json()
+    
+    # Salva o log do payload recebido para diagnóstico
+    try:
+        with open("webhook_incoming.log", "a", encoding="utf-8") as f:
+            f.write(f"\n--- Webhook Recebido: {datetime.now()} ---\n")
+            f.write(json.dumps(payload, indent=2, ensure_ascii=False))
+            f.write("\n")
+    except Exception as log_ex:
+        logging.error(f"Erro ao salvar log de webhook: {str(log_ex)}")
+    
+    # Verifica se é um evento de mensagem recebida
+    event = payload.get("event")
+    if event != "messages.upsert":
+        return {"status": "ignorado", "motivo": "evento nao e messages.upsert"}
+        
+    data = payload.get("data", {})
+    key = data.get("key", {})
+    from_me = key.get("fromMe", False)
+    
+    # Ignora mensagens enviadas pelo próprio bot para evitar loops
+    if from_me:
+        return {"status": "ignorado", "motivo": "mensagem enviada pelo proprio bot"}
+        
+    # Extrai o número do WhatsApp do remetente
+    remote_jid = key.get("remoteJid", "")
+    if not remote_jid or ("@s.whatsapp.net" not in remote_jid and "@lid" not in remote_jid):
+        return {"status": "ignorado", "motivo": "JID invalido"}
+        
+    whatsapp_num = remote_jid.split("@")[0] # Ex: "5524999681057" ou "139646617002175"
+    
+    # Extrai o texto da mensagem
+    message_obj = data.get("message", {})
+    text = ""
+    if "conversation" in message_obj:
+        text = message_obj["conversation"]
+    elif "extendedTextMessage" in message_obj:
+        text = message_obj["extendedTextMessage"].get("text", "")
+        
+    text = text.strip()
+    if not text:
+        return {"status": "ignorado", "motivo": "mensagem vazia"}
+        
+    # Identifica o usuário pelo número de WhatsApp no banco com normalização de 9º dígito e D.D.D.
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        # Garante a criação das tabelas necessárias
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS conversas_whatsapp (
+                whatsapp VARCHAR(50) PRIMARY KEY,
+                state VARCHAR(50) NOT NULL,
+                temp_data TEXT,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        conn.commit()
+        
+        # Puxa todos os usuários ativos
+        cur.execute("SELECT username, nome_completo, whatsapp FROM usuarios WHERE whatsapp IS NOT NULL AND deletado = FALSE")
+        rows = cur.fetchall()
+        
+        # Função interna de normalização de números brasileiros
+        def normalizar_numero(num_str):
+            clean = "".join(c for c in str(num_str) if c.isdigit())
+            # Remove código de país se presente
+            if clean.startswith("55") and len(clean) >= 10:
+                clean = clean[2:]
+            # Se tiver 11 dígitos e o terceiro for '9' (nono dígito), remove-o para normalizar em 10 dígitos
+            if len(clean) == 11 and clean[2] == '9':
+                clean = clean[:2] + clean[3:]
+            return clean
+            
+        # Normaliza o remetente
+        remetente_normalizado = normalizar_numero(whatsapp_num)
+        
+        user_match = None
+        for r in rows:
+            u_username, u_nome, u_whatsapp = r
+            if normalizar_numero(u_whatsapp) == remetente_normalizado:
+                user_match = (u_username, u_nome)
+                break
+                
+        instance = payload.get("instance", "admin")
+        
+        if not user_match:
+            # Envia resposta de erro amigável
+            enviar_resposta_whatsapp(instance, remote_jid, "⚠️ *Olá!* Não encontrei nenhuma conta cadastrada em nossa plataforma associada a este número de WhatsApp. Por favor, acesse o painel, vá em *Meu Perfil* e cadastre o seu número de WhatsApp com o DDD (ex: 24999999999) para poder usar a automação!")
+            return {"status": "usuario_nao_encontrado"}
+            
+        username, nome_completo = user_match
+        nome = nome_completo if nome_completo else username
+        
+        # 1. Verifica se a mensagem corresponde a um comando direto do atalho rápido (Legado)
+        partes = text.split(" ", 2)
+        if len(partes) >= 2 and partes[0].lower() in ["gasto", "despesa", "receita", "recebimento"]:
+            comando = partes[0].lower()
+            valor_str = partes[1].replace(",", ".")
+            try:
+                valor = float(valor_str)
+                descricao = partes[2] if len(partes) > 2 else "Lançamento rápido via WhatsApp"
+                tipo = "despesa" if comando in ["gasto", "despesa"] else "receita"
+                
+                # Registra o lançamento
+                from datetime import date
+                cur.execute("""
+                    INSERT INTO financas (username, tipo, descricao, valor, data, categoria, pagamento, status)
+                    VALUES (%s, %s, %s, %s, %s, 'Outros', %s, 'pago')
+                """, (username, tipo, descricao, valor, date.today().strftime("%Y-%m-%d"), "PIX" if tipo == "receita" else "Dinheiro"))
+                conn.commit()
+                
+                tipo_label = "Despesa 📉" if tipo == "despesa" else "Receita 📈"
+                valor_format = f"R$ {valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+                enviar_resposta_whatsapp(instance, remote_jid, f"✅ *Registro Rápido Efetuado!*\n\n• *Tipo:* {tipo_label}\n• *Valor:* {valor_format}\n• *Descrição:* {descricao}\n• *Data:* {date.today().strftime('%d/%m/%Y')}\n\nO seu painel já foi atualizado!")
+                return {"status": "sucesso_atalho"}
+            except ValueError:
+                pass # Se falhar ao converter valor, segue para o funil interativo
+                
+        # 2. Recupera o estado atual do usuário no funil
+        cur.execute("SELECT state, temp_data FROM conversas_whatsapp WHERE whatsapp = %s", (whatsapp_num,))
+        state_row = cur.fetchone()
+        
+        menu_msg = f"👋 *Olá, {nome}!* Como posso ajudar você hoje?\n\n" \
+                   f"Digite o número da opção desejada:\n" \
+                   f"1️⃣ - Registrar Despesa / Gasto 📉\n" \
+                   f"2️⃣ - Registrar Receita / Ganho 📈\n" \
+                   f"3️⃣ - Ver Saldo do Mês 📊\n" \
+                   f"4️⃣ - Ajuda / Como usar ❓"
+                   
+        if not state_row:
+            # Novo contato / sem estado. Inicia e envia o menu
+            cur.execute("INSERT INTO conversas_whatsapp (whatsapp, state, temp_data) VALUES (%s, 'MENU', NULL)", (whatsapp_num,))
+            conn.commit()
+            enviar_resposta_whatsapp(instance, remote_jid, menu_msg)
+            return {"status": "menu_inicial"}
+            
+        state, temp_data_raw = state_row
+        temp_data = json.loads(temp_data_raw) if temp_data_raw else {}
+        
+        # 3. Lógica do Menu Principal
+        if state == "MENU":
+            if text == "1":
+                cur.execute("UPDATE conversas_whatsapp SET state = 'AGUARDANDO_VALOR_DESPESA' WHERE whatsapp = %s", (whatsapp_num,))
+                conn.commit()
+                enviar_resposta_whatsapp(instance, remote_jid, "📉 *Registrar Despesa*\n\nDigite o *valor* da despesa (ex: `15.50` ou `50`):")
+            elif text == "2":
+                cur.execute("UPDATE conversas_whatsapp SET state = 'AGUARDANDO_VALOR_RECEITA' WHERE whatsapp = %s", (whatsapp_num,))
+                conn.commit()
+                enviar_resposta_whatsapp(instance, remote_jid, "📈 *Registrar Receita*\n\nDigite o *valor* da receita/ganho (ex: `1500` ou `250.00`):")
+            elif text == "3":
+                # Mostra o saldo consolidado do mês atual
+                from datetime import datetime as dt
+                mes_atual = dt.now().month
+                ano_atual = dt.now().year
+                
+                cur.execute("""
+                    SELECT SUM(CASE 
+                        WHEN LOWER(tipo) IN ('recebimento', 'receita') THEN valor 
+                        WHEN LOWER(tipo) IN ('gasto', 'despesa') THEN -valor 
+                        ELSE 0 END) 
+                    FROM financas WHERE username = %s
+                """, (username,))
+                saldo_geral = float(cur.fetchone()[0] or 0.0)
+                
+                cur.execute("""
+                    SELECT SUM(valor) FROM financas 
+                    WHERE username = %s AND LOWER(tipo) IN ('recebimento', 'receita')
+                    AND EXTRACT(MONTH FROM data) = %s AND EXTRACT(YEAR FROM data) = %s
+                """, (username, mes_atual, ano_atual))
+                receitas_mes = float(cur.fetchone()[0] or 0.0)
+                
+                cur.execute("""
+                    SELECT SUM(valor) FROM financas 
+                    WHERE username = %s AND LOWER(tipo) IN ('gasto', 'despesa')
+                    AND EXTRACT(MONTH FROM data) = %s AND EXTRACT(YEAR FROM data) = %s
+                """, (username, mes_atual, ano_atual))
+                despesas_mes = float(cur.fetchone()[0] or 0.0)
+                
+                def fmt(val):
+                    return f"R$ {val:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+                    
+                saldo_msg = f"📊 *Resumo Financeiro - {mes_atual}/{ano_atual}*\n\n" \
+                            f"📈 *Receitas (Mês):* {fmt(receitas_mes)}\n" \
+                            f"📉 *Despesas (Mês):* {fmt(despesas_mes)}\n" \
+                            f"💰 *Saldo Geral Acumulado:* {fmt(saldo_geral)}\n\n" \
+                            f"Digite qualquer mensagem para voltar ao menu!"
+                            
+                cur.execute("DELETE FROM conversas_whatsapp WHERE whatsapp = %s", (whatsapp_num,))
+                conn.commit()
+                enviar_resposta_whatsapp(instance, remote_jid, saldo_msg)
+            elif text == "4":
+                ajuda = "❓ *Ajuda do Assistente Financeiro*\n\n" \
+                        "Você pode interagir respondendo aos menus numerados ou usando os atalhos rápidos de mensagem única:\n\n" \
+                        "👉 *Exemplo de Gasto rápido:* `gasto 45.90 mercado`\n" \
+                        "👉 *Exemplo de Receita rápida:* `receita 1200 salario`\n\n" \
+                        "Digite qualquer mensagem para retornar ao menu principal."
+                cur.execute("DELETE FROM conversas_whatsapp WHERE whatsapp = %s", (whatsapp_num,))
+                conn.commit()
+                enviar_resposta_whatsapp(instance, remote_jid, ajuda)
+            else:
+                # Entrada inválida no menu principal, reenvia o menu
+                enviar_resposta_whatsapp(instance, remote_jid, "⚠️ *Opção inválida.*\n\n" + menu_msg)
+                
+        # 4. Estados do Fluxo de Gasto (Despesa)
+        elif state == "AGUARDANDO_VALOR_DESPESA":
+            try:
+                valor = float(text.replace(",", "."))
+                temp_data["valor"] = valor
+                cur.execute("UPDATE conversas_whatsapp SET state = 'AGUARDANDO_DESC_DESPESA', temp_data = %s WHERE whatsapp = %s", (json.dumps(temp_data), whatsapp_num))
+                conn.commit()
+                enviar_resposta_whatsapp(instance, remote_jid, "📝 *Descrição do Gasto*\n\nDigite o nome ou descrição do gasto (ex: `almoço` ou `posto shell`):")
+            except ValueError:
+                enviar_resposta_whatsapp(instance, remote_jid, "❌ *Valor inválido!* Por favor, digite apenas números decimais (ex: `15.50` ou `120`):")
+                
+        elif state == "AGUARDANDO_DESC_DESPESA":
+            valor = temp_data.get("valor", 0.0)
+            descricao = text
+            from datetime import date
+            
+            cur.execute("""
+                INSERT INTO financas (username, tipo, descricao, valor, data, categoria, pagamento, status)
+                VALUES (%s, 'despesa', %s, %s, %s, 'Outros', 'Dinheiro', 'pago')
+            """, (username, descricao, valor, date.today().strftime("%Y-%m-%d")))
+            cur.execute("DELETE FROM conversas_whatsapp WHERE whatsapp = %s", (whatsapp_num,))
+            conn.commit()
+            
+            valor_format = f"R$ {valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+            enviar_resposta_whatsapp(instance, remote_jid, f"✅ *Gasto Registrado com Sucesso!*\n\n• *Tipo:* Despesa 📉\n• *Valor:* {valor_format}\n• *Descrição:* {descricao}\n• *Data:* {date.today().strftime('%d/%m/%Y')}\n\nO seu painel financeiro foi atualizado!")
+            
+        # 5. Estados do Fluxo de Receita (Ganho)
+        elif state == "AGUARDANDO_VALOR_RECEITA":
+            try:
+                valor = float(text.replace(",", "."))
+                temp_data["valor"] = valor
+                cur.execute("UPDATE conversas_whatsapp SET state = 'AGUARDANDO_DESC_RECEITA', temp_data = %s WHERE whatsapp = %s", (json.dumps(temp_data), whatsapp_num))
+                conn.commit()
+                enviar_resposta_whatsapp(instance, remote_jid, "📝 *Descrição da Receita*\n\nDigite o nome ou descrição do recebimento (ex: `salário` ou `PIX joão`):")
+            except ValueError:
+                enviar_resposta_whatsapp(instance, remote_jid, "❌ *Valor inválido!* Por favor, digite apenas números decimais (ex: `1500` ou `250.50`):")
+                
+        elif state == "AGUARDANDO_DESC_RECEITA":
+            valor = temp_data.get("valor", 0.0)
+            descricao = text
+            from datetime import date
+            
+            cur.execute("""
+                INSERT INTO financas (username, tipo, descricao, valor, data, categoria, pagamento, status)
+                VALUES (%s, 'receita', %s, %s, %s, 'Outros', 'PIX', 'pago')
+            """, (username, descricao, valor, date.today().strftime("%Y-%m-%d")))
+            cur.execute("DELETE FROM conversas_whatsapp WHERE whatsapp = %s", (whatsapp_num,))
+            conn.commit()
+            
+            valor_format = f"R$ {valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+            enviar_resposta_whatsapp(instance, remote_jid, f"✅ *Receita Registrada com Sucesso!*\n\n• *Tipo:* Receita 📈\n• *Valor:* {valor_format}\n• *Descrição:* {descricao}\n• *Data:* {date.today().strftime('%d/%m/%Y')}\n\nO seu painel financeiro foi atualizado!")
+            
+        return {"status": "sucesso"}
+        
+    except Exception as e:
+        conn.rollback()
+        logging.error(f"Erro no webhook WhatsApp: {str(e)}")
+        return {"status": "erro", "detalhe": str(e)}
     finally:
-        cur.close(); conn.close()
+        cur.close()
+        conn.close()
+
+def enviar_resposta_whatsapp(instance: str, remote_jid: str, text: str):
+    import requests as req
+    try:
+        url = f"http://192.168.29.221:8081/message/sendText/{instance}"
+        headers = {
+            "apikey": "TNINFO_MASTER_KEY_123",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "number": remote_jid,  # Envia diretamente para o JID completo (@s.whatsapp.net ou @lid) para evitar problemas de roteamento
+            "text": text,
+            "delay": 1200,
+            "linkPreview": False
+        }
+        res = req.post(url, json=payload, headers=headers, timeout=10)
+        logging.info(f"Envio WhatsApp status: {res.status_code}")
+    except Exception as e:
+        logging.error(f"Falha ao enviar resposta de WhatsApp: {str(e)}")
