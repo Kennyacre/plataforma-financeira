@@ -14,22 +14,22 @@ DB_CONFIG = {
 }
 
 def get_db_connection():
-    """Retorna uma conex??o com a base de dados."""
+    """Retorna uma conexão com a base de dados."""
     return pg8000.connect(**DB_CONFIG)
 
 def check_and_add_column(cur, table, column, definition):
-    """Auxiliar para adicionar colunas se n??o existirem (Soft Migrations)."""
+    """Auxiliar para adicionar colunas se não existirem (Soft Migrations)."""
     cur.execute("""
         SELECT column_name 
         FROM information_schema.columns 
         WHERE table_name=%s AND column_name=%s
     """, (table, column))
     if not cur.fetchone():
-        logging.info(f"Adicionando coluna {column} ?? tabela {table}...")
+        logging.info(f"Adicionando coluna {column} à tabela {table}...")
         cur.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
 
 def startup_db():
-    """Inicializa as tabelas e garante que as colunas necess??rias existam."""
+    """Inicializa as tabelas e garante que as colunas necessárias existam."""
     conn = get_db_connection()
     cur = conn.cursor()
 
@@ -157,7 +157,7 @@ def startup_db():
             )
         """)
 
-        # Criar Admin Padr??o se n??o existir
+        # Criar Admin Padrão se não existir
         cur.execute("SELECT username FROM usuarios WHERE username = 'admin'")
         if not cur.fetchone():
             cur.execute("INSERT INTO usuarios (username, password, role, status) VALUES ('admin', '451630', 'admin', 'ativo')")

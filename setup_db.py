@@ -20,7 +20,7 @@ def create_database():
         conn.autocommit = True
         cur = conn.cursor()
 
-        # Verifica se j?? existe
+        # Verifica se já existe
         cur.execute("SELECT datname FROM pg_catalog.pg_database WHERE datname = %s", (dbname,))
         exists = cur.fetchone()
 
@@ -29,7 +29,7 @@ def create_database():
             cur.execute(f'CREATE DATABASE "{dbname}"')
             logging.info("Banco criado com sucesso!")
         else:
-            logging.info(f"Banco '{dbname}' j?? existe.")
+            logging.info(f"Banco '{dbname}' já existe.")
 
         cur.close()
         conn.close()
@@ -144,10 +144,10 @@ def create_tables():
             )
         """)
 
-        # Criar admin padr??o
+        # Criar admin padrão
         cur.execute("SELECT username FROM usuarios WHERE username = 'admin'")
         if not cur.fetchone():
-            logging.info("Criando usu??rio admin padr??o...")
+            logging.info("Criando usuário admin padrão...")
             cur.execute("INSERT INTO usuarios (username, password, role, status) VALUES ('admin', '451630', 'admin', 'ativo')")
 
         conn.commit()
