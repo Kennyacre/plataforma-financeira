@@ -163,16 +163,27 @@
 </div>
 </div>
 <div class="bottom-grid">
+<div class="cards-summary-widget" id="metas-dashboard-box" style="margin-top: 0;">
+<div class="widget-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 15px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between;">
+<h2>Minhas Metas de Gastos</h2>
+<span class="material-symbols-rounded" style="color: #ffffff;">track_changes</span>
+</div>
+<div class="widget-body" id="dashboard-metas-container" style="display: flex; flex-direction: column; gap: 15px; max-height: 250px; overflow-y: auto;">
+<p class="no-cards-msg">Carregando suas metas...</p>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 20px;">
+<div class="pie-chart-box">
+<h2>Gastos por Categoria</h2>
+<div class="pie-container">
+<canvas id="categoryPieChart"></canvas>
+</div>
+</div>
 <div class="pie-chart-box">
 <h2>Dinheiro vs Cartão</h2>
 <div class="pie-container">
 <canvas id="paymentPieChart"></canvas>
 </div>
-</div>
-<div class="pie-chart-box">
-<h2>Gastos por Categoria</h2>
-<div class="pie-container">
-<canvas id="categoryPieChart"></canvas>
 </div>
 </div>
 <div class="cards-summary-widget">
@@ -182,14 +193,6 @@
 <div class="widget-body" id="cards-widget-container">
 <p class="no-cards-msg">Puxando dados dos cartões...</p>
 </div>
-</div>
-<div class="cards-summary-widget" id="metas-dashboard-box">
-<div class="widget-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 15px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between;">
-<h2>Minhas Metas de Gastos</h2>
-<span class="material-symbols-rounded" style="color: #ffffff;">track_changes</span>
-</div>
-<div class="widget-body" id="dashboard-metas-container" style="display: flex; flex-direction: column; gap: 15px; max-height: 250px; overflow-y: auto;">
-<p class="no-cards-msg">Carregando suas metas...</p>
 </div>
 </div>
 </div>
