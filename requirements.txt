@@ -10,3 +10,5 @@ requests
 pg8000
 psutil
 speedtest-cli
+
+gunicorn

@@ -10,6 +10,30 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = FastAPI(title="API TN INFO MODULAR")
+
+from fastapi import Request
+from fastapi.responses import JSONResponse
+import requests
+import traceback
+
+TELEGRAM_TOKEN = "8873359796:AAFZJDuW8VrLajJikVsy-_dOOFM5FL7M-R8"
+TELEGRAM_CHAT_ID = "6016539904"
+
+def send_telegram_alert(message: str):
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message}
+    try:
+        requests.post(url, json=payload, timeout=5)
+    except Exception as e:
+        print(f"Erro ao enviar alerta para o Telegram: {e}")
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    error_msg = f"?????? ERRO 500 no Financeiro Beta ??????\n\nRota: {request.method} {request.url.path}\nErro: {str(exc)}\n\nTraceback:\n{traceback.format_exc()[:500]}"
+    send_telegram_alert(error_msg)
+    return JSONResponse(status_code=500, content={"detail": "Erro Interno no Servidor"})
+
+
 VERSION = "2.1.0-PIX"
 
 app.add_middleware(

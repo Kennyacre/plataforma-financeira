@@ -125,6 +125,20 @@
             <h4 style="font-size:11px; color:#71717a; text-transform:uppercase; margin-top:20px; margin-bottom:10px;">Convites Recebidos</h4>
             <div id="lista-recebidos"></div>
         </div>
+        
+        <!-- CARD GOOGLE -->
+        <div class="card-premium" style="background:#09090b; border: 1px solid rgba(255,255,255,0.05); padding:25px; border-radius:15px; margin-top: 10px;">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" style="width: 24px; height: 24px;">
+                <h3 style="margin:0; color: white;">Conta Google</h3>
+            </div>
+            <p style="font-size:13px; color:#a1a1aa; margin-bottom:20px;">Vincule sua conta Google para fazer login sem senha.</p>
+            
+            <button onclick="window.location.href='/api/auth/google/login?action=link&username=' + localStorage.getItem('usuarioLogado')" class="btn-login" style="width:auto; padding: 14px 30px; background: #18181b; color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; cursor: pointer; font-weight: 700; display: flex; align-items: center; gap: 8px; transition: 0.3s;">
+                <span class="material-symbols-rounded">link</span> Vincular Google
+            </button>
+        </div>
+
         <!-- CARD DE ALTERAÇÃO DE SENHA -->
         <div class="card-premium" style="background:#09090b; border: 1px solid rgba(255,255,255,0.05); padding:25px; border-radius:15px; grid-column: span 2; margin-top: 10px;">
             <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">

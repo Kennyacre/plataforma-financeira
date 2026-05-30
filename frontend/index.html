@@ -153,6 +153,30 @@
         .register-link p { color: var(--text-muted); font-size: 14px; }
         .register-link a { color: #ffffff; text-decoration: none; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.2); transition: 0.3s; }
         .register-link a:hover { border-bottom-color: #ffffff; }
+    
+        .btn-google {
+            width: 100%;
+            background: #18181b;
+            color: #ffffff;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+        .btn-google:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.2);
+        }
+        .btn-google img { width: 20px; height: 20px; }
+
     </style>
 
     <!-- PWA Core -->
@@ -213,6 +237,11 @@
                 <span class="material-symbols-rounded">arrow_forward</span>
             </button>
 
+            <button type="button" class="btn-google" onclick="window.location.href='/api/auth/google/login?action=login'">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
+                Continuar com o Google
+            </button>
+
             <div class="register-link">
                 <p style="color: #94a3b8; font-size: 14px;">Não tem uma conta? <a href="cadastro.html">Registe-se aqui</a></p>
                 <p style="margin-top: 10px; font-size: 13px;"><a href="recuperar-senha.html" style="color: #64748b; font-weight: 400; border-bottom: 1px dashed #64748b;">Esqueci minha senha</a></p>
@@ -226,6 +255,26 @@
 
 
     <script src="js/login.js?v=1"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const erro = urlParams.get('erro');
+        if (erro) {
+            const msgBox = document.getElementById('mensagemErro');
+            const msgText = document.getElementById('error-text');
+            msgBox.style.display = 'flex';
+            if (erro === 'google_sem_email') {
+                msgText.innerText = 'A conta Google não forneceu um e-mail válido.';
+            } else if (erro === 'conta_bloqueada') {
+                msgText.innerText = 'Sua conta está bloqueada no sistema.';
+            } else {
+                msgText.innerText = 'Erro ao processar login com Google.';
+            }
+        }
+    });
+</script>
+
 </body>
 
 </html>

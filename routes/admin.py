@@ -928,3 +928,73 @@ def confirmar_renovacao(usuario_id: int):
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         cur.close(); conn.close()
+
+import subprocess
+@router.post("/backup-manual")
+def backup_manual():
+    try:
+        subprocess.Popen(["/bin/bash", "/home/kennyacre/plataforma-financeira/scripts_manutencao/backup_gdrive.sh"])
+        return {"status": "sucesso", "mensagem": "Backup manual iniciado em segundo plano com sucesso!"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
+@router.get("/indicacoes")
+def listar_indicacoes():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            SELECT id, username, email, nome_completo, revendedor 
+            FROM usuarios 
+            WHERE revendedor IS NOT NULL AND revendedor != '' AND deletado IS NOT TRUE
+            ORDER BY id DESC
+        """)
+        indicacoes = []
+        for r in cur.fetchall():
+            indicacoes.append({
+                "id": r[0],
+                "username": r[1],
+                "email": r[2] if r[2] else "",
+                "nome_completo": r[3] if r[3] else r[1],
+                "quem_indicou": r[4]
+            })
+        return {"status": "sucesso", "indicacoes": indicacoes}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cur.close()
+        conn.close()
+
+
+@router.get("/health-check")
+def health_check():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT 1")
+        db_ok = True
+        
+        cur.execute("SELECT COUNT(*) FROM usuarios")
+        users_count = cur.fetchone()[0]
+        
+        cur.execute("SELECT COUNT(*) FROM financas")
+        financas_count = cur.fetchone()[0]
+        
+        return {
+            "status": "sucesso",
+            "database": "CONECTADO",
+            "usuarios": users_count,
+            "lancamentos": financas_count,
+            "api": "OK"
+        }
+    except Exception as e:
+        return {
+            "status": "erro",
+            "database": "FALHA",
+            "detalhe": str(e)
+        }
+    finally:
+        cur.close()
+        conn.close()

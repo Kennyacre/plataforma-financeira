@@ -1,22 +1,16 @@
 <!DOCTYPE html>
-
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Receitas Totais | TN INFO</title>
-<link rel="shortcut icon" href="../assets/img/logo.jpg" type="image/x-icon">
+    <title>Indicações | TN INFO</title>
+    <link rel="shortcut icon" href="../assets/img/logo.jpg" type="image/x-icon">
 <script src="../js/security.js?v=2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
 <link href="../cliente/css/dashboard.css?v=1" rel="stylesheet"/>
 <link href="css/admin.css?v=1" rel="stylesheet"/>
-<link href="css/receitas-admin.css?v=1" rel="stylesheet"/>
-<!-- PWA -->
-<link href="../manifest.json" rel="manifest"/>
-<meta content="#000000" name="theme-color"/>
-<meta content="yes" name="apple-mobile-web-app-capable"/>
-</link></head>
+</head>
 <body>
 <div class="dashboard-wrapper">
 <div class="navigation" id="minha-sidebar">
@@ -27,72 +21,94 @@
 </div>
 <ul class="">
 <li class="list"><a href="painel-admin.html"><span class="icon"><span class="material-symbols-rounded">bar_chart</span></span><span class="title">Visão Geral</span></a></li>
-<li class="list"><a href="indicacoes.html"><span class="icon"><span class="material-symbols-rounded">groups</span></span><span class="title">Indicações</span></a></li>
+<li class="list active"><a href="indicacoes.html"><span class="icon"><span class="material-symbols-rounded">groups</span></span><span class="title">Indicações</span></a></li>
 <li class="list"><a href="saude.html"><span class="icon"><span class="material-symbols-rounded">monitor_heart</span></span><span class="title">Saúde do Servidor</span></a></li>
             <li class="list"><a href="diagnostico.html"><span class="icon"><span class="material-symbols-rounded">troubleshoot</span></span><span class="title">Diagnóstico</span></a></li>
+<li class="list"><a href="recuperacoes.html"><span class="icon"><span class="material-symbols-rounded">lock_reset</span></span><span class="title">Recuperações</span></a></li>
 <li class="list"><a href="novo-cliente.html"><span class="icon"><span class="material-symbols-rounded">person_add</span></span><span class="title">Criar Cliente</span></a></li>
 <li class="list"><a href="todos-clientes.html"><span class="icon"><span class="material-symbols-rounded">group</span></span><span class="title">Todos os Clientes</span></a></li>
 <li class="list"><a href="lixeira-admin.html"><span class="icon"><span class="material-symbols-rounded">delete_sweep</span></span><span class="title">Lixeira do Sistema</span></a></li>
 <li class="list"><a href="http://192.168.29.221:8081/manager" target="_blank"><span class="icon"><span class="material-symbols-rounded">chat</span></span><span class="title">WhatsApp (Conexão)</span></a></li>
 <li class="list"><a href="arquivos.html"><span class="icon"><span class="material-symbols-rounded">folder_open</span></span><span class="title">Arquivos (HDD)</span></a></li>
 <li class="separator"><span class="title">FINANCEIRO GLOBAL</span></li>
-<li class="list active"><a href="receitas-admin.html"><span class="icon"><span class="material-symbols-rounded">account_balance</span></span><span class="title">Receitas Totais</span></a></li>
+<li class="list"><a href="receitas-admin.html"><span class="icon"><span class="material-symbols-rounded">account_balance</span></span><span class="title">Receitas Totais</span></a></li>
 <li class="list"><a href="perfil-admin.html"><span class="icon"><span class="material-symbols-rounded">manage_accounts</span></span><span class="title">Meu Perfil</span></a></li>
 </ul>
 </div>
 <main class="main-content">
+
 <header class="top-bar" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
 <div class="header-left">
 <button class="btn-menu" id="btn-toggle-sidebar"><span class="material-symbols-rounded">menu</span></button>
 <div>
-<h1>Cofre Forte (Receitas)</h1>
-<p>Acompanhe toda a movimentação de capital do sistema em tempo real.</p>
+<h1>Indicações (Código de Convite)</h1>
+<p>Veja quem acessou o sistema e quem indicou o acesso.</p>
 </div>
 </div>
 <div class="top-actions" style="display: flex; gap: 10px; align-items: center; margin-left: auto;">
-    <button class="btn-top-action-premium" onclick="forcarAtualizacao()" title="Atualizar App">
-        <span class="material-symbols-rounded" style="font-size: 20px;">sync</span>
-        <span class="action-text">Atualizar Sistema</span>
-    </button>
-    <button class="btn-reject" onclick="fazerLogout()" title="Sair" style="padding: 8px 16px; border-radius: 8px; font-weight: 600;">
+    <button class="btn-top-action" onclick="fazerLogout()" title="Sair" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s; font-weight: 600;">
         <span class="material-symbols-rounded" style="font-size: 20px;">logout</span>
         <span class="action-text">Sair</span>
     </button>
 </div>
 </header>
-<div class="admin-stats">
-<div class="stat-card card-gold">
-<span class="title">Faturamento Total (Histórico)</span>
-<h2 id="total-geral">R$ 0,00</h2>
-</div>
-<div class="stat-card" style="background: rgba(255,255,255,0.05);">
-<span class="title">Faturamento Deste Mês</span>
-<h2 id="total-mes">R$ 0,00</h2>
-</div>
-</div>
-<div class="table-container">
-<h3 style="margin-top: 0; margin-bottom: 20px;">Histórico de Transações</h3>
+
+<div class="table-container" style="margin-top: 30px;">
 <table class="premium-table">
 <thead>
 <tr>
-<th>Data</th>
-<th>Revendedor/Cliente</th>
-<th class="hide-tablet">Descrição</th>
-<th class="hide-mobile">Método</th>
-<th class="hide-mobile">Fluxo</th>
-<th style="text-align: right;">Valor</th>
+<th>ID</th>
+<th>Nome / Login</th>
+<th>E-mail do Novo Cliente</th>
+<th>Quem Indicou (ID de Indicação)</th>
 </tr>
 </thead>
-<tbody id="lista-receitas">
+<tbody id="lista-indicacoes">
 <tr>
-<td colspan="6" style="text-align: center;">Desbloqueando cofre...</td>
+<td colspan="4" style="text-align: center;">Carregando indicações...</td>
 </tr>
 </tbody>
 </table>
 </div>
 </main>
 </div>
-<script src="js/receitas.js?v=1"></script>
-<script src="js/admin-ia.js?v=1"></script>
+<script>
+async function carregarIndicacoes() {
+    try {
+        const res = await fetch('/api/admin/indicacoes');
+        if (!res.ok) throw new Error("Erro ao carregar");
+        const data = await res.json();
+        
+        const tbody = document.getElementById('lista-indicacoes');
+        tbody.innerHTML = '';
+        
+        if (data.indicacoes.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Nenhuma indicação encontrada.</td></tr>';
+            return;
+        }
+        
+        data.indicacoes.forEach(i => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>#${i.id}</td>
+                <td>
+                    <div style="font-weight:bold; color:white;">${i.nome_completo}</div>
+                    <div style="font-size:11px; color:rgba(255,255,255,0.4);">${i.username}</div>
+                </td>
+                <td>${i.email}</td>
+                <td><span style="background: rgba(16,185,129,0.1); color: #10b981; padding: 4px 10px; border-radius: 20px; font-weight: bold; border: 1px solid rgba(16,185,129,0.2);">${i.quem_indicou}</span></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch(e) {
+        console.error(e);
+        document.getElementById('lista-indicacoes').innerHTML = '<tr><td colspan="4" style="text-align: center; color: red;">Erro ao carregar os dados.</td></tr>';
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    carregarIndicacoes();
+});
+</script>
 </body>
 </html>

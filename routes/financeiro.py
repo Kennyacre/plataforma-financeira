@@ -20,7 +20,7 @@ def novo_lancamento(request: LancamentoRequest):
     cur = conn.cursor()
     try:
         # Segurança: Verifica se o utilizador existe e não está deletado (IS NOT TRUE cobre NULL e FALSE)
-        cur.execute("SELECT id FROM usuarios WHERE username = %s AND deletado IS NOT TRUE", (request.username,))
+        cur.execute("SELECT id FROM usuarios WHERE username IN (SELECT u.username FROM usuarios u WHERE COALESCE(u.revendedor, u.username) = (SELECT COALESCE(u2.revendedor, u2.username) FROM usuarios u2 WHERE u2.username = %s)) AND deletado IS NOT TRUE", (request.username,))
         if not cur.fetchone():
             raise HTTPException(status_code=401, detail="Conta inativa ou não encontrada.")
 
@@ -36,7 +36,7 @@ def novo_lancamento(request: LancamentoRequest):
 
             if request.tipo == "gasto" and request.pagamento not in ["PIX", "Dinheiro", "Boleto", "Saldo em Conta"]:
                 # Se for cartão
-                cur.execute("UPDATE cartoes SET fatura_atual = fatura_atual + %s WHERE username = %s AND nome_cartao = %s", (request.valor, request.username, request.pagamento))
+                cur.execute("UPDATE cartoes SET fatura_atual = fatura_atual + %s WHERE username IN (SELECT u.username FROM usuarios u WHERE COALESCE(u.revendedor, u.username) = (SELECT COALESCE(u2.revendedor, u2.username) FROM usuarios u2 WHERE u2.username = %s)) AND nome_cartao = %s", (request.valor, request.username, request.pagamento))
 
         conn.commit()
         return {"status": "sucesso", "mensagem": f"{qtd} lançamento(s) registrado(s)!"}
@@ -53,11 +53,11 @@ def buscar_lancamentos(username: str):
     cur = conn.cursor()
     try:
         # Segurança: Verifica se o utilizador existe e não está deletado (IS NOT TRUE cobre NULL e FALSE)
-        cur.execute("SELECT id FROM usuarios WHERE username = %s AND deletado IS NOT TRUE", (username,))
+        cur.execute("SELECT id FROM usuarios WHERE username IN (SELECT u.username FROM usuarios u WHERE COALESCE(u.revendedor, u.username) = (SELECT COALESCE(u2.revendedor, u2.username) FROM usuarios u2 WHERE u2.username = %s)) AND deletado IS NOT TRUE", (username,))
         if not cur.fetchone():
             raise HTTPException(status_code=401, detail="Conta inativa ou não encontrada.")
 
-        cur.execute("SELECT id, tipo, descricao, valor, data, categoria, pagamento, status FROM financas WHERE username = %s ORDER BY data DESC", (username,))
+        cur.execute("SELECT id, tipo, descricao, valor, data, categoria, pagamento, status FROM financas WHERE username IN (SELECT u.username FROM usuarios u WHERE COALESCE(u.revendedor, u.username) = (SELECT COALESCE(u2.revendedor, u2.username) FROM usuarios u2 WHERE u2.username = %s)) ORDER BY data DESC", (username,))
         res = [{"id": l[0], "tipo": l[1], "descricao": l[2], "valor": float(l[3]), "data": l[4].strftime("%d/%m/%Y"), "categoria": l[5], "pagamento": l[6], "status": l[7]} for l in cur.fetchall()]
         return {"status": "sucesso", "dados": res}
     except HTTPException: raise
@@ -77,7 +77,7 @@ def excluir_lancamento(lancamento_id: int):
         if res:
             username, valor, pagamento, tipo = res
             if tipo == "gasto" and pagamento not in ["PIX", "Dinheiro", "Boleto", "Saldo em Conta"]:
-                cur.execute("UPDATE cartoes SET fatura_atual = fatura_atual - %s WHERE username = %s AND nome_cartao = %s", (valor, username, pagamento))
+                cur.execute("UPDATE cartoes SET fatura_atual = fatura_atual - %s WHERE username IN (SELECT u.username FROM usuarios u WHERE COALESCE(u.revendedor, u.username) = (SELECT COALESCE(u2.revendedor, u2.username) FROM usuarios u2 WHERE u2.username = %s)) AND nome_cartao = %s", (valor, username, pagamento))
         
         cur.execute("DELETE FROM financas WHERE id = %s", (lancamento_id,))
         conn.commit()
@@ -94,7 +94,7 @@ def get_dashboard_stats(username: str, month: int = None, year: int = None):
     cur = conn.cursor()
     try:
         # Segurança (IS NOT TRUE cobre NULL e FALSE)
-        cur.execute("SELECT id FROM usuarios WHERE username = %s AND deletado IS NOT TRUE", (username,))
+        cur.execute("SELECT id FROM usuarios WHERE username IN (SELECT u.username FROM usuarios u WHERE COALESCE(u.revendedor, u.username) = (SELECT COALESCE(u2.revendedor, u2.username) FROM usuarios u2 WHERE u2.username = %s)) AND deletado IS NOT TRUE", (username,))
         if not cur.fetchone():
             raise HTTPException(status_code=401, detail="Sessão inativa.")
 
@@ -108,14 +108,14 @@ def get_dashboard_stats(username: str, month: int = None, year: int = None):
                 WHEN LOWER(tipo) IN ('recebimento', 'receita') THEN valor 
                 WHEN LOWER(tipo) IN ('gasto', 'despesa') THEN -valor 
                 ELSE 0 END) 
-            FROM financas WHERE username = %s
+            FROM financas WHERE username IN (SELECT u.username FROM usuarios u WHERE COALESCE(u.revendedor, u.username) = (SELECT COALESCE(u2.revendedor, u2.username) FROM usuarios u2 WHERE u2.username = %s))
         """, (username,))
         saldo_global = float(cur.fetchone()[0] or 0.0)
 
         # 2. Receitas do Período
         cur.execute("""
             SELECT SUM(valor) FROM financas 
-            WHERE username = %s AND LOWER(tipo) IN ('recebimento', 'receita')
+            WHERE username IN (SELECT u.username FROM usuarios u WHERE COALESCE(u.revendedor, u.username) = (SELECT COALESCE(u2.revendedor, u2.username) FROM usuarios u2 WHERE u2.username = %s)) AND LOWER(tipo) IN ('recebimento', 'receita')
             AND EXTRACT(MONTH FROM data) = %s
             AND EXTRACT(YEAR FROM data) = %s
         """, (username, month, year))
@@ -124,7 +124,7 @@ def get_dashboard_stats(username: str, month: int = None, year: int = None):
         # 3. Despesas do Período
         cur.execute("""
             SELECT SUM(valor) FROM financas 
-            WHERE username = %s AND LOWER(tipo) IN ('gasto', 'despesa')
+            WHERE username IN (SELECT u.username FROM usuarios u WHERE COALESCE(u.revendedor, u.username) = (SELECT COALESCE(u2.revendedor, u2.username) FROM usuarios u2 WHERE u2.username = %s)) AND LOWER(tipo) IN ('gasto', 'despesa')
             AND EXTRACT(MONTH FROM data) = %s
             AND EXTRACT(YEAR FROM data) = %s
         """, (username, month, year))
@@ -153,7 +153,7 @@ def get_chart_data(username: str, year: int = None):
         cur.execute("""
             SELECT EXTRACT(MONTH FROM data), tipo, SUM(valor) 
             FROM financas 
-            WHERE username = %s AND EXTRACT(YEAR FROM data) = %s 
+            WHERE username IN (SELECT u.username FROM usuarios u WHERE COALESCE(u.revendedor, u.username) = (SELECT COALESCE(u2.revendedor, u2.username) FROM usuarios u2 WHERE u2.username = %s)) AND EXTRACT(YEAR FROM data) = %s 
             GROUP BY 1, 2
         """, (username, year))
         linhas = cur.fetchall()
@@ -209,7 +209,7 @@ def get_cartoes(username: str):
              WHERE f.username = c.username AND f.pagamento = c.nome_cartao 
              AND EXTRACT(MONTH FROM f.data) = %s AND EXTRACT(YEAR FROM f.data) = %s
              AND f.tipo = 'gasto') as fatura_mes
-            FROM cartoes c WHERE c.username = %s
+            FROM cartoes c WHERE c.username IN (SELECT u.username FROM usuarios u WHERE COALESCE(u.revendedor, u.username) = (SELECT COALESCE(u2.revendedor, u2.username) FROM usuarios u2 WHERE u2.username = %s))
         """, (agora.month, agora.year, username))
         
         cartoes = []
@@ -234,7 +234,7 @@ def deletar_cartao(username: str, nome_cartao: str):
     conn = get_db_connection()
     cur = conn.cursor()
     try:
-        cur.execute("DELETE FROM cartoes WHERE username = %s AND nome_cartao = %s", (username, nome_cartao))
+        cur.execute("DELETE FROM cartoes WHERE username IN (SELECT u.username FROM usuarios u WHERE COALESCE(u.revendedor, u.username) = (SELECT COALESCE(u2.revendedor, u2.username) FROM usuarios u2 WHERE u2.username = %s)) AND nome_cartao = %s", (username, nome_cartao))
         conn.commit()
         return {"status": "sucesso"}
     except Exception as e:
@@ -248,7 +248,7 @@ def adicionar_gasto_cartao(dados: dict):
     conn = get_db_connection()
     cur = conn.cursor()
     try:
-        cur.execute("UPDATE cartoes SET fatura_atual = fatura_atual + %s WHERE username = %s AND nome_cartao = %s", (dados['valor'], dados['username'], dados['nome_cartao']))
+        cur.execute("UPDATE cartoes SET fatura_atual = fatura_atual + %s WHERE username IN (SELECT u.username FROM usuarios u WHERE COALESCE(u.revendedor, u.username) = (SELECT COALESCE(u2.revendedor, u2.username) FROM usuarios u2 WHERE u2.username = %s)) AND nome_cartao = %s", (dados['valor'], dados['username'], dados['nome_cartao']))
         cur.execute("INSERT INTO financas (username, tipo, descricao, valor, data, categoria, pagamento) VALUES (%s, 'gasto', %s, %s, CURRENT_DATE, 'Cartão', %s)", (dados['username'], f"Gasto no {dados['nome_cartao']}", dados['valor'], dados['nome_cartao']))
         conn.commit()
         return {"status": "sucesso"}
@@ -267,7 +267,7 @@ def pagar_fatura(dados: dict):
         # 1. Calcula o valor total de compras deste mês para este cartão
         cur.execute("""
             SELECT COALESCE(SUM(valor), 0) FROM financas 
-            WHERE username = %s AND pagamento = %s 
+            WHERE username IN (SELECT u.username FROM usuarios u WHERE COALESCE(u.revendedor, u.username) = (SELECT COALESCE(u2.revendedor, u2.username) FROM usuarios u2 WHERE u2.username = %s)) AND pagamento = %s 
             AND EXTRACT(MONTH FROM data) = %s AND EXTRACT(YEAR FROM data) = %s
             AND tipo = 'gasto'
         """, (dados['username'], dados['nome_cartao'], agora.month, agora.year))
@@ -281,7 +281,7 @@ def pagar_fatura(dados: dict):
         cur.execute("""
             UPDATE cartoes 
             SET fatura_atual = GREATEST(fatura_atual - %s, 0) 
-            WHERE username = %s AND nome_cartao = %s
+            WHERE username IN (SELECT u.username FROM usuarios u WHERE COALESCE(u.revendedor, u.username) = (SELECT COALESCE(u2.revendedor, u2.username) FROM usuarios u2 WHERE u2.username = %s)) AND nome_cartao = %s
         """, (valor_fatura_mes, dados['username'], dados['nome_cartao']))
         
         # 3. Registra o pagamento no histórico (para abater do saldo em conta)
@@ -306,7 +306,7 @@ def editar_lancamento(lancamento_id: int, request: LancamentoRequest):
         cur.execute("""
             UPDATE financas 
             SET tipo = %s, descricao = %s, valor = %s, data = %s, categoria = %s, pagamento = %s, status = %s
-            WHERE id = %s AND username = %s
+            WHERE id = %s AND username IN (SELECT u.username FROM usuarios u WHERE COALESCE(u.revendedor, u.username) = (SELECT COALESCE(u2.revendedor, u2.username) FROM usuarios u2 WHERE u2.username = %s))
         """, (request.tipo, request.descricao, request.valor, request.data, request.categoria, request.pagamento, request.status or 'pago', lancamento_id, request.username))
         
         if cur.rowcount == 0:
@@ -342,7 +342,7 @@ def get_categorias(username: str):
     conn = get_db_connection()
     cur = conn.cursor()
     try:
-        cur.execute("SELECT id, nome, tipo, cor FROM categorias WHERE username = %s ORDER BY nome ASC", (username,))
+        cur.execute("SELECT id, nome, tipo, cor FROM categorias WHERE username IN (SELECT u.username FROM usuarios u WHERE COALESCE(u.revendedor, u.username) = (SELECT COALESCE(u2.revendedor, u2.username) FROM usuarios u2 WHERE u2.username = %s)) ORDER BY nome ASC", (username,))
         dados = [{"id": r[0], "nome": r[1], "tipo": r[2], "cor": r[3]} for r in cur.fetchall()]
         return {"status": "sucesso", "dados": dados}
     except Exception as e:
@@ -386,7 +386,7 @@ def get_formas_pagamento(username: str):
     conn = get_db_connection()
     cur = conn.cursor()
     try:
-        cur.execute("SELECT id, nome FROM formas_pagamento WHERE username = %s ORDER BY nome ASC", (username,))
+        cur.execute("SELECT id, nome FROM formas_pagamento WHERE username IN (SELECT u.username FROM usuarios u WHERE COALESCE(u.revendedor, u.username) = (SELECT COALESCE(u2.revendedor, u2.username) FROM usuarios u2 WHERE u2.username = %s)) ORDER BY nome ASC", (username,))
         dados = [{"id": r[0], "nome": r[1]} for r in cur.fetchall()]
         return {"status": "sucesso", "dados": dados}
     except Exception as e:
@@ -430,7 +430,7 @@ def get_metas(username: str):
     conn = get_db_connection()
     cur = conn.cursor()
     try:
-        cur.execute("SELECT categoria, limite, COALESCE(tipo_periodo, 'mes') FROM metas_gastos WHERE username = %s ORDER BY categoria ASC", (username,))
+        cur.execute("SELECT categoria, limite, COALESCE(tipo_periodo, 'mes') FROM metas_gastos WHERE username IN (SELECT u.username FROM usuarios u WHERE COALESCE(u.revendedor, u.username) = (SELECT COALESCE(u2.revendedor, u2.username) FROM usuarios u2 WHERE u2.username = %s)) ORDER BY categoria ASC", (username,))
         dados = [{"categoria": r[0], "limite": float(r[1]), "tipo_periodo": r[2]} for r in cur.fetchall()]
         return dados
     except Exception as e:
@@ -461,7 +461,7 @@ def deletar_meta(username: str, categoria: str):
     conn = get_db_connection()
     cur = conn.cursor()
     try:
-        cur.execute("DELETE FROM metas_gastos WHERE username = %s AND categoria = %s", (username, categoria))
+        cur.execute("DELETE FROM metas_gastos WHERE username IN (SELECT u.username FROM usuarios u WHERE COALESCE(u.revendedor, u.username) = (SELECT COALESCE(u2.revendedor, u2.username) FROM usuarios u2 WHERE u2.username = %s)) AND categoria = %s", (username, categoria))
         conn.commit()
         return {"status": "sucesso"}
     except Exception as e:
@@ -633,20 +633,20 @@ async def webhook_whatsapp(request: Request):
                         WHEN LOWER(tipo) IN ('recebimento', 'receita') THEN valor 
                         WHEN LOWER(tipo) IN ('gasto', 'despesa') THEN -valor 
                         ELSE 0 END) 
-                    FROM financas WHERE username = %s
+                    FROM financas WHERE username IN (SELECT u.username FROM usuarios u WHERE COALESCE(u.revendedor, u.username) = (SELECT COALESCE(u2.revendedor, u2.username) FROM usuarios u2 WHERE u2.username = %s))
                 """, (username,))
                 saldo_geral = float(cur.fetchone()[0] or 0.0)
                 
                 cur.execute("""
                     SELECT SUM(valor) FROM financas 
-                    WHERE username = %s AND LOWER(tipo) IN ('recebimento', 'receita')
+                    WHERE username IN (SELECT u.username FROM usuarios u WHERE COALESCE(u.revendedor, u.username) = (SELECT COALESCE(u2.revendedor, u2.username) FROM usuarios u2 WHERE u2.username = %s)) AND LOWER(tipo) IN ('recebimento', 'receita')
                     AND EXTRACT(MONTH FROM data) = %s AND EXTRACT(YEAR FROM data) = %s
                 """, (username, mes_atual, ano_atual))
                 receitas_mes = float(cur.fetchone()[0] or 0.0)
                 
                 cur.execute("""
                     SELECT SUM(valor) FROM financas 
-                    WHERE username = %s AND LOWER(tipo) IN ('gasto', 'despesa')
+                    WHERE username IN (SELECT u.username FROM usuarios u WHERE COALESCE(u.revendedor, u.username) = (SELECT COALESCE(u2.revendedor, u2.username) FROM usuarios u2 WHERE u2.username = %s)) AND LOWER(tipo) IN ('gasto', 'despesa')
                     AND EXTRACT(MONTH FROM data) = %s AND EXTRACT(YEAR FROM data) = %s
                 """, (username, mes_atual, ano_atual))
                 despesas_mes = float(cur.fetchone()[0] or 0.0)

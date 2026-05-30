@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import Request, APIRouter, HTTPException, Depends
 from core.database import get_db_connection
 from models.schemas import LoginRequest, PerfilUpdate, ManualRegistrationRequest, SolicitacaoRecuperacao, RedefinirSenha
 import logging
@@ -58,7 +58,7 @@ def cadastro_manual(dados: ManualRegistrationRequest):
             if res: gestor = res[0]
             
         from datetime import date, timedelta
-        vencimento = date.today() + timedelta(days=30)
+        vencimento = date.today() + timedelta(days=5)
         
         cur.execute("""
             INSERT INTO usuarios (username, password, email, nome_completo, role, revendedor, vencimento, status, deletado)
@@ -265,3 +265,155 @@ def solicitar_desbloqueio(username: str):
     finally:
         cur.close(); conn.close()
 
+
+
+import requests
+import os
+from fastapi.responses import RedirectResponse
+
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
+GOOGLE_REDIRECT_URI = "https://beta.tninfo-angra.duckdns.org/api/auth/google/callback"
+
+@router.get("/auth/google/login")
+def google_login(request: Request, action: str = "login", username: str = None):
+    host = request.headers.get("host", "beta.tninfo-angra.duckdns.org")
+    dynamic_redirect_uri = f"https://{host}/api/auth/google/callback"
+    # state will store 'action|username' (e.g. 'login|' or 'link|joao')
+    state = f"{action}|{username if username else ''}"
+    auth_url = (
+        "https://accounts.google.com/o/oauth2/v2/auth?"
+        "response_type=code&"
+        f"client_id={GOOGLE_CLIENT_ID}&"
+        f"redirect_uri={dynamic_redirect_uri}&"
+        "scope=openid%20email%20profile&"
+        "access_type=offline&"
+        "prompt=consent&"
+        f"state={state}"
+    )
+    return RedirectResponse(auth_url)
+
+@router.get("/auth/google/callback")
+def google_callback(request: Request, code: str, state: str = "login|"):
+    host = request.headers.get("host", "beta.tninfo-angra.duckdns.org")
+    dynamic_redirect_uri = f"https://{host}/api/auth/google/callback"
+    # 1. Exchange code for token
+    token_url = "https://oauth2.googleapis.com/token"
+    data = {
+        "code": code,
+        "client_id": GOOGLE_CLIENT_ID,
+        "client_secret": GOOGLE_CLIENT_SECRET,
+        "redirect_uri": dynamic_redirect_uri,
+        "grant_type": "authorization_code",
+    }
+    r = requests.post(token_url, data=data)
+    token_data = r.json()
+    access_token = token_data.get("access_token")
+    if not access_token:
+        return RedirectResponse("/index.html?erro=google_token_invalido")
+
+    # 2. Get user info
+    user_info_url = "https://www.googleapis.com/oauth2/v1/userinfo"
+    headers = {"Authorization": f"Bearer {access_token}"}
+    r_info = requests.get(user_info_url, headers=headers)
+    user_info = r_info.json()
+    
+    email = user_info.get("email")
+    google_id = user_info.get("id")
+    name = user_info.get("name", "Usuário Google")
+    
+    if not email:
+        return RedirectResponse("/index.html?erro=google_sem_email")
+
+    action, _, local_username = state.partition("|")
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        if action == "link" and local_username:
+            # Vincular conta Google ao usuário logado
+            cur.execute("UPDATE usuarios SET google_id = %s WHERE username = %s AND deletado = FALSE", (google_id, local_username))
+            conn.commit()
+            return RedirectResponse(f"/cliente/perfil.html?msg=google_vinculado")
+        
+        # Fluxo normal de Login
+        cur.execute("SELECT username, role, status FROM usuarios WHERE google_id = %s OR email = %s AND deletado = FALSE", (google_id, email))
+        user = cur.fetchone()
+        
+        if user:
+            # Usuário já existe, atualiza google_id se estiver nulo
+            cur.execute("UPDATE usuarios SET google_id = %s WHERE email = %s AND deletado = FALSE", (google_id, email))
+            conn.commit()
+            
+            db_user, db_role, db_status = user
+            if db_status == 'bloqueado':
+                return RedirectResponse("/index.html?erro=conta_bloqueada")
+                
+            # Logar o usuário redirecionando com um hash/token ou simplesmente simulando a sessão (usando query param ou cookies. 
+            # O frontend original usa POST /login que retorna JSON, então redirecionamos com um parametro temporario para o frontend processar)
+            # Para manter segurança, vamos usar sessionStorage via frontend, mas precisamos passar pro HTML de alguma forma.
+            # Um método simples: redirecionar para uma rota que injeta JS.
+            html_response = f"""
+            <html><body><script>
+                localStorage.setItem('usuarioLogado', '{db_user}');
+                localStorage.setItem('funcaoUsuario', '{db_role}');
+                window.location.href = '{'/gerente/painel-admin.html' if db_role == 'admin' or db_role == 'revendedor' else '/cliente/painel-cliente.html'}';
+            </script></body></html>
+            """
+            from fastapi.responses import HTMLResponse
+            return HTMLResponse(content=html_response)
+        
+        else:
+            # Usuário NOVO - Pausar para o Indicação Code
+            # Redireciona para completar-google.html passando os dados na URL
+            import urllib.parse
+            safe_email = urllib.parse.quote(email)
+            safe_name = urllib.parse.quote(name)
+            return RedirectResponse(f"/completar-google.html?email={safe_email}&name={safe_name}&gid={google_id}")
+            
+    finally:
+        cur.close()
+        conn.close()
+
+class CompletarGoogleRequest(BaseModel):
+    email: str
+    nome: str
+    google_id: str
+    codigo_indicacao: str = ""
+
+@router.post("/auth/google/completar")
+def google_completar(dados: CompletarGoogleRequest):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        # Gera username
+        username = dados.email.split('@')[0].lower()
+        # Garante username único
+        cur.execute("SELECT id FROM usuarios WHERE username = %s", (username,))
+        if cur.fetchone():
+            import random
+            username = f"{username}{random.randint(100,999)}"
+            
+        gestor = "admin" # Fallback
+        if dados.codigo_indicacao:
+            cur.execute("SELECT username FROM usuarios WHERE id::text = %s AND deletado = FALSE", (dados.codigo_indicacao,))
+            res = cur.fetchone()
+            if res:
+                gestor = res[0]
+                
+        from datetime import date, timedelta
+        vencimento = date.today() + timedelta(days=5)
+        
+        cur.execute("""
+            INSERT INTO usuarios (username, password, email, nome_completo, role, revendedor, vencimento, status, deletado, google_id)
+            VALUES (%s, 'senha_google', %s, %s, 'cliente', %s, %s, 'ativo', FALSE, %s)
+        """, (username, dados.email, dados.nome, gestor, vencimento, dados.google_id))
+        
+        conn.commit()
+        return {"status": "sucesso", "username": username, "role": "cliente"}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cur.close()
+        conn.close()

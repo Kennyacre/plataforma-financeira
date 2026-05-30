@@ -26,6 +26,6 @@ services:
       - .:/app
     ports:
       - "8501:8251"
-    command: uvicorn main:app --host 0.0.0.0 --port 8251 --reload
+    command: gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8251
 
 
